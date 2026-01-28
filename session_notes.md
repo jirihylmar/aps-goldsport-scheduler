@@ -76,6 +76,89 @@ TSV Upload → S3 → Lambda (process) → JSON → S3 (static site) → Display
 - Task 0.2: Select playbook template and document rationale
 - Document the simplified architecture choice
 
+---
+
+### Task 0.2: Select playbook template and document rationale
+
+#### Selection: aws-serverless-multirepo (SIMPLIFIED)
+
+**Template chosen:** `playbook-aws-serverless-multirepo`
+
+**Why this template:**
+1. Uses AWS services we need (S3, Lambda, CDK)
+2. Established patterns for static site hosting
+3. Infrastructure-as-code with CDK
+4. Clear separation of concerns
+
+**Simplifications needed:**
+| Original Template | Our Adaptation |
+|-------------------|----------------|
+| 5 repos (orchestration, infrastructure, backend, frontend, testing) | 2 repos: orchestration + infrastructure |
+| API Gateway + Lambda API | Lambda triggered by S3/schedule only |
+| DynamoDB | Not needed - TSV is source |
+| Full React frontend | Simple HTML/CSS/JS static page |
+| Cognito auth | Not needed - public display |
+
+**Rationale for simplification:**
+- This is a **read-only display** - no user interaction
+- Data source is **file upload** (TSV), not database
+- Display is **internal use** - no auth needed
+- Complexity should match requirements
+
+#### Architecture Decision
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     SIMPLIFIED ARCHITECTURE                      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────────┐   │
+│  │  TSV File   │────▶│  S3 Input   │────▶│  Lambda         │   │
+│  │  (upload)   │     │  Bucket     │     │  (process TSV)  │   │
+│  └─────────────┘     └─────────────┘     └────────┬────────┘   │
+│                                                    │            │
+│                                                    ▼            │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────────┐   │
+│  │  Display    │◀────│ CloudFront  │◀────│  S3 Website     │   │
+│  │  (browser)  │     │  (optional) │     │  (HTML + JSON)  │   │
+│  └─────────────┘     └─────────────┘     └─────────────────┘   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Components:**
+1. **S3 Input Bucket** - receives TSV uploads
+2. **Lambda Processor** - triggered by S3 upload, parses TSV, generates JSON
+3. **S3 Website Bucket** - hosts static HTML/CSS/JS + generated JSON
+4. **CloudFront** (optional) - caching, HTTPS
+5. **Static Page** - auto-refreshes, reads JSON, displays schedule
+
+#### Repository Structure
+
+```
+aps-goldsport-scheduler/           # Orchestration (this repo)
+├── CLAUDE.md
+├── IMPLEMENTATION_PLAN.md
+├── progress.json
+├── session_notes.md
+├── tasks/
+└── infrastructure/                # CDK project (nested or separate)
+    ├── lib/
+    │   └── scheduler-stack.ts
+    ├── lambda/
+    │   └── process-tsv/
+    └── static-site/
+        ├── index.html
+        ├── styles.css
+        └── app.js
+```
+
+**Decision: Mono-repo with nested infrastructure**
+- Simpler for small project
+- Single git history
+- Easier context for Claude
+
 ### Status
 - Task 0.1: COMPLETE
-- Current: Ready for Task 0.2
+- Task 0.2: COMPLETE
+- Current: Ready for Task 0.3

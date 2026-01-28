@@ -26,10 +26,12 @@
         {
           "id": "0.2",
           "name": "Select playbook template and document rationale",
-          "status": "pending",
+          "status": "complete",
+          "completed_at": "2026-01-28",
           "size": "small",
           "verify": "Template selection documented with reasons",
-          "depends_on": ["0.1"]
+          "depends_on": ["0.1"],
+          "notes": "Selected aws-serverless-multirepo with simplifications: mono-repo, no API GW, no DynamoDB, simple static site"
         },
         {
           "id": "0.3",
@@ -98,7 +100,7 @@
     }
   },
 
-  "current_task": "0.2",
+  "current_task": "0.3",
 
   "git_repos": {
     "orchestration": {
