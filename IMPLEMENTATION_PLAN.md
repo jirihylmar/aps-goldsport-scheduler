@@ -210,6 +210,8 @@ for processor in pipeline:
 
 | Aspect | Specification |
 |--------|---------------|
+| **Display client** | Windows screensaver-based engine |
+| **Protocol** | HTTPS required (CloudFront) |
 | Orientation | Portrait (vertical) |
 | Font size | Large, readable from 3m |
 | Refresh interval | Configurable (default: 60 seconds) |
@@ -399,15 +401,18 @@ The frontend loads translations based on `lang` parameter and renders all text a
 
 ---
 
-### Phase 5: CDN & Production
-**Objective**: Production readiness
+### Phase 5: CloudFront & Production
+**Objective**: HTTPS delivery (required for display engine)
 
 **Deliverables**:
-- CloudFront distribution
-- HTTPS enabled
-- Cache configuration
-- End-to-end testing
+- CloudFront distribution with HTTPS
+- SSL certificate (ACM)
+- Cache configuration for schedule.json (short TTL)
+- Cache configuration for static assets (long TTL)
+- End-to-end testing with display engine
 - Monitoring/alerting setup
+
+**Note**: CloudFront is required, not optional. Display engine (Windows screensaver) expects HTTPS URL.
 
 **Dependencies**: Phase 4
 
@@ -652,26 +657,20 @@ Permissions:
 
 ---
 
-### CloudFront: Why and When
+### CloudFront: Required for HTTPS
 
-**What CloudFront provides**:
+**Why CloudFront is required**:
+- Display engine is Windows screensaver-based
+- Screensaver expects HTTPS URL
+- S3 website hosting only supports HTTP
+- CloudFront provides SSL/TLS termination
+
+**CloudFront provides**:
 | Feature | Benefit |
 |---------|---------|
-| HTTPS | S3 website hosting is HTTP only; CloudFront adds SSL/TLS |
+| **HTTPS** | Required - display engine expects secure URL |
 | Caching | Reduces S3 requests, faster page loads |
 | Custom domain | Use your own domain (e.g., schedule.goldsport.cz) |
-| Edge locations | Faster delivery (minor benefit for single-location use) |
-
-**Do you need it?**
-
-| Scenario | CloudFront Needed? |
-|----------|-------------------|
-| Internal display on local network | No - HTTP from S3 is fine |
-| Public URL with HTTPS required | Yes |
-| Custom domain (schedule.goldsport.cz) | Yes |
-| Simple S3 URL is acceptable | No |
-
-**Recommendation**: Start without CloudFront (Phase 4 is optional). Add it later if you need HTTPS or custom domain.
 
 ---
 
