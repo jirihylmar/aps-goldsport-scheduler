@@ -739,6 +739,17 @@ Implemented single-page layout with many iterations:
 - Phase 6: IN PROGRESS (5/9 tasks: 6.1✓, 6.4✓, 6.5✓, 6.6✓, 6.6a✓, 6.7 in progress)
 - Test URL: https://d2uodie4uj65pq.cloudfront.net?debug=true&date=02.01.2026
 
+**Bug fixes:**
+- Fixed date fallback: When user selects future date with no data, show "No lessons" instead of wrong data
+- Removed duplicate date selector from footer (now only in debug banner)
+
+### Commits This Session
+| Hash | Description |
+|------|-------------|
+| f947f31 | Session 7: UI overhaul + group_type + debug enhancements |
+| d1208ad | fix: Show empty state for dates with no data |
+| deb07f3 | Remove duplicate date selector from footer |
+
 ### Next Steps
 - Deploy Lambda with updated processors (group_type changes)
 - Continue 6.7 (format tuning) when graphics phase begins
