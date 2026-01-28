@@ -1,1 +1,31 @@
-syndicate-playbooks-examples/
+# Dependencies
+node_modules/
+.npm/
+
+# Build artifacts
+cdk.out/
+dist/
+*.js.map
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Input data (contains PII)
+input/
+
+# Local environment
+.env
+.env.local
