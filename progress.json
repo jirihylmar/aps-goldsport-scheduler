@@ -4,7 +4,7 @@
   "description": "Ski school lesson display system - shows current and upcoming courses on external vertical display",
   "created_at": "2026-01-28",
   "last_updated": "2026-01-28",
-  "last_session_summary": "Phase 4 COMPLETE. Display frontend built: HTML structure, CSS for vertical display, JavaScript with data fetching, multi-language support, auto-refresh. Static files uploaded to S3. Awaiting CloudFront (Phase 5) for public access.",
+  "last_session_summary": "Phase 5 IN PROGRESS. CloudFront deployed (https://d2uodie4uj65pq.cloudfront.net), HTTPS verified. Tasks 5.5-5.8 remaining: display engine test, CloudWatch monitoring, documentation, production deployment.",
 
   "phases": {
     "phase_0_planning": {
@@ -257,15 +257,15 @@
     },
     "phase_5_production": {
       "name": "CloudFront & Production",
-      "status": "pending",
-      "started_at": null,
+      "status": "in_progress",
+      "started_at": "2026-01-28",
       "completed_at": null,
       "description": "HTTPS delivery and production readiness",
       "tasks": [
-        {"id": "5.1", "name": "Add CloudFront distribution to CDK", "status": "pending", "size": "medium", "verify": "cdk synth succeeds, CloudFront in template"},
-        {"id": "5.2", "name": "Configure cache policies", "status": "pending", "size": "small", "verify": "Cache policies defined in CDK", "depends_on": ["5.1"]},
-        {"id": "5.3", "name": "Deploy CloudFront", "status": "pending", "size": "small", "verify": "CloudFront active, HTTPS works", "depends_on": ["5.2"]},
-        {"id": "5.4", "name": "Test HTTPS access", "status": "pending", "size": "small", "verify": "All content accessible via HTTPS", "depends_on": ["5.3"]},
+        {"id": "5.1", "name": "Add CloudFront distribution to CDK", "status": "complete", "completed_at": "2026-01-28", "size": "medium", "verify": "cdk synth succeeds, CloudFront in template", "notes": "Added distribution with OAC, 3 cache policies"},
+        {"id": "5.2", "name": "Configure cache policies", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Cache policies defined in CDK", "depends_on": ["5.1"], "notes": "Default 1h, Data 1min, Config 15min TTL"},
+        {"id": "5.3", "name": "Deploy CloudFront", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "CloudFront active, HTTPS works", "depends_on": ["5.2"], "notes": "Distribution ID: E1UECZ9R3RFNX"},
+        {"id": "5.4", "name": "Test HTTPS access", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "All content accessible via HTTPS", "depends_on": ["5.3"], "notes": "https://d2uodie4uj65pq.cloudfront.net - all endpoints 200 OK"},
         {"id": "5.5", "name": "Test with display engine", "status": "pending", "size": "medium", "verify": "Display engine shows schedule", "depends_on": ["5.4"]},
         {"id": "5.6", "name": "Add CloudWatch monitoring", "status": "pending", "size": "small", "verify": "CloudWatch dashboard shows metrics", "depends_on": ["5.3"]},
         {"id": "5.7", "name": "Create deployment documentation", "status": "pending", "size": "small", "verify": "Documentation in docs/ folder"},
