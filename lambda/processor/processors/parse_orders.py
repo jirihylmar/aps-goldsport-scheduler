@@ -191,13 +191,22 @@ class ParseOrdersProcessor(Processor):
                     'location_meeting': record.get('location_meeting', ''),
                     'name_sponsor': record.get('name_sponsor', ''),
                     'group_size': self._safe_int(record.get('group_size', '1')),
-                    'participants': [],
+                    'participants': [],  # [{name, language, is_sponsor}, ...]
                 }
 
-            # Add participant to lesson
+            # Add participant to lesson with their language and sponsor
             participant_name = record.get('name_participant', '').strip()
-            if participant_name and participant_name not in lessons_map[key]['participants']:
-                lessons_map[key]['participants'].append(participant_name)
+            participant_lang = record.get('language', '').strip()
+            sponsor_name = record.get('name_sponsor', '').strip()
+
+            # Check if already added (by name)
+            existing_names = [p['name'] for p in lessons_map[key]['participants']]
+            if participant_name and participant_name not in existing_names:
+                lessons_map[key]['participants'].append({
+                    'name': participant_name,
+                    'language': participant_lang,
+                    'sponsor': sponsor_name,  # Full sponsor name (will be filtered by privacy processor)
+                })
 
         return list(lessons_map.values())
 

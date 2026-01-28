@@ -44,12 +44,28 @@ class PrivacyProcessor(Processor):
                 original_sponsor = lesson.get('sponsor', '')
                 lesson['sponsor'] = self._filter_sponsor_name(original_sponsor)
 
-                # Participants are already given names only - no transformation needed
-                # But ensure they're strings and stripped
+                # Participants: each has {name, language, sponsor}
+                # Names are already given names only - no transformation needed
+                # Sponsor names need privacy filtering
                 participants = lesson.get('participants', [])
-                lesson['participants'] = [
-                    str(p).strip() for p in participants if p
-                ]
+                filtered_participants = []
+                for p in participants:
+                    if isinstance(p, dict):
+                        # New format with language and sponsor
+                        sponsor_filtered = self._filter_sponsor_name(p.get('sponsor', ''))
+                        filtered_participants.append({
+                            'name': str(p.get('name', '')).strip(),
+                            'language': str(p.get('language', '')).strip(),
+                            'sponsor': sponsor_filtered,
+                        })
+                    elif p:
+                        # Legacy string format
+                        filtered_participants.append({
+                            'name': str(p).strip(),
+                            'language': '',
+                            'sponsor': '',
+                        })
+                lesson['participants'] = filtered_participants
 
             logger.info(f"Applied privacy rules to {len(lessons)} lessons")
 
