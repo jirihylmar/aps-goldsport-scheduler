@@ -212,7 +212,7 @@
         {"id": "2.2", "name": "Implement ParseOrdersProcessor", "status": "complete", "completed_at": "2026-01-28", "size": "medium", "verify": "Unit test with sample TSV passes", "depends_on": ["2.1"], "notes": "Parses TSV, filters 1970 dates, groups by booking_id. 5 unit tests passing."},
         {"id": "2.3", "name": "Implement ParseInstructorsProcessor", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Unit test with sample JSON passes", "depends_on": ["2.1"], "notes": "Parses roster and profiles JSON, helper for instructor lookup. 4 unit tests passing."},
         {"id": "2.4", "name": "Implement MergeDataProcessor", "status": "complete", "completed_at": "2026-01-28", "size": "medium", "verify": "Unit test with combined data passes", "depends_on": ["2.2", "2.3"], "notes": "Merges orders with instructors, default instructor fallback. 5 unit tests passing."},
-        {"id": "2.5", "name": "Implement ValidateProcessor", "status": "pending", "size": "small", "verify": "Unit test filters invalid records", "depends_on": ["2.4"]},
+        {"id": "2.5", "name": "Implement ValidateProcessor", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Unit test filters invalid records", "depends_on": ["2.4"], "notes": "Validates required fields, time formats. 8 unit tests passing."},
         {"id": "2.6", "name": "Implement PrivacyProcessor", "status": "pending", "size": "small", "verify": "Unit test transforms names correctly", "depends_on": ["2.5"]},
         {"id": "2.7", "name": "Implement DynamoDB storage", "status": "pending", "size": "medium", "verify": "Data appears in DynamoDB after Lambda run", "depends_on": ["2.6"]},
         {"id": "2.8", "name": "Implement JSON output generation", "status": "pending", "size": "small", "verify": "schedule.json appears in website bucket", "depends_on": ["2.7"]},
@@ -275,7 +275,7 @@
     }
   },
 
-  "current_task": "2.5",
+  "current_task": "2.6",
 
   "git_repos": {
     "orchestration": {
