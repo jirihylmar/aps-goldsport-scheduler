@@ -86,11 +86,12 @@
         {
           "id": "0.8",
           "name": "Generate remaining phase tasks",
-          "status": "pending",
+          "status": "complete",
+          "completed_at": "2026-01-28",
           "size": "medium",
           "verify": "All phase task files exist, progress.json complete",
           "depends_on": ["0.7"],
-          "notes": "May span multiple sessions if many phases"
+          "notes": "Created Phase 2 (9 tasks), Phase 3 (6 tasks), Phase 4 (9 tasks), Phase 5 (8 tasks)"
         },
         {
           "id": "0.9",
@@ -168,10 +169,82 @@
         }
       ],
       "artifacts": []
+    },
+    "phase_2_processing": {
+      "name": "Processing Engine (MVP)",
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "description": "Implement core processing pipeline with modular architecture",
+      "tasks": [
+        {"id": "2.1", "name": "Create pipeline architecture", "status": "pending", "size": "small", "verify": "handler.py imports pipeline, basic structure works"},
+        {"id": "2.2", "name": "Implement ParseOrdersProcessor", "status": "pending", "size": "medium", "verify": "Unit test with sample TSV passes", "depends_on": ["2.1"]},
+        {"id": "2.3", "name": "Implement ParseInstructorsProcessor", "status": "pending", "size": "small", "verify": "Unit test with sample JSON passes", "depends_on": ["2.1"]},
+        {"id": "2.4", "name": "Implement MergeDataProcessor", "status": "pending", "size": "medium", "verify": "Unit test with combined data passes", "depends_on": ["2.2", "2.3"]},
+        {"id": "2.5", "name": "Implement ValidateProcessor", "status": "pending", "size": "small", "verify": "Unit test filters invalid records", "depends_on": ["2.4"]},
+        {"id": "2.6", "name": "Implement PrivacyProcessor", "status": "pending", "size": "small", "verify": "Unit test transforms names correctly", "depends_on": ["2.5"]},
+        {"id": "2.7", "name": "Implement DynamoDB storage", "status": "pending", "size": "medium", "verify": "Data appears in DynamoDB after Lambda run", "depends_on": ["2.6"]},
+        {"id": "2.8", "name": "Implement JSON output generation", "status": "pending", "size": "small", "verify": "schedule.json appears in website bucket", "depends_on": ["2.7"]},
+        {"id": "2.9", "name": "Integration test with real data", "status": "pending", "size": "medium", "verify": "End-to-end flow works with real TSV", "depends_on": ["2.8"]}
+      ],
+      "artifacts": []
+    },
+    "phase_3_configuration": {
+      "name": "Configuration & Dictionaries",
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "description": "Implement translation and configuration system",
+      "tasks": [
+        {"id": "3.1", "name": "Create UI translations file", "status": "pending", "size": "small", "verify": "JSON valid, all 4 languages have same keys"},
+        {"id": "3.2", "name": "Create semantic dictionaries file", "status": "pending", "size": "medium", "verify": "JSON valid, covers all known TSV values"},
+        {"id": "3.3", "name": "Create enrichment config file", "status": "pending", "size": "small", "verify": "JSON valid"},
+        {"id": "3.4", "name": "Implement config loader in Lambda", "status": "pending", "size": "small", "verify": "Lambda can read config from S3", "depends_on": ["3.1", "3.2", "3.3"]},
+        {"id": "3.5", "name": "Upload config files to S3", "status": "pending", "size": "small", "verify": "Files exist in S3", "depends_on": ["3.1", "3.2", "3.3"]},
+        {"id": "3.6", "name": "Update schedule.json with translation keys", "status": "pending", "size": "small", "verify": "schedule.json contains *_key fields", "depends_on": ["3.4"]}
+      ],
+      "artifacts": []
+    },
+    "phase_4_frontend": {
+      "name": "Display Frontend",
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "description": "Build multi-language display page for vertical screens",
+      "tasks": [
+        {"id": "4.1", "name": "Create HTML structure", "status": "pending", "size": "small", "verify": "HTML valid, displays in browser"},
+        {"id": "4.2", "name": "Create CSS for vertical display", "status": "pending", "size": "medium", "verify": "Page looks good on vertical display", "depends_on": ["4.1"]},
+        {"id": "4.3", "name": "Implement JavaScript - data fetching", "status": "pending", "size": "small", "verify": "Console shows data loaded"},
+        {"id": "4.4", "name": "Implement JavaScript - language support", "status": "pending", "size": "medium", "verify": "?lang=de shows German UI", "depends_on": ["4.3"]},
+        {"id": "4.5", "name": "Implement JavaScript - lesson rendering", "status": "pending", "size": "medium", "verify": "Lessons display correctly", "depends_on": ["4.4"]},
+        {"id": "4.6", "name": "Implement JavaScript - auto-refresh", "status": "pending", "size": "small", "verify": "Data refreshes without page reload", "depends_on": ["4.5"]},
+        {"id": "4.7", "name": "Implement current vs upcoming logic", "status": "pending", "size": "small", "verify": "Lessons in correct section", "depends_on": ["4.6"]},
+        {"id": "4.8", "name": "Upload static site to S3", "status": "pending", "size": "small", "verify": "Site accessible via S3 URL", "depends_on": ["4.2", "4.7"]},
+        {"id": "4.9", "name": "End-to-end frontend test", "status": "pending", "size": "small", "verify": "All features work", "depends_on": ["4.8"]}
+      ],
+      "artifacts": []
+    },
+    "phase_5_production": {
+      "name": "CloudFront & Production",
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "description": "HTTPS delivery and production readiness",
+      "tasks": [
+        {"id": "5.1", "name": "Add CloudFront distribution to CDK", "status": "pending", "size": "medium", "verify": "cdk synth succeeds, CloudFront in template"},
+        {"id": "5.2", "name": "Configure cache policies", "status": "pending", "size": "small", "verify": "Cache policies defined in CDK", "depends_on": ["5.1"]},
+        {"id": "5.3", "name": "Deploy CloudFront", "status": "pending", "size": "small", "verify": "CloudFront active, HTTPS works", "depends_on": ["5.2"]},
+        {"id": "5.4", "name": "Test HTTPS access", "status": "pending", "size": "small", "verify": "All content accessible via HTTPS", "depends_on": ["5.3"]},
+        {"id": "5.5", "name": "Test with display engine", "status": "pending", "size": "medium", "verify": "Display engine shows schedule", "depends_on": ["5.4"]},
+        {"id": "5.6", "name": "Add CloudWatch monitoring", "status": "pending", "size": "small", "verify": "CloudWatch dashboard shows metrics", "depends_on": ["5.3"]},
+        {"id": "5.7", "name": "Create deployment documentation", "status": "pending", "size": "small", "verify": "Documentation in docs/ folder"},
+        {"id": "5.8", "name": "Production deployment", "status": "pending", "size": "medium", "verify": "Production environment functional", "depends_on": ["5.5"]}
+      ],
+      "artifacts": []
     }
   },
 
-  "current_task": "0.8",
+  "current_task": "0.9",
 
   "git_repos": {
     "orchestration": {
