@@ -318,27 +318,25 @@ function renderLessons(containerId, lessons, emptyMessageKey) {
         card.querySelector('.lesson-level').textContent =
             translateValue(lesson.level_key, 'levels');
 
-        // Group size (count of participants)
-        const count = lesson.participant_count || (lesson.participants ? lesson.participants.length : 0);
+        // Group size
+        const count = lesson.group_size || (lesson.people ? lesson.people.length : 0);
         card.querySelector('.lesson-count').textContent = count > 0 ? count : '';
 
         // Location (translated)
         card.querySelector('.lesson-location').textContent =
             translateValue(lesson.location_key, 'locations');
 
-        // Line 2: Participants with individual language flags
-        // Format: "Anna 🇩🇪, Max 🇬🇧, Petra 🇨🇿 *" (* = sponsor)
+        // Line 2: People with individual language flags and sponsors
+        // Format: "Anna 🇩🇪 (Ir.Sc.), Max 🇬🇧 (Ma.Mü.)"
         const participantList = card.querySelector('.participant-list');
         const langEl = card.querySelector('.lesson-language');
 
-        // Hide the lesson-level language element (we show per-participant now)
+        // Hide the lesson-level language element (we show per-person now)
         if (langEl) langEl.style.display = 'none';
 
-        if (lesson.participants && lesson.participants.length > 0) {
-            const formatted = lesson.participants.map(formatParticipant).join(', ');
+        if (lesson.people && lesson.people.length > 0) {
+            const formatted = lesson.people.map(formatParticipant).join(', ');
             participantList.textContent = formatted;
-        } else if (lesson.sponsor) {
-            participantList.textContent = lesson.sponsor;
         }
 
         // Line 3: Instructor

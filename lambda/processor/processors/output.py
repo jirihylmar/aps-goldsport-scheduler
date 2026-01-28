@@ -187,17 +187,14 @@ class OutputProcessor(Processor):
             'start': lesson.get('start', ''),
             'end': lesson.get('end', ''),
             'level_key': lesson.get('level_key', ''),
-            'language_key': lesson.get('language_key', ''),
             'location_key': lesson.get('location_key', ''),
-            'sponsor': lesson.get('sponsor', ''),
-            'participants': lesson.get('participants', []),
-            'participant_count': lesson.get('participant_count', 0),
+            'group_size': lesson.get('group_size', 0),
+            'people': lesson.get('people', []),  # [{name, language, sponsor}, ...]
             'instructor': {
                 'id': instructor.get('id'),
                 'name': instructor.get('name', ''),
                 'photo': instructor.get('photo', ''),
             } if instructor else None,
-            'booking_id': lesson.get('booking_id'),
             'notes': lesson.get('notes'),
         }
 

@@ -102,17 +102,18 @@ class MergeDataProcessor(Processor):
         start_time = self._extract_time(order.get('timestamp_start', ''))
         end_time = self._extract_time(order.get('timestamp_end', ''))
 
+        # Get people list (new format with name, language, sponsor per person)
+        people = order.get('people', [])
+
         return {
             'booking_id': booking_id,
             'date': order.get('date_lesson', ''),
             'start': start_time,
             'end': end_time,
             'level_key': order.get('level', ''),
-            'language_key': order.get('language', ''),
             'location_key': order.get('location_meeting', ''),
-            'sponsor': order.get('name_sponsor', ''),
-            'participants': order.get('participants', []),
-            'participant_count': len(order.get('participants', [])),
+            'group_size': order.get('group_size', len(people)),
+            'people': people,  # [{name, language, sponsor}, ...]
             'instructor': instructor,
             'notes': None,
         }

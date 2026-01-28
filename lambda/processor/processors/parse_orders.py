@@ -160,53 +160,47 @@ class ParseOrdersProcessor(Processor):
         """
         Group records into lessons.
 
-        Same booking_id + same time slot = same lesson with multiple participants.
-        If booking_id is empty, use combination of time + sponsor as key.
+        Group by: date + start time + level + location
+        This puts all people in the same lesson type together.
         """
         lessons_map: Dict[str, Dict] = {}
 
         for record in records:
-            # Create grouping key
-            booking_id = record.get('booking_id', '').strip()
+            # Create grouping key: date + start + level + location
+            date = record.get('date_lesson', '')
             start = record.get('timestamp_start_lesson', '')
             end = record.get('timestamp_end_lesson', '')
-            date = record.get('date_lesson', '')
+            level = record.get('level', '').strip()
+            location = record.get('location_meeting', '').strip()
 
-            if booking_id:
-                key = f"{booking_id}_{start}_{end}"
-            else:
-                # Fallback: sponsor + time slot
-                sponsor = record.get('name_sponsor', '')
-                key = f"{sponsor}_{date}_{start}_{end}"
+            key = f"{date}_{start}_{level}_{location}"
 
             if key not in lessons_map:
                 # Create new lesson
                 lessons_map[key] = {
-                    'booking_id': booking_id or None,
                     'date_lesson': date,
                     'timestamp_start': start,
                     'timestamp_end': end,
-                    'level': record.get('level', ''),
-                    'language': record.get('language', ''),
-                    'location_meeting': record.get('location_meeting', ''),
-                    'name_sponsor': record.get('name_sponsor', ''),
-                    'group_size': self._safe_int(record.get('group_size', '1')),
-                    'participants': [],  # [{name, language, is_sponsor}, ...]
+                    'level': level,
+                    'location_meeting': location,
+                    'group_size': 0,  # Will count actual people
+                    'people': [],  # [{name, language, sponsor}, ...]
                 }
 
-            # Add participant to lesson with their language and sponsor
-            participant_name = record.get('name_participant', '').strip()
-            participant_lang = record.get('language', '').strip()
+            # Add person to lesson with their language and sponsor
+            person_name = record.get('name_participant', '').strip()
+            person_lang = record.get('language', '').strip()
             sponsor_name = record.get('name_sponsor', '').strip()
 
-            # Check if already added (by name)
-            existing_names = [p['name'] for p in lessons_map[key]['participants']]
-            if participant_name and participant_name not in existing_names:
-                lessons_map[key]['participants'].append({
-                    'name': participant_name,
-                    'language': participant_lang,
-                    'sponsor': sponsor_name,  # Full sponsor name (will be filtered by privacy processor)
+            # Check if already added (by name + sponsor to handle same name different sponsor)
+            existing = [(p['name'], p['sponsor']) for p in lessons_map[key]['people']]
+            if person_name and (person_name, sponsor_name) not in existing:
+                lessons_map[key]['people'].append({
+                    'name': person_name,
+                    'language': person_lang,
+                    'sponsor': sponsor_name,  # Full sponsor name (filtered by privacy processor)
                 })
+                lessons_map[key]['group_size'] += 1
 
         return list(lessons_map.values())
 

@@ -44,28 +44,28 @@ class PrivacyProcessor(Processor):
                 original_sponsor = lesson.get('sponsor', '')
                 lesson['sponsor'] = self._filter_sponsor_name(original_sponsor)
 
-                # Participants: each has {name, language, sponsor}
+                # People: each has {name, language, sponsor}
                 # Names are already given names only - no transformation needed
-                # Sponsor names need privacy filtering
-                participants = lesson.get('participants', [])
-                filtered_participants = []
-                for p in participants:
+                # Sponsor names need privacy filtering (Ir.Sc. format)
+                people = lesson.get('people', [])
+                filtered_people = []
+                for p in people:
                     if isinstance(p, dict):
                         # New format with language and sponsor
                         sponsor_filtered = self._filter_sponsor_name(p.get('sponsor', ''))
-                        filtered_participants.append({
+                        filtered_people.append({
                             'name': str(p.get('name', '')).strip(),
                             'language': str(p.get('language', '')).strip(),
                             'sponsor': sponsor_filtered,
                         })
                     elif p:
                         # Legacy string format
-                        filtered_participants.append({
+                        filtered_people.append({
                             'name': str(p).strip(),
                             'language': '',
                             'sponsor': '',
                         })
-                lesson['participants'] = filtered_participants
+                lesson['people'] = filtered_people
 
             logger.info(f"Applied privacy rules to {len(lessons)} lessons")
 
@@ -78,14 +78,14 @@ class PrivacyProcessor(Processor):
         """
         Filter sponsor name for privacy.
 
-        Keeps: given name + first 2 letters of surname
-        Example: "Iryna Schröder" -> "Iryna Sc"
+        Abbreviates both names: first 2 letters of given name + first 2 letters of surname
+        Example: "Iryna Schröder" -> "Ir.Sc."
 
         Args:
             name: Full sponsor name
 
         Returns:
-            Privacy-filtered name
+            Privacy-filtered name (e.g., "Ir.Sc.")
         """
         if not name:
             return ''
@@ -97,14 +97,12 @@ class PrivacyProcessor(Processor):
             return ''
 
         if len(parts) == 1:
-            # Only one name part - return as-is
-            return parts[0]
+            # Only one name part - abbreviate it
+            abbrev = parts[0][:2] if len(parts[0]) >= 2 else parts[0]
+            return f"{abbrev}."
 
-        # Given name (first part) + first 2 letters of surname (last part)
-        given_name = parts[0]
-        surname = parts[-1]
+        # First 2 letters of given name + first 2 letters of surname
+        given_abbrev = parts[0][:2] if len(parts[0]) >= 2 else parts[0]
+        surname_abbrev = parts[-1][:2] if len(parts[-1]) >= 2 else parts[-1]
 
-        # Handle short surnames
-        surname_abbrev = surname[:2] if len(surname) >= 2 else surname
-
-        return f"{given_name} {surname_abbrev}"
+        return f"{given_abbrev}.{surname_abbrev}."

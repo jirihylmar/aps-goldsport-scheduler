@@ -146,17 +146,15 @@ class StorageProcessor(Processor):
         """
         Generate unique ID for a lesson.
 
-        Always includes start time to handle multiple time slots per booking.
+        Uses: date + start + level + location for uniqueness.
         """
-        booking_id = lesson.get('booking_id') or ''
+        date = lesson.get('date', '')
         start = lesson.get('start', '')
+        level = lesson.get('level_key', '')
+        location = lesson.get('location_key', '')
 
-        if booking_id:
-            # booking_id + start time for uniqueness
-            return f"{booking_id}_{start}"
-
-        # Generate hash from key fields
-        key_data = f"{lesson.get('date')}_{start}_{lesson.get('sponsor')}"
+        # Generate hash from grouping fields
+        key_data = f"{date}_{start}_{level}_{location}"
         return hashlib.md5(key_data.encode()).hexdigest()[:16]
 
     def _prepare_lesson_item(self, lesson: Dict) -> Dict:
@@ -171,11 +169,9 @@ class StorageProcessor(Processor):
             'start': lesson.get('start'),
             'end': lesson.get('end'),
             'level_key': lesson.get('level_key'),
-            'language_key': lesson.get('language_key'),
             'location_key': lesson.get('location_key'),
-            'sponsor': lesson.get('sponsor'),
-            'participants': lesson.get('participants', []),
-            'participant_count': lesson.get('participant_count', 0),
+            'group_size': lesson.get('group_size', 0),
+            'people': lesson.get('people', []),
             'notes': lesson.get('notes'),
         }
 

@@ -100,10 +100,10 @@ class ValidateProcessor(Processor):
         if not self._is_valid_time(end):
             return False, "invalid_end_time"
 
-        # Check for valid participant list (warn but don't filter)
-        participants = lesson.get('participants', [])
-        if not participants:
-            logger.debug(f"Lesson {lesson.get('booking_id', 'unknown')} has no participants")
+        # Check for valid people list (warn but don't filter)
+        people = lesson.get('people', [])
+        if not people:
+            logger.debug(f"Lesson has no people listed")
 
         return True, ""
 
