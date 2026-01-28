@@ -4,7 +4,7 @@
   "description": "Ski school lesson display system - shows current and upcoming courses on external vertical display",
   "created_at": "2026-01-28",
   "last_updated": "2026-01-28",
-  "last_session_summary": "Phase 1 COMPLETE. All infrastructure deployed to AWS: S3 buckets, DynamoDB, Processor Lambda, Fetcher Lambda with EventBridge trigger (5 min). Ready for Phase 2: Processing Engine.",
+  "last_session_summary": "Phase 2 COMPLETE. Processing pipeline fully implemented: ParseOrders, ParseInstructors, MergeData, Validate, Privacy, Storage, Output processors. 45 unit tests, end-to-end integration test passed. Ready for Phase 3: Configuration & Dictionaries.",
 
   "phases": {
     "phase_0_planning": {
@@ -203,9 +203,9 @@
     },
     "phase_2_processing": {
       "name": "Processing Engine (MVP)",
-      "status": "in_progress",
+      "status": "complete",
       "started_at": "2026-01-28",
-      "completed_at": null,
+      "completed_at": "2026-01-28",
       "description": "Implement core processing pipeline with modular architecture",
       "tasks": [
         {"id": "2.1", "name": "Create pipeline architecture", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "handler.py imports pipeline, basic structure works", "notes": "Created processors/__init__.py (Processor base class, ProcessorError), pipeline.py (Pipeline, PipelineBuilder), updated handler.py to use pipeline"},
@@ -216,7 +216,7 @@
         {"id": "2.6", "name": "Implement PrivacyProcessor", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Unit test transforms names correctly", "depends_on": ["2.5"], "notes": "Sponsor: given + 2 letters surname. Participants: as-is. 8 unit tests passing."},
         {"id": "2.7", "name": "Implement DynamoDB storage", "status": "complete", "completed_at": "2026-01-28", "size": "medium", "verify": "Data appears in DynamoDB after Lambda run", "depends_on": ["2.6"], "notes": "Stores lessons grouped by date, batch writes, metadata tracking. 7 unit tests passing."},
         {"id": "2.8", "name": "Implement JSON output generation", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "schedule.json appears in website bucket", "depends_on": ["2.7"], "notes": "Generates schedule.json with current/upcoming separation. Wired up all processors in handler. 7 unit tests, 44 total passing."},
-        {"id": "2.9", "name": "Integration test with real data", "status": "pending", "size": "medium", "verify": "End-to-end flow works with real TSV", "depends_on": ["2.8"]}
+        {"id": "2.9", "name": "Integration test with real data", "status": "complete", "completed_at": "2026-01-28", "size": "medium", "verify": "End-to-end flow works with real TSV", "depends_on": ["2.8"], "notes": "End-to-end test passed: 1113 records parsed, 579 lessons, 616 DynamoDB items, schedule.json generated. Fixed duplicate key issue by including time in lesson ID."}
       ],
       "artifacts": []
     },
@@ -275,7 +275,7 @@
     }
   },
 
-  "current_task": "2.9",
+  "current_task": "3.1",
 
   "git_repos": {
     "orchestration": {

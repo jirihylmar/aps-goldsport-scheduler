@@ -175,6 +175,23 @@ class TestStorageProcessor(unittest.TestCase):
         lesson_id = item['SK'].replace('LESSON#', '')
         self.assertEqual(len(lesson_id), 16)  # MD5 truncated
 
+    def test_lesson_id_includes_time(self):
+        """Test that lesson ID includes time for uniqueness."""
+        lesson = self._make_lesson(booking_id='same-booking', start='09:00')
+        data = {
+            'config': {'data_table': 'test-table'},
+            'lessons': [lesson],
+            'metadata': {'data_sources': {}},
+        }
+
+        self.processor.process(data)
+
+        batch_call = self.mock_batch.put_item.call_args
+        item = batch_call[1]['Item']
+
+        # Should include time in ID
+        self.assertEqual(item['SK'], 'LESSON#same-booking_09:00')
+
 
 if __name__ == '__main__':
     unittest.main()

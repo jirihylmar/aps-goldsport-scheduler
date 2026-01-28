@@ -428,3 +428,82 @@ http://kurzy.classicskischool.cz/export/export-tsv-2026.php?action=download
 - Phase 1: COMPLETE
 - Phase 2: PENDING (next)
 - Current Task: 2.1
+
+---
+
+## Session 3 - 2026-01-28
+
+### Phase 2: Processing Engine Implementation
+
+**Task 2.1: Create pipeline architecture** - COMPLETE
+- Created `processors/__init__.py` with Processor base class and ProcessorError
+- Created `pipeline.py` with Pipeline orchestrator and PipelineBuilder
+- Updated `handler.py` to use pipeline structure
+
+**Task 2.2: Implement ParseOrdersProcessor** - COMPLETE
+- Parses TSV orders from S3
+- Filters invalid records (1970 dates, missing fields)
+- Groups records by booking_id and time slot
+- 5 unit tests
+
+**Task 2.3: Implement ParseInstructorsProcessor** - COMPLETE
+- Parses roster and profiles JSON
+- Helper function for instructor lookup
+- 4 unit tests
+
+**Task 2.4: Implement MergeDataProcessor** - COMPLETE
+- Merges orders with instructor assignments
+- Default instructor fallback
+- 5 unit tests
+
+**Task 2.5: Implement ValidateProcessor** - COMPLETE
+- Validates required fields and time formats
+- 8 unit tests
+
+**Task 2.6: Implement PrivacyProcessor** - COMPLETE
+- Sponsor: given name + first 2 letters surname
+- Participants: unchanged (already given names)
+- 8 unit tests
+
+**Task 2.7: Implement DynamoDB storage** - COMPLETE
+- Stores lessons grouped by date
+- Batch writes for efficiency
+- 8 unit tests (including fix for duplicate key issue)
+
+**Task 2.8: Implement JSON output generation** - COMPLETE
+- Generates schedule.json with current/upcoming separation
+- Wired up all processors in handler.py
+- 7 unit tests
+
+**Task 2.9: Integration test with real data** - COMPLETE
+- Deployed Lambda with `cdk deploy`
+- Uploaded real TSV (1113 records)
+- Verified: 579 lessons parsed, 616 DynamoDB items stored
+- schedule.json generated in website bucket
+- Privacy applied correctly: "Iryna Schröder" → "Iryna Sc"
+
+---
+
+## Phase 2 COMPLETE
+
+### Summary
+- 7 processors implemented and tested
+- 45 unit tests passing
+- End-to-end integration test successful
+- Lambda deployed and operational
+
+### Pipeline Flow
+```
+S3 Upload → ParseOrders → ParseInstructors → MergeData → Validate → Privacy → Storage → Output
+```
+
+### Next Session
+- Phase 3: Configuration & Dictionaries
+- Start with Task 3.1: Create UI translations file
+
+### Status
+- Phase 0: COMPLETE
+- Phase 1: COMPLETE
+- Phase 2: COMPLETE
+- Phase 3: PENDING (next)
+- Current Task: 3.1
