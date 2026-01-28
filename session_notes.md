@@ -158,7 +158,29 @@ aps-goldsport-scheduler/           # Orchestration (this repo)
 - Single git history
 - Easier context for Claude
 
+---
+
+### Task 0.3: Draft IMPLEMENTATION_PLAN.md sections 1-3
+
+Created IMPLEMENTATION_PLAN.md with:
+
+**Section 1 - Project Overview:**
+- Description: Web display for ski school lessons
+- Goals: Current/upcoming lessons, auto-refresh, privacy
+- Success criteria: 5-min update, readable from 3m, handles 1000+ records
+
+**Section 2 - Architecture:**
+- Data flow: TSV → S3 → Lambda → JSON → S3 Website → Display
+- Components: CDK, Python Lambda, HTML/CSS/JS, S3, CloudFront
+
+**Section 3 - Technical Specifications:**
+- Input schema: TSV columns mapped
+- Output schema: schedule.json format
+- Privacy rules: sponsor = given + 2 letters, participant = as-is
+- Display requirements: portrait, large font, 60s refresh
+
 ### Status
 - Task 0.1: COMPLETE
 - Task 0.2: COMPLETE
-- Current: Ready for Task 0.3
+- Task 0.3: COMPLETE
+- Current: Ready for Task 0.4
