@@ -1,0 +1,80 @@
+{
+  "levels": {
+    "dětská školka": {
+      "en": "Kids Ski School",
+      "de": "Kinderskischule",
+      "cz": "Dětská školka",
+      "pl": "Przedszkole narciarskie"
+    },
+    "lyže začátečník": {
+      "en": "Ski Beginner",
+      "de": "Ski Anfänger",
+      "cz": "Lyže začátečník",
+      "pl": "Narty początkujący"
+    },
+    "lyže pokročilý": {
+      "en": "Ski Advanced",
+      "de": "Ski Fortgeschritten",
+      "cz": "Lyže pokročilý",
+      "pl": "Narty zaawansowany"
+    },
+    "snowboard začátečník": {
+      "en": "Snowboard Beginner",
+      "de": "Snowboard Anfänger",
+      "cz": "Snowboard začátečník",
+      "pl": "Snowboard początkujący"
+    },
+    "snowboard pokročilý": {
+      "en": "Snowboard Advanced",
+      "de": "Snowboard Fortgeschritten",
+      "cz": "Snowboard pokročilý",
+      "pl": "Snowboard zaawansowany"
+    },
+    "běžky začátečník": {
+      "en": "Cross-Country Beginner",
+      "de": "Langlauf Anfänger",
+      "cz": "Běžky začátečník",
+      "pl": "Biegi narciarskie początkujący"
+    }
+  },
+  "languages": {
+    "en": {
+      "en": "English",
+      "de": "Englisch",
+      "cz": "Angličtina",
+      "pl": "Angielski"
+    },
+    "de": {
+      "en": "German",
+      "de": "Deutsch",
+      "cz": "Němčina",
+      "pl": "Niemiecki"
+    },
+    "cz": {
+      "en": "Czech",
+      "de": "Tschechisch",
+      "cz": "Čeština",
+      "pl": "Czeski"
+    },
+    "pl": {
+      "en": "Polish",
+      "de": "Polnisch",
+      "cz": "Polština",
+      "pl": "Polski"
+    }
+  },
+  "locations": {
+    "Rýžoviště": {
+      "en": "Rýžoviště",
+      "de": "Rýžoviště",
+      "cz": "Rýžoviště",
+      "pl": "Rýžoviště"
+    },
+    "Stone bar": {
+      "en": "Stone Bar",
+      "de": "Stone Bar",
+      "cz": "Stone bar",
+      "pl": "Stone Bar"
+    }
+  }
+}
