@@ -276,12 +276,12 @@
     },
     "phase_6_ui_tuning": {
       "name": "UI/UX Improvements",
-      "status": "pending",
-      "started_at": null,
+      "status": "in_progress",
+      "started_at": "2026-01-28",
       "completed_at": null,
       "description": "Tune display for passive screen usage - no scrolling, auto-rotation, language-specific views",
       "tasks": [
-        {"id": "6.1", "name": "Analyze display requirements", "status": "pending", "size": "small", "verify": "Analysis document with max lessons per page, typical lesson counts"},
+        {"id": "6.1", "name": "Analyze display requirements", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Analysis document with max lessons per page, typical lesson counts", "notes": "Created docs/display-analysis.md. Current: 4 cards visible, max needed: 17. Recommends compact cards + rotation."},
         {"id": "6.2", "name": "Implement page rotation system", "status": "pending", "size": "medium", "verify": "Demo with 20+ lessons shows rotation working", "depends_on": ["6.1"]},
         {"id": "6.3", "name": "Language-specific views", "status": "pending", "size": "medium", "verify": "Each language has optimized view", "depends_on": ["6.1"]},
         {"id": "6.4", "name": "Fix data grouping issues", "status": "pending", "size": "medium", "verify": "Related lessons (kids school) appear together"},
