@@ -652,14 +652,67 @@ Permissions:
 
 ---
 
-### Estimated Costs (Monthly)
-| Resource | Estimate |
-|----------|----------|
-| S3 (storage + requests) | < $1 |
-| Lambda | < $1 (minimal invocations) |
-| DynamoDB (on-demand) | < $1 (low volume) |
-| CloudFront | < $1 (low traffic) |
-| **Total** | **< $5/month** |
+### CloudFront: Why and When
+
+**What CloudFront provides**:
+| Feature | Benefit |
+|---------|---------|
+| HTTPS | S3 website hosting is HTTP only; CloudFront adds SSL/TLS |
+| Caching | Reduces S3 requests, faster page loads |
+| Custom domain | Use your own domain (e.g., schedule.goldsport.cz) |
+| Edge locations | Faster delivery (minor benefit for single-location use) |
+
+**Do you need it?**
+
+| Scenario | CloudFront Needed? |
+|----------|-------------------|
+| Internal display on local network | No - HTTP from S3 is fine |
+| Public URL with HTTPS required | Yes |
+| Custom domain (schedule.goldsport.cz) | Yes |
+| Simple S3 URL is acceptable | No |
+
+**Recommendation**: Start without CloudFront (Phase 4 is optional). Add it later if you need HTTPS or custom domain.
+
+---
+
+### Estimated Operational Costs (Monthly)
+
+**Assumptions**:
+- ~1000 lessons/day in peak season
+- 5-10 data uploads per day
+- 1 display refreshing every 60 seconds (1440 requests/day)
+- ~100KB schedule.json, ~50KB static files
+
+#### Detailed Breakdown
+
+| Resource | Usage | Unit Cost | Monthly Cost |
+|----------|-------|-----------|--------------|
+| **S3 Storage** | ~10 MB total | $0.023/GB | ~$0.01 |
+| **S3 Requests** | ~50K GET/month | $0.0004/1K | ~$0.02 |
+| **S3 PUT** | ~300/month | $0.005/1K | ~$0.01 |
+| **DynamoDB Write** | ~10K/month | $1.25/1M | ~$0.01 |
+| **DynamoDB Read** | ~50K/month | $0.25/1M | ~$0.01 |
+| **Lambda Invocations** | ~300/month | Free tier (1M) | $0.00 |
+| **Lambda Compute** | ~30 sec total | Free tier (400K GB-sec) | $0.00 |
+| **CloudFront** (if used) | ~5 GB/month | Free tier (1TB) | $0.00 |
+| **CloudWatch Logs** | ~100 MB | $0.50/GB | ~$0.05 |
+
+#### Summary
+
+| Scenario | Monthly Cost |
+|----------|--------------|
+| **Without CloudFront** | **~$0.10 - $0.50** |
+| **With CloudFront** | **~$0.10 - $0.50** (free tier) |
+| **After free tier expires** | **~$1 - $2** |
+
+**Note**: AWS Free Tier (12 months) covers most of this usage. Even after free tier, costs are minimal for this scale.
+
+#### Off-Season vs Peak Season
+
+| Period | Uploads/day | Display refreshes | Est. Cost |
+|--------|-------------|-------------------|-----------|
+| Off-season | 0-1 | 0 (display off) | ~$0.05 |
+| Peak season | 5-10 | 1440 | ~$0.50 |
 
 ---
 
@@ -781,12 +834,11 @@ Types: feat, fix, docs, refactor, test, chore, infra
 ### MVP Scope (Phases 1-5)
 - Display current/upcoming lessons
 - Multi-language support
-- Basic instructor assignment (from input files)
 - Modular architecture ready for extensions
 
 ### Future Scope (Phases 6+)
+- Instructor assignment (manual from input files, then automatic)
 - Conflict detection
-- Automatic instructor assignment
 - API for interactive features
 - Notifications
 
