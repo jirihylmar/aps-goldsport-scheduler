@@ -303,3 +303,128 @@ Completed IMPLEMENTATION_PLAN.md with:
 - Phase 0: COMPLETE
 - Phase 1: PENDING (next)
 - Current Task: 1.1
+
+---
+
+## Session 2 - 2026-01-28
+
+### Discussion: Architecture Change - Timer-Based Data Fetching
+
+**Issue raised**: Original plan assumed manual S3 uploads for orders data. However, orders data is available via HTTP export:
+```
+http://kurzy.classicskischool.cz/export/export-tsv-2026.php?action=download
+```
+
+**Tested**: URL returns fresh TSV data directly (verified with curl).
+
+**Architectural Decision**: Two-Lambda architecture (Option A)
+1. **Fetcher Lambda** - scheduled via EventBridge, fetches from external URLs, saves to S3
+2. **Processor Lambda** - triggered by S3, processes data through pipeline
+
+**Benefits**:
+- Automated data refresh (no manual uploads needed)
+- Extensible for additional data sources
+- Consistent refresh schedule (every 5 minutes)
+- S3 trigger still works for manual uploads (fallback)
+
+### Changes Made
+
+**IMPLEMENTATION_PLAN.md**:
+- Updated architecture diagram with Data Acquisition layer
+- Added Fetcher Lambda and EventBridge to Components table
+- Updated Data Flow to show automated fetch process
+- Updated Phase 1 deliverables
+- Added Fetcher Lambda, EventBridge rule to resource tables
+- Added External Data Sources section documenting URLs
+- Updated IAM Permissions for both Lambda roles
+- Added decision to Decision Log
+
+**progress.json**:
+- Renamed task 1.5 to "Create Processor Lambda skeleton"
+- Added task 1.5a: Create Fetcher Lambda skeleton
+- Added task 1.5b: Create EventBridge schedule rule
+- Updated task 1.7 dependencies to include 1.5b
+
+**tasks/phase_1_infrastructure.md**:
+- Added task 1.5a with Fetcher Lambda details and sample code
+- Added task 1.5b with EventBridge CDK code
+- Updated dependency diagram
+- Updated completion criteria
+
+### Phase 1 Tasks (Updated)
+
+| ID | Task | Status |
+|----|------|--------|
+| 1.1 | Initialize CDK project | pending |
+| 1.2 | Create S3 input bucket | pending |
+| 1.3 | Create S3 website bucket | pending |
+| 1.4 | Create DynamoDB table | pending |
+| 1.5 | Create Processor Lambda skeleton | pending |
+| 1.5a | Create Fetcher Lambda skeleton | pending |
+| 1.5b | Create EventBridge schedule rule | pending |
+| 1.6 | Configure S3 trigger | pending |
+| 1.7 | Deploy and verify infrastructure | pending |
+
+### Status
+- Phase 0: COMPLETE
+- Phase 1: PENDING (updated with new tasks)
+- Current Task: 1.1
+
+---
+
+### Phase 1 Implementation
+
+**Task 1.1: Initialize CDK project** - COMPLETE
+- Created `infrastructure/` with CDK TypeScript project
+- Created `scheduler-stack.ts` with environment configuration
+- Configured for eu-central-1, account 299025166536
+
+**Tasks 1.2, 1.3, 1.4** - COMPLETE (parallel)
+- S3 input bucket: `goldsport-scheduler-input-dev`
+- S3 website bucket: `goldsport-scheduler-web-dev`
+- DynamoDB table: `goldsport-scheduler-data-dev`
+
+**Task 1.5: Processor Lambda skeleton** - COMPLETE
+- `lambda/processor/handler.py` with basic S3 event handling
+- Environment: DATA_TABLE, WEBSITE_BUCKET, INPUT_BUCKET
+
+**Task 1.5a: Fetcher Lambda skeleton** - COMPLETE
+- `lambda/fetcher/handler.py` with HTTP fetch and S3 save logic
+- Environment: INPUT_BUCKET, ORDERS_URL (configured with export URL)
+
+**Task 1.5b: EventBridge schedule rule** - COMPLETE
+- `goldsport-scheduler-fetch-schedule-dev`
+- Rate: every 5 minutes
+- Target: Fetcher Lambda
+
+**Task 1.6: S3 trigger** - COMPLETE
+- S3 notifications on input bucket for prefixes: orders/, instructors/, schedule-overrides/
+- Target: Processor Lambda
+
+**Task 1.7: Deploy and verify** - COMPLETE
+- `cdk deploy` successful
+- All resources verified via MCP tools
+
+---
+
+## Phase 1 COMPLETE
+
+### Deployed Resources
+| Resource | Name |
+|----------|------|
+| S3 Input | goldsport-scheduler-input-dev |
+| S3 Website | goldsport-scheduler-web-dev |
+| DynamoDB | goldsport-scheduler-data-dev |
+| Fetcher Lambda | goldsport-scheduler-fetcher-dev |
+| Processor Lambda | goldsport-scheduler-engine-dev |
+| EventBridge Rule | goldsport-scheduler-fetch-schedule-dev (rate 5 min) |
+
+### Next Session
+- Phase 2: Processing Engine
+- Start with Task 2.1: Create pipeline architecture
+
+### Status
+- Phase 0: COMPLETE
+- Phase 1: COMPLETE
+- Phase 2: PENDING (next)
+- Current Task: 2.1

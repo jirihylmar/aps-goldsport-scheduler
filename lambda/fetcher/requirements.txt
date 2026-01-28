@@ -1,0 +1,2 @@
+# GoldSport Scheduler - Fetcher Lambda dependencies
+# boto3 and urllib are provided by Lambda runtime

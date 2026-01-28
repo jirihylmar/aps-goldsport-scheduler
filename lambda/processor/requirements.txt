@@ -1,0 +1,2 @@
+# GoldSport Scheduler - Processor Lambda dependencies
+# boto3 is provided by Lambda runtime

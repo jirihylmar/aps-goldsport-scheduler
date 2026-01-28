@@ -4,7 +4,7 @@
   "description": "Ski school lesson display system - shows current and upcoming courses on external vertical display",
   "created_at": "2026-01-28",
   "last_updated": "2026-01-28",
-  "last_session_summary": "Phase 0 COMPLETE. Spec approved, CLAUDE.md created, all 39 implementation tasks generated across 5 phases. Ready for Phase 1: Infrastructure.",
+  "last_session_summary": "Phase 1 COMPLETE. All infrastructure deployed to AWS: S3 buckets, DynamoDB, Processor Lambda, Fetcher Lambda with EventBridge trigger (5 min). Ready for Phase 2: Processing Engine.",
 
   "phases": {
     "phase_0_planning": {
@@ -108,22 +108,25 @@
     },
     "phase_1_infrastructure": {
       "name": "Infrastructure Foundation",
-      "status": "pending",
-      "started_at": null,
-      "completed_at": null,
+      "status": "complete",
+      "started_at": "2026-01-28",
+      "completed_at": "2026-01-28",
       "description": "Set up AWS resources and CDK project with modular architecture",
       "tasks": [
         {
           "id": "1.1",
           "name": "Initialize CDK project",
-          "status": "pending",
+          "status": "complete",
+          "completed_at": "2026-01-28",
           "size": "small",
-          "verify": "infrastructure/ exists, npm run build succeeds"
+          "verify": "infrastructure/ exists, npm run build succeeds",
+          "notes": "CDK TypeScript project initialized with SchedulerStack, configured for eu-central-1"
         },
         {
           "id": "1.2",
           "name": "Create S3 input bucket",
-          "status": "pending",
+          "status": "complete",
+          "completed_at": "2026-01-28",
           "size": "small",
           "verify": "cdk synth succeeds, bucket defined in template",
           "depends_on": ["1.1"]
@@ -131,7 +134,8 @@
         {
           "id": "1.3",
           "name": "Create S3 website bucket",
-          "status": "pending",
+          "status": "complete",
+          "completed_at": "2026-01-28",
           "size": "small",
           "verify": "cdk synth succeeds, bucket defined with website config",
           "depends_on": ["1.1"]
@@ -139,23 +143,47 @@
         {
           "id": "1.4",
           "name": "Create DynamoDB table",
-          "status": "pending",
+          "status": "complete",
+          "completed_at": "2026-01-28",
           "size": "small",
           "verify": "cdk synth succeeds, table defined in template",
           "depends_on": ["1.1"]
         },
         {
           "id": "1.5",
-          "name": "Create Lambda function skeleton",
-          "status": "pending",
+          "name": "Create Processor Lambda skeleton",
+          "status": "complete",
+          "completed_at": "2026-01-28",
           "size": "medium",
           "verify": "cdk synth succeeds, Lambda and IAM role defined",
-          "depends_on": ["1.2", "1.3", "1.4"]
+          "depends_on": ["1.2", "1.3", "1.4"],
+          "notes": "Processing pipeline Lambda triggered by S3"
+        },
+        {
+          "id": "1.5a",
+          "name": "Create Fetcher Lambda skeleton",
+          "status": "complete",
+          "completed_at": "2026-01-28",
+          "size": "medium",
+          "verify": "cdk synth succeeds, Fetcher Lambda and IAM role defined",
+          "depends_on": ["1.2"],
+          "notes": "Data acquisition Lambda that fetches from external URLs and saves to S3"
+        },
+        {
+          "id": "1.5b",
+          "name": "Create EventBridge schedule rule",
+          "status": "complete",
+          "completed_at": "2026-01-28",
+          "size": "small",
+          "verify": "cdk synth succeeds, EventBridge rule triggers Fetcher Lambda every 5 min",
+          "depends_on": ["1.5a"],
+          "notes": "Scheduled trigger for automated data fetching"
         },
         {
           "id": "1.6",
           "name": "Configure S3 trigger",
-          "status": "pending",
+          "status": "complete",
+          "completed_at": "2026-01-28",
           "size": "small",
           "verify": "cdk synth succeeds, notification config in template",
           "depends_on": ["1.5"]
@@ -163,10 +191,12 @@
         {
           "id": "1.7",
           "name": "Deploy and verify infrastructure",
-          "status": "pending",
+          "status": "complete",
+          "completed_at": "2026-01-28",
           "size": "medium",
           "verify": "All resources exist in AWS, verified via MCP tools",
-          "depends_on": ["1.6"]
+          "depends_on": ["1.5b", "1.6"],
+          "notes": "Deployed to AWS. Verified: S3 buckets, DynamoDB table, Processor Lambda, Fetcher Lambda, EventBridge rule (rate 5 min)"
         }
       ],
       "artifacts": []
@@ -245,7 +275,7 @@
     }
   },
 
-  "current_task": "1.1",
+  "current_task": "2.1",
 
   "git_repos": {
     "orchestration": {

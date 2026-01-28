@@ -54,15 +54,19 @@ A scheduling engine for GoldSport ski school that processes lesson bookings, man
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
 │  ┌─────────────────────────────────────────────────────────────────┐   │
-│  │                        INPUT LAYER                               │   │
-│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐    │   │
-│  │  │  Orders  │  │Instructors│  │Locations │  │  Overrides   │    │   │
-│  │  │  (TSV)   │  │  (JSON)  │  │  (JSON)  │  │   (JSON)     │    │   │
-│  │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └──────┬───────┘    │   │
-│  └───────┼─────────────┼─────────────┼───────────────┼────────────┘   │
-│          └─────────────┴─────────────┴───────────────┘                 │
-│                                    │                                    │
-│                                    ▼                                    │
+│  │                      DATA ACQUISITION                            │   │
+│  │                                                                   │   │
+│  │   EventBridge          Fetcher Lambda         External Sources   │   │
+│  │   (schedule)  ────────▶  (fetch data)  ◀────── • Orders TSV URL  │   │
+│  │   every 5 min              │                   • (future sources)│   │
+│  │                            ▼                                      │   │
+│  │                     ┌──────────────┐    Manual uploads also      │   │
+│  │                     │  S3 Input    │◀───── supported (fallback)  │   │
+│  │                     │   Bucket     │                              │   │
+│  │                     └──────┬───────┘                              │   │
+│  └────────────────────────────┼──────────────────────────────────────┘   │
+│                               │ S3 trigger                              │
+│                               ▼                                         │
 │  ┌─────────────────────────────────────────────────────────────────┐   │
 │  │                    PROCESSING PIPELINE                           │   │
 │  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐    │   │
@@ -97,6 +101,7 @@ A scheduling engine for GoldSport ski school that processes lesson bookings, man
 | Component | Technology | Purpose |
 |-----------|------------|---------|
 | Infrastructure | AWS CDK (TypeScript) | Define and deploy AWS resources |
+| Data Fetcher | Python Lambda + EventBridge | Scheduled fetch from external URLs |
 | Processing Engine | Python Lambda | Modular pipeline for data processing |
 | State Storage | DynamoDB | Processed schedules, conflicts, history |
 | Configuration | S3 (JSON) | Translations, dictionaries, settings |
@@ -126,16 +131,24 @@ for processor in pipeline:
 ### Data Flow
 
 **MVP Flow**:
-1. Staff uploads data to S3 input bucket (orders, instructors, etc.)
-2. S3 event triggers Processing Lambda
-3. Lambda runs pipeline: Parse → Merge → Validate → Privacy
-4. Lambda stores processed schedule in DynamoDB
-5. Lambda generates schedule.json → S3 website bucket
-6. Display auto-refreshes from S3/CloudFront
+1. **EventBridge triggers Fetcher Lambda** on schedule (every 5 minutes)
+2. **Fetcher Lambda fetches data from external URLs**:
+   - Orders: `http://kurzy.classicskischool.cz/export/export-tsv-2026.php?action=download`
+   - (Future: instructors, locations, etc.)
+3. **Fetcher Lambda saves data to S3 input bucket** (`orders/orders-{timestamp}.tsv`)
+4. **S3 event triggers Processor Lambda**
+5. Processor Lambda runs pipeline: Parse → Merge → Validate → Privacy
+6. Processor Lambda stores processed schedule in DynamoDB
+7. Processor Lambda generates schedule.json → S3 website bucket
+8. Display auto-refreshes from S3/CloudFront
+
+**Manual Upload Fallback**:
+- Staff can still manually upload files to S3 input bucket
+- S3 trigger works the same way regardless of upload source
 
 **Future Flow** (additions):
-- Step 3 adds: Conflict Detection → Assignment → Optimization
-- Step 5 adds: API endpoints, Notifications
+- Step 5 adds: Conflict Detection → Assignment → Optimization
+- Step 7 adds: API endpoints, Notifications
 
 ---
 
@@ -349,8 +362,10 @@ The frontend loads translations based on `lang` parameter and renders all text a
 - CDK project initialized with modular stack structure
 - S3 buckets (input + website)
 - DynamoDB table for schedule state
-- Lambda function skeleton with pipeline structure
-- S3 trigger configured
+- Processor Lambda function skeleton with pipeline structure
+- Fetcher Lambda for scheduled data acquisition
+- EventBridge rule for scheduled triggering (every 5 minutes)
+- S3 trigger configured for processor
 
 **Dependencies**: None
 
@@ -462,8 +477,11 @@ The frontend loads translations based on `lang` parameter and renders all text a
 | S3 Input Bucket | `{project}-{component}-input-{env}` | `goldsport-scheduler-input-prod` |
 | S3 Website Bucket | `{project}-{component}-web-{env}` | `goldsport-scheduler-web-prod` |
 | DynamoDB Table | `{project}-{component}-data-{env}` | `goldsport-scheduler-data-prod` |
-| Lambda (Engine) | `{project}-{component}-engine-{env}` | `goldsport-scheduler-engine-prod` |
-| IAM Role | `{project}-{component}-lambda-role-{env}` | `goldsport-scheduler-lambda-role-prod` |
+| Lambda (Fetcher) | `{project}-{component}-fetcher-{env}` | `goldsport-scheduler-fetcher-prod` |
+| Lambda (Processor) | `{project}-{component}-engine-{env}` | `goldsport-scheduler-engine-prod` |
+| EventBridge Rule | `{project}-{component}-fetch-schedule-{env}` | `goldsport-scheduler-fetch-schedule-prod` |
+| IAM Role (Fetcher) | `{project}-{component}-fetcher-role-{env}` | `goldsport-scheduler-fetcher-role-prod` |
+| IAM Role (Processor) | `{project}-{component}-engine-role-{env}` | `goldsport-scheduler-engine-role-prod` |
 | CloudFront | `{project}-{component}-cdn-{env}` | `goldsport-scheduler-cdn-prod` |
 | CloudWatch Logs | `/aws/lambda/{lambda-name}` | `/aws/lambda/goldsport-scheduler-engine-prod` |
 
@@ -582,8 +600,11 @@ goldsport-scheduler-web-prod/
 | S3 Bucket | `goldsport-scheduler-input-{env}` | Receives data uploads |
 | S3 Bucket | `goldsport-scheduler-web-{env}` | Static site + config + data |
 | DynamoDB | `goldsport-scheduler-data-{env}` | Processed schedules, state |
+| Lambda | `goldsport-scheduler-fetcher-{env}` | Fetches data from external URLs |
 | Lambda | `goldsport-scheduler-engine-{env}` | Processing pipeline |
-| IAM Role | `goldsport-scheduler-lambda-role-{env}` | Lambda execution permissions |
+| EventBridge | `goldsport-scheduler-fetch-schedule-{env}` | Triggers fetcher every 5 min |
+| IAM Role | `goldsport-scheduler-fetcher-role-{env}` | Fetcher Lambda permissions |
+| IAM Role | `goldsport-scheduler-engine-role-{env}` | Processor Lambda permissions |
 
 #### Phase 4 Resources
 | Type | Name | Purpose |
@@ -635,8 +656,19 @@ Item Types:
 
 ---
 
-### IAM Permissions (Lambda Role)
+### IAM Permissions (Lambda Roles)
 
+**Fetcher Lambda Role** (`goldsport-scheduler-fetcher-role-{env}`):
+```yaml
+Permissions:
+  # Write fetched data to input bucket
+  - s3:PutObject on goldsport-scheduler-input-{env}/*
+
+  # Logging
+  - logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents
+```
+
+**Processor Lambda Role** (`goldsport-scheduler-engine-role-{env}`):
 ```yaml
 Permissions:
   # Read all input sources
@@ -654,6 +686,29 @@ Permissions:
   # Logging
   - logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents
 ```
+
+---
+
+### External Data Sources
+
+The Fetcher Lambda retrieves data from external URLs on a schedule.
+
+| Source | URL | Format | Schedule |
+|--------|-----|--------|----------|
+| Orders | `http://kurzy.classicskischool.cz/export/export-tsv-2026.php?action=download` | TSV | Every 5 min |
+
+**Configuration**: Data source URLs are stored in environment variables on the Fetcher Lambda, allowing updates without code changes.
+
+**Future Sources** (can be added via env vars):
+- Instructor roster URL (if available)
+- Location data URL (if available)
+- Override/cancellation feeds
+
+**Fetcher Lambda behavior**:
+1. Read source URLs from environment variables
+2. HTTP GET each configured URL
+3. Save response to S3 input bucket with timestamped filename
+4. S3 trigger then invokes Processor Lambda
 
 ---
 
@@ -745,7 +800,10 @@ aps-goldsport-scheduler/           # Single repository
 │   ├── package.json
 │   └── tsconfig.json
 ├── lambda/                        # Lambda source
-│   └── processor/
+│   ├── fetcher/                   # Data acquisition Lambda
+│   │   ├── handler.py
+│   │   └── requirements.txt
+│   └── processor/                 # Processing pipeline Lambda
 │       ├── handler.py
 │       └── requirements.txt
 └── static-site/                   # Frontend
@@ -817,7 +875,7 @@ Types: feat, fix, docs, refactor, test, chore, infra
 |------|----------|-----------|
 | 2026-01-28 | Mono-repo structure | Simple project, single deployment unit |
 | 2026-01-28 | Python for Lambda | Better TSV/data processing libraries |
-| 2026-01-28 | S3 trigger (not scheduled) | Updates only when new data uploaded |
+| 2026-01-28 | ~~S3 trigger (not scheduled)~~ | ~~Updates only when new data uploaded~~ |
 | 2026-01-28 | CloudFront for CDN | HTTPS, caching, professional delivery |
 | 2026-01-28 | JSON config for translations | No code changes needed to add languages/terms |
 | 2026-01-28 | Keys in schedule.json | Frontend handles translation, allows runtime language switch |
@@ -825,6 +883,8 @@ Types: feat, fix, docs, refactor, test, chore, infra
 | 2026-01-28 | **DynamoDB for state** | Store processed schedules, conflicts, assignments for future features |
 | 2026-01-28 | **Modular pipeline** | Easy to add processors (conflict, assignment) without rewriting |
 | 2026-01-28 | **Multiple input sources** | Orders, instructors, overrides as separate uploads |
+| 2026-01-28 | **Timer-based Fetcher Lambda** | Orders data available via HTTP export URL - automated fetch every 5 min instead of manual upload. Two-Lambda architecture (Fetcher + Processor) keeps concerns separated. S3 trigger still works for manual uploads as fallback. |
+| 2026-01-28 | **EventBridge for scheduling** | Standard AWS service for scheduled Lambda invocation |
 
 ---
 
