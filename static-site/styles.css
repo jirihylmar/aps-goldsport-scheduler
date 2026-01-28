@@ -1,0 +1,354 @@
+/* GoldSport Scheduler - Vertical Display Styles */
+/* Optimized for portrait orientation, readable from 3m distance */
+
+:root {
+    /* Colors */
+    --color-primary: #1e3a5f;
+    --color-secondary: #2e5c8a;
+    --color-accent: #f0b800;
+    --color-background: #f5f7fa;
+    --color-card: #ffffff;
+    --color-text: #1a1a1a;
+    --color-text-light: #666666;
+    --color-border: #e0e4e8;
+    --color-current: #e8f5e9;
+    --color-current-border: #4caf50;
+    --color-upcoming: #fff8e1;
+    --color-upcoming-border: #ffc107;
+
+    /* Typography */
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-size-base: 24px;
+    --font-size-large: 32px;
+    --font-size-xlarge: 40px;
+    --font-size-small: 20px;
+
+    /* Spacing */
+    --spacing-xs: 8px;
+    --spacing-sm: 16px;
+    --spacing-md: 24px;
+    --spacing-lg: 32px;
+    --spacing-xl: 48px;
+
+    /* Card */
+    --card-radius: 12px;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Reset and base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    background: var(--color-background);
+    color: var(--color-text);
+}
+
+/* Container - full height layout */
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-md);
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md);
+    background: var(--color-primary);
+    color: white;
+    border-radius: var(--card-radius);
+    margin-bottom: var(--spacing-md);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.logo img {
+    height: 60px;
+    width: auto;
+}
+
+.logo h1 {
+    font-size: var(--font-size-xlarge);
+    font-weight: 600;
+}
+
+/* Language selector */
+.language-selector {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.lang-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    border: 2px solid white;
+    border-radius: 8px;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lang-btn:hover,
+.lang-btn.active {
+    background: white;
+    color: var(--color-primary);
+}
+
+/* Main content */
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    overflow-y: auto;
+}
+
+/* Sections */
+.lessons-section {
+    background: var(--color-card);
+    border-radius: var(--card-radius);
+    padding: var(--spacing-md);
+    box-shadow: var(--card-shadow);
+}
+
+.current-section {
+    border-left: 6px solid var(--color-current-border);
+}
+
+.upcoming-section {
+    border-left: 6px solid var(--color-upcoming-border);
+}
+
+.section-title {
+    font-size: var(--font-size-large);
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.current-section .section-title {
+    color: var(--color-current-border);
+}
+
+.upcoming-section .section-title {
+    color: var(--color-upcoming-border);
+}
+
+/* Lessons container */
+.lessons-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+/* Lesson card */
+.lesson-card {
+    display: grid;
+    grid-template-columns: 140px 1fr 1fr;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--color-background);
+    border-radius: var(--card-radius);
+    border: 1px solid var(--color-border);
+}
+
+.current-section .lesson-card {
+    background: var(--color-current);
+    border-color: var(--color-current-border);
+}
+
+.upcoming-section .lesson-card {
+    background: var(--color-upcoming);
+    border-color: var(--color-upcoming-border);
+}
+
+/* Time column */
+.lesson-time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-large);
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.time-separator {
+    font-size: var(--font-size-small);
+    color: var(--color-text-light);
+}
+
+/* Details column */
+.lesson-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.lesson-level {
+    font-size: var(--font-size-large);
+    font-weight: 600;
+    color: var(--color-secondary);
+}
+
+.lesson-info {
+    display: flex;
+    gap: var(--spacing-md);
+    font-size: var(--font-size-small);
+    color: var(--color-text-light);
+}
+
+.lesson-location::before {
+    content: '\1F4CD';
+    margin-right: var(--spacing-xs);
+}
+
+.lesson-language::before {
+    content: '\1F30D';
+    margin-right: var(--spacing-xs);
+}
+
+/* People column */
+.lesson-people {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.lesson-instructor {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.instructor-photo {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-primary);
+}
+
+.instructor-name {
+    font-weight: 600;
+}
+
+.lesson-participants {
+    font-size: var(--font-size-small);
+    color: var(--color-text-light);
+}
+
+.participant-label {
+    font-weight: 500;
+}
+
+.participant-list {
+    color: var(--color-text);
+}
+
+.participant-count {
+    font-weight: 600;
+    color: var(--color-secondary);
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-xl);
+    font-size: var(--font-size-large);
+    color: var(--color-text-light);
+}
+
+/* Loading state */
+.loading {
+    text-align: center;
+    padding: var(--spacing-xl);
+    font-size: var(--font-size-large);
+    color: var(--color-text-light);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* Error state */
+.error {
+    text-align: center;
+    padding: var(--spacing-xl);
+    font-size: var(--font-size-large);
+    color: #d32f2f;
+}
+
+/* Footer */
+.footer {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-card);
+    border-radius: var(--card-radius);
+    text-align: center;
+    font-size: var(--font-size-small);
+    color: var(--color-text-light);
+}
+
+.status {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-xs);
+}
+
+/* Responsive adjustments for very large displays */
+@media (min-width: 1200px) {
+    :root {
+        --font-size-base: 28px;
+        --font-size-large: 36px;
+        --font-size-xlarge: 48px;
+        --font-size-small: 24px;
+    }
+
+    .lesson-card {
+        grid-template-columns: 160px 1fr 1fr;
+    }
+}
+
+/* Portrait orientation optimization */
+@media (orientation: portrait) {
+    .lesson-card {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+    }
+
+    .lesson-time {
+        flex-direction: row;
+        gap: var(--spacing-xs);
+        justify-content: flex-start;
+    }
+}
+
+/* Hide scrollbar but allow scrolling */
+.content {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.content::-webkit-scrollbar {
+    display: none;
+}
