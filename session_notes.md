@@ -576,12 +576,41 @@ S3 Upload → ParseOrders → ParseInstructors → MergeData → Validate → Pr
 - Phase 5: CloudFront & Production
 - Start with Task 5.1: Add CloudFront distribution to CDK
 
+---
+
+## Session 5 - 2026-01-28
+
+### Phase 6 Added: UI/UX Improvements
+
+User requested extensive UI tuning work via `/add-work` command.
+
+**Key requirements identified:**
+1. Passive display (screensaver mode) - no scrolling, no interaction
+2. All content must fit on one page OR auto-rotate
+3. Language-specific views
+4. Data grouping issues (kids school not grouped correctly)
+5. Sponsor display decisions needed
+6. Distinguish participant language vs lesson language
+7. Format and layout tuning throughout
+
+**Tasks created:**
+| ID | Task | Size |
+|----|------|------|
+| 6.1 | Analyze display requirements | small |
+| 6.2 | Implement page rotation system | medium |
+| 6.3 | Language-specific views | medium |
+| 6.4 | Fix data grouping issues | medium |
+| 6.5 | Sponsor display decision | small |
+| 6.6 | Participant language indicator | small |
+| 6.7 | Format and layout tuning | medium |
+| 6.8 | Implement no-scroll safeguards | small |
+
+**Files created:**
+- `tasks/phase_6_ui_tuning.md` - detailed task descriptions
+- Updated `progress.json` with Phase 6
+
 ### Status
-- Phase 0: COMPLETE
-- Phase 1: COMPLETE
-- Phase 2: COMPLETE
-- Phase 3: COMPLETE
-- Phase 4: COMPLETE
-- Phase 5: IN PROGRESS (5/9 tasks)
+- Phase 0-4: COMPLETE
+- Phase 5: IN PROGRESS (5/9 tasks, current: 5.5)
+- Phase 6: PENDING (8 tasks added)
 - Debug URL: https://d2uodie4uj65pq.cloudfront.net?debug=true&date=28.01.2026&time=09:30
-- Current Task: 5.5

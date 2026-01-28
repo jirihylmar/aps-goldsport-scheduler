@@ -4,7 +4,7 @@
   "description": "Ski school lesson display system - shows current and upcoming courses on external vertical display",
   "created_at": "2026-01-28",
   "last_updated": "2026-01-28",
-  "last_session_summary": "Phase 5 IN PROGRESS. CloudFront deployed, debug mode added with date/time simulation (?debug=true&date=28.01.2026&time=09:30). Ready for display engine testing (Task 5.5).",
+  "last_session_summary": "Phase 6 (UI/UX Improvements) ADDED with 8 tasks for passive display optimization: page rotation, language-specific views, data grouping fixes, sponsor handling, language indicators, format tuning. Phase 5 still in progress (Task 5.5 pending).",
 
   "phases": {
     "phase_0_planning": {
@@ -271,6 +271,24 @@
         {"id": "5.6", "name": "Add CloudWatch monitoring", "status": "pending", "size": "small", "verify": "CloudWatch dashboard shows metrics", "depends_on": ["5.3"]},
         {"id": "5.7", "name": "Create deployment documentation", "status": "pending", "size": "small", "verify": "Documentation in docs/ folder"},
         {"id": "5.8", "name": "Production deployment", "status": "pending", "size": "medium", "verify": "Production environment functional", "depends_on": ["5.5"]}
+      ],
+      "artifacts": []
+    },
+    "phase_6_ui_tuning": {
+      "name": "UI/UX Improvements",
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "description": "Tune display for passive screen usage - no scrolling, auto-rotation, language-specific views",
+      "tasks": [
+        {"id": "6.1", "name": "Analyze display requirements", "status": "pending", "size": "small", "verify": "Analysis document with max lessons per page, typical lesson counts"},
+        {"id": "6.2", "name": "Implement page rotation system", "status": "pending", "size": "medium", "verify": "Demo with 20+ lessons shows rotation working", "depends_on": ["6.1"]},
+        {"id": "6.3", "name": "Language-specific views", "status": "pending", "size": "medium", "verify": "Each language has optimized view", "depends_on": ["6.1"]},
+        {"id": "6.4", "name": "Fix data grouping issues", "status": "pending", "size": "medium", "verify": "Related lessons (kids school) appear together"},
+        {"id": "6.5", "name": "Sponsor display decision", "status": "pending", "size": "small", "verify": "Sponsor display matches agreed approach"},
+        {"id": "6.6", "name": "Participant language indicator", "status": "pending", "size": "small", "verify": "Language indicators are clear and unambiguous"},
+        {"id": "6.7", "name": "Format and layout tuning", "status": "pending", "size": "medium", "verify": "User approves final layout", "depends_on": ["6.2", "6.3"]},
+        {"id": "6.8", "name": "Implement no-scroll safeguards", "status": "pending", "size": "small", "verify": "No scrollbars appear, all content accessible via rotation", "depends_on": ["6.2"]}
       ],
       "artifacts": []
     }
