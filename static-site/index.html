@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoldSport Ski School</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <img src="assets/logo.png" alt="GoldSport" onerror="this.style.display='none'">
+                <h1>GoldSport Ski School</h1>
+            </div>
+            <div class="language-selector">
+                <button class="lang-btn" data-lang="cz">CZ</button>
+                <button class="lang-btn" data-lang="de">DE</button>
+                <button class="lang-btn" data-lang="en">EN</button>
+                <button class="lang-btn" data-lang="pl">PL</button>
+            </div>
+        </header>
+
+        <main class="content">
+            <section class="lessons-section current-section">
+                <h2 class="section-title" data-i18n="current_lessons">Current Lessons</h2>
+                <div class="lessons-container" id="current-lessons">
+                    <div class="loading" data-i18n="loading">Loading...</div>
+                </div>
+            </section>
+
+            <section class="lessons-section upcoming-section">
+                <h2 class="section-title" data-i18n="upcoming_lessons">Upcoming Lessons</h2>
+                <div class="lessons-container" id="upcoming-lessons">
+                    <div class="loading" data-i18n="loading">Loading...</div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <div class="status">
+                <span class="update-time" data-i18n="last_updated">Last updated</span>:
+                <span id="last-update">--:--</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Lesson card template -->
+    <template id="lesson-template">
+        <article class="lesson-card">
+            <div class="lesson-time">
+                <span class="time-start"></span>
+                <span class="time-separator">-</span>
+                <span class="time-end"></span>
+            </div>
+            <div class="lesson-details">
+                <div class="lesson-level"></div>
+                <div class="lesson-info">
+                    <span class="lesson-location"></span>
+                    <span class="lesson-language"></span>
+                </div>
+            </div>
+            <div class="lesson-people">
+                <div class="lesson-instructor">
+                    <img class="instructor-photo" src="" alt="" onerror="this.style.display='none'">
+                    <span class="instructor-name"></span>
+                </div>
+                <div class="lesson-participants">
+                    <span class="participant-label" data-i18n="participants">Participants</span>:
+                    <span class="participant-list"></span>
+                    <span class="participant-count"></span>
+                </div>
+            </div>
+        </article>
+    </template>
+
+    <!-- Empty state template -->
+    <template id="empty-template">
+        <div class="empty-state">
+            <span data-i18n="no_lessons">No lessons scheduled</span>
+        </div>
+    </template>
+
+    <script src="app.js"></script>
+</body>
+</html>
