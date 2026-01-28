@@ -211,9 +211,42 @@ Completed IMPLEMENTATION_PLAN.md with:
 **Section 9 - Out of Scope:**
 - No auth, no data entry, no history, web only
 
+---
+
+### Task 0.5: Spec Review - Revision 1
+
+**User feedback:**
+- Need more robust architecture for future development
+- Multi-language support (EN/DE/PL/CZ)
+- Semantic dictionaries for data translation (levels, etc.)
+- Extensibility for additional data (instructors, locations)
+
+**Changes made:**
+1. Added Dictionary & Translation System section
+   - ui-translations.json for UI text
+   - dictionaries.json for semantic translations (levels, languages, locations)
+   - enrichment.json for additional data (instructors)
+
+2. Updated output schema
+   - Uses `*_key` fields for raw values
+   - Frontend handles translation based on selected language
+
+3. Added multi-language display
+   - URL parameter ?lang=de/en/pl/cz
+   - Default: Czech
+
+4. Updated repository structure
+   - Added config/ folder for all configuration files
+
+5. Updated phases
+   - Phase 2 includes dictionary system
+   - Phase 3 includes multi-language rendering
+
+6. Added extensibility model documentation
+
 ### Status
 - Task 0.1: COMPLETE
 - Task 0.2: COMPLETE
 - Task 0.3: COMPLETE
 - Task 0.4: COMPLETE
-- Current: Ready for Task 0.5 (USER APPROVAL REQUIRED)
+- Current: Task 0.5 - awaiting user approval (revision 1)

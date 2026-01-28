@@ -54,19 +54,21 @@ A web-based display system for GoldSport ski school that shows current and upcom
 | Component | Technology | Purpose |
 |-----------|------------|---------|
 | Infrastructure | AWS CDK (TypeScript) | Define and deploy AWS resources |
-| Data Processing | Python Lambda | Parse TSV, generate schedule JSON |
-| Static Site | HTML/CSS/JS | Display schedule on vertical screen |
-| Storage | S3 | Input bucket + website hosting |
+| Data Processing | Python Lambda | Parse TSV, apply enrichment, generate JSON |
+| Configuration | JSON files | Translations, dictionaries, enrichment data |
+| Static Site | HTML/CSS/JS | Multi-language display on vertical screen |
+| Storage | S3 | Input bucket + website hosting + config |
 | CDN | CloudFront | HTTPS, caching, fast delivery |
 
 ### Data Flow
 
 1. Staff uploads TSV export to S3 input bucket
 2. S3 event triggers Lambda function
-3. Lambda parses TSV, filters to current date, generates JSON
-4. Lambda writes schedule.json to S3 website bucket
-5. Display page auto-refreshes, fetches schedule.json
-6. Page renders current and upcoming lessons
+3. Lambda parses TSV, filters to current date
+4. Lambda applies dictionaries (translations, enrichment)
+5. Lambda writes schedule.json to S3 website bucket
+6. Display page loads with language parameter (?lang=de)
+7. Page renders using UI translations for selected language
 
 ---
 
@@ -96,26 +98,20 @@ A web-based display system for GoldSport ski school that shows current and upcom
     {
       "start": "10:00",
       "end": "11:50",
-      "level": "dětská školka",
-      "language": "de",
-      "location": "Stone bar",
+      "level_key": "dětská školka",
+      "language_key": "de",
+      "location_key": "Stone bar",
       "sponsor": "Iryna Sc",
-      "participants": ["Vera", "Eugen", "Gerda"]
+      "participants": ["Vera", "Eugen", "Gerda"],
+      "instructor": "Jan Novák",
+      "booking_id": "2405020a-b5a4-469e-81ab-18713fc5198a"
     }
   ],
-  "upcoming_lessons": [
-    {
-      "start": "13:00",
-      "end": "14:20",
-      "level": "lyže začátečník",
-      "language": "cz",
-      "location": "Stone bar",
-      "sponsor": "Jana Sc",
-      "participants": ["George"]
-    }
-  ]
+  "upcoming_lessons": [ ... ]
 }
 ```
+
+**Note**: The `*_key` fields contain raw values from TSV. The frontend looks up translations from dictionaries based on selected language.
 
 ### Privacy Rules
 
@@ -144,6 +140,108 @@ Records with these characteristics are filtered out:
 
 ---
 
+### Dictionary & Translation System
+
+The system uses configuration files for translations and data enrichment:
+
+#### 1. UI Translations (`config/ui-translations.json`)
+Static text for the display interface:
+```json
+{
+  "en": {
+    "current_lessons": "Current Lessons",
+    "upcoming_lessons": "Upcoming Lessons",
+    "no_lessons": "No lessons scheduled",
+    "participants": "Participants",
+    "instructor": "Instructor"
+  },
+  "de": {
+    "current_lessons": "Aktuelle Kurse",
+    "upcoming_lessons": "Kommende Kurse",
+    ...
+  },
+  "cz": { ... },
+  "pl": { ... }
+}
+```
+
+#### 2. Semantic Dictionaries (`config/dictionaries.json`)
+Translate data values from TSV:
+```json
+{
+  "levels": {
+    "dětská školka": {
+      "en": "Kids Ski School",
+      "de": "Kinderskischule",
+      "cz": "Dětská školka",
+      "pl": "Przedszkole narciarskie"
+    },
+    "lyže začátečník": {
+      "en": "Ski Beginner",
+      "de": "Ski Anfänger",
+      ...
+    }
+  },
+  "languages": {
+    "de": { "en": "German", "de": "Deutsch", "cz": "Němčina", "pl": "Niemiecki" },
+    "cz": { "en": "Czech", "de": "Tschechisch", ... },
+    "en": { "en": "English", ... },
+    "pl": { "en": "Polish", ... }
+  },
+  "locations": {
+    "Stone bar": {
+      "display_name": { "en": "Stone Bar", "de": "Stone Bar", ... },
+      "description": { "en": "Meeting point at Stone Bar terrace", ... }
+    }
+  }
+}
+```
+
+#### 3. Enrichment Data (`config/enrichment.json`)
+Additional data not in TSV (managed separately):
+```json
+{
+  "instructors": {
+    "booking_id_or_pattern": {
+      "name": "Jan Novák",
+      "photo": "instructors/jan.jpg"
+    }
+  },
+  "default_instructor": {
+    "name": "GoldSport Team"
+  }
+}
+```
+
+### Extensibility Model
+
+The system is designed for future additions:
+
+| Current | Future Possible |
+|---------|-----------------|
+| Sponsor, participants | + Instructor assignment |
+| Level, language | + Difficulty rating |
+| Location name | + Location details, map |
+| Time slot | + Equipment notes |
+
+**Extension approach**:
+1. Add new fields to enrichment.json (no code change)
+2. Add translations to dictionaries.json (no code change)
+3. Update display template (minor code change)
+
+### Multi-Language Display
+
+| URL | Display Language |
+|-----|------------------|
+| `/index.html` | Czech (default) |
+| `/index.html?lang=de` | German |
+| `/index.html?lang=en` | English |
+| `/index.html?lang=pl` | Polish |
+
+The frontend loads translations based on `lang` parameter and renders all text accordingly
+
+---
+
 ## 4. Implementation Phases
 
 > **NOTE**: These are high-level phases. Detailed tasks are generated via `/generate-phases`
@@ -162,13 +260,15 @@ Records with these characteristics are filtered out:
 
 ---
 
-### Phase 2: Data Processing
-**Objective**: Implement TSV parsing and JSON generation
+### Phase 2: Data Processing & Configuration
+**Objective**: Implement TSV parsing, dictionaries, and JSON generation
 
 **Deliverables**:
 - Lambda function parses TSV
 - Privacy filtering applied
-- schedule.json generated
+- Dictionary system (ui-translations, semantic dictionaries)
+- Enrichment data structure (instructors, etc.)
+- schedule.json generated with keys for translation
 - Handles edge cases (invalid dates, missing fields)
 
 **Dependencies**: Phase 1
@@ -176,13 +276,15 @@ Records with these characteristics are filtered out:
 ---
 
 ### Phase 3: Display Frontend
-**Objective**: Build the display page
+**Objective**: Build the multi-language display page
 
 **Deliverables**:
 - HTML/CSS for vertical display
 - JavaScript for auto-refresh
 - Large, readable typography
 - Current vs upcoming lesson distinction
+- Multi-language support (EN/DE/PL/CZ via ?lang= param)
+- Dictionary-based rendering (levels, languages, locations)
 
 **Dependencies**: Phase 2
 
@@ -255,6 +357,10 @@ aps-goldsport-scheduler/           # Single repository
 │   └── phase_4_cdn.md
 ├── input/                         # Input materials (gitignored after setup)
 │   └── orders-*.tsv
+├── config/                        # Configuration & translations
+│   ├── ui-translations.json       # UI text in all languages
+│   ├── dictionaries.json          # Semantic translations (levels, etc.)
+│   └── enrichment.json            # Additional data (instructors, etc.)
 ├── infrastructure/                # CDK project
 │   ├── bin/
 │   │   └── app.ts
@@ -316,6 +422,9 @@ Types: feat, fix, docs, refactor, test, chore, infra
 | 2026-01-28 | S3 trigger (not scheduled) | Updates only when new data uploaded |
 | 2026-01-28 | No database | TSV is source of truth, regenerate on each upload |
 | 2026-01-28 | CloudFront for CDN | HTTPS, caching, professional delivery |
+| 2026-01-28 | JSON config for translations | No code changes needed to add languages/terms |
+| 2026-01-28 | Enrichment file for instructors | Decouples instructor assignment from TSV |
+| 2026-01-28 | Keys in schedule.json | Frontend handles translation, allows runtime language switch |
 
 ---
 
