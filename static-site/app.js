@@ -23,15 +23,24 @@ const state = {
     schedule: null,
     lastUpdate: null,
     refreshTimer: null,
+    debugMode: false,      // ?debug=true shows all lessons
+    dateOverride: null,    // ?date=28.01.2026 shows specific date
 };
 
 /**
  * Initialize the application
  */
 async function init() {
-    // Get language from URL parameter
+    // Get parameters from URL
     const urlParams = new URLSearchParams(window.location.search);
     state.language = urlParams.get('lang') || CONFIG.defaultLanguage;
+    state.debugMode = urlParams.get('debug') === 'true';
+    state.dateOverride = urlParams.get('date') || null;
+
+    // Show debug indicator
+    if (state.debugMode || state.dateOverride) {
+        showDebugBanner();
+    }
 
     // Set up language selector
     setupLanguageSelector();
@@ -172,6 +181,40 @@ function translateValue(value, category) {
 function renderSchedule() {
     if (!state.schedule) return;
 
+    // Debug mode: show all lessons for a specific date
+    if (state.debugMode || state.dateOverride) {
+        const allByDate = state.schedule.all_lessons_by_date || {};
+        const dates = Object.keys(allByDate).sort();
+
+        // Find which date to show
+        let targetDate = state.dateOverride;
+        if (!targetDate && dates.length > 0) {
+            // Default to first date with data
+            targetDate = dates[0];
+        }
+
+        const lessons = targetDate ? (allByDate[targetDate] || []) : [];
+
+        // Update section titles for debug mode
+        const currentTitle = document.querySelector('.current-section .section-title');
+        const upcomingTitle = document.querySelector('.upcoming-section .section-title');
+
+        if (currentTitle) {
+            currentTitle.textContent = `All Lessons: ${targetDate || 'No data'}`;
+        }
+        if (upcomingTitle) {
+            upcomingTitle.textContent = `Available dates: ${dates.join(', ') || 'None'}`;
+        }
+
+        // Show all lessons in current section
+        renderLessons('current-lessons', lessons, 'no_lessons');
+
+        // Show date selector in upcoming section
+        renderDateSelector('upcoming-lessons', dates, targetDate);
+        return;
+    }
+
+    // Normal mode: current and upcoming lessons
     renderLessons('current-lessons', state.schedule.current_lessons, 'no_current_lessons');
     renderLessons('upcoming-lessons', state.schedule.upcoming_lessons, 'no_upcoming_lessons');
 }
@@ -298,6 +341,68 @@ function stopAutoRefresh() {
         clearInterval(state.refreshTimer);
         state.refreshTimer = null;
     }
+}
+
+/**
+ * Show debug mode banner
+ */
+function showDebugBanner() {
+    const banner = document.createElement('div');
+    banner.className = 'debug-banner';
+    banner.innerHTML = `
+        <strong>DEBUG MODE</strong>
+        ${state.dateOverride ? `| Date: ${state.dateOverride}` : '| Showing all dates'}
+        | <a href="?">Exit debug</a>
+    `;
+    banner.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: #ff5722;
+        color: white;
+        padding: 8px 16px;
+        text-align: center;
+        font-size: 14px;
+        z-index: 9999;
+    `;
+    banner.querySelector('a').style.color = 'white';
+    document.body.prepend(banner);
+    document.body.style.paddingTop = '40px';
+}
+
+/**
+ * Render date selector for debug mode
+ */
+function renderDateSelector(containerId, dates, currentDate) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    if (dates.length === 0) {
+        container.innerHTML = '<div class="empty-state">No dates available</div>';
+        return;
+    }
+
+    const selectorDiv = document.createElement('div');
+    selectorDiv.className = 'date-selector';
+    selectorDiv.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px; padding: 16px;';
+
+    dates.forEach(date => {
+        const btn = document.createElement('button');
+        btn.textContent = date;
+        btn.className = date === currentDate ? 'lang-btn active' : 'lang-btn';
+        btn.onclick = () => {
+            const url = new URL(window.location);
+            url.searchParams.set('debug', 'true');
+            url.searchParams.set('date', date);
+            window.location.href = url.toString();
+        };
+        selectorDiv.appendChild(btn);
+    });
+
+    container.appendChild(selectorDiv);
 }
 
 // Initialize when DOM is ready

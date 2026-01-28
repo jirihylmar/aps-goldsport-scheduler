@@ -113,17 +113,42 @@ class OutputProcessor(Processor):
         current_lessons.sort(key=lambda x: x['start'])
         upcoming_lessons.sort(key=lambda x: x['start'])
 
+        # For debugging: include all lessons by date
+        all_by_date = self._group_all_by_date(lessons)
+
         return {
             'generated_at': now.isoformat(),
             'date': today,
             'data_sources': metadata.get('data_sources', {}),
             'current_lessons': current_lessons,
             'upcoming_lessons': upcoming_lessons,
+            'all_lessons_by_date': all_by_date,  # Debug: all lessons grouped by date
         }
 
     def _is_today(self, lesson_date: str, today: str) -> bool:
         """Check if lesson is for today."""
         return lesson_date == today
+
+    def _group_all_by_date(self, lessons: List[Dict]) -> Dict[str, List[Dict]]:
+        """
+        Group all lessons by date for debugging.
+
+        Returns dict like: {"28.01.2026": [...lessons...], "29.01.2026": [...]}
+        """
+        by_date = {}
+        for lesson in lessons:
+            date = lesson.get('date', '')
+            if not date:
+                continue
+            if date not in by_date:
+                by_date[date] = []
+            by_date[date].append(self._format_lesson(lesson))
+
+        # Sort lessons within each date by start time
+        for date in by_date:
+            by_date[date].sort(key=lambda x: x['start'])
+
+        return by_date
 
     def _is_current(self, lesson: Dict, current_time: str) -> bool:
         """
