@@ -62,13 +62,17 @@ A web-based display system for GoldSport ski school that shows current and upcom
 
 ### Data Flow
 
-1. Staff uploads TSV export to S3 input bucket
+1. Staff uploads data to S3 input bucket:
+   - `orders/` - lesson bookings (TSV from booking system)
+   - `instructors/` - daily roster and profiles (JSON)
+   - `schedule-overrides/` - manual adjustments (JSON, optional)
 2. S3 event triggers Lambda function
-3. Lambda parses TSV, filters to current date
-4. Lambda applies dictionaries (translations, enrichment)
-5. Lambda writes schedule.json to S3 website bucket
-6. Display page loads with language parameter (?lang=de)
-7. Page renders using UI translations for selected language
+3. Lambda reads latest files from each input folder
+4. Lambda combines: orders + instructors + overrides
+5. Lambda applies dictionaries (translations)
+6. Lambda writes schedule.json to S3 website bucket
+7. Display page loads with language parameter (?lang=de)
+8. Page renders using UI translations for selected language
 
 ---
 
@@ -94,6 +98,11 @@ A web-based display system for GoldSport ski school that shows current and upcom
 {
   "generated_at": "2026-01-28T10:30:00+01:00",
   "date": "2026-01-28",
+  "data_sources": {
+    "orders": "orders-2026-01-28-093000.tsv",
+    "roster": "roster-2026-01-28.json",
+    "overrides": null
+  },
   "current_lessons": [
     {
       "start": "10:00",
@@ -103,15 +112,29 @@ A web-based display system for GoldSport ski school that shows current and upcom
       "location_key": "Stone bar",
       "sponsor": "Iryna Sc",
       "participants": ["Vera", "Eugen", "Gerda"],
-      "instructor": "Jan Novák",
-      "booking_id": "2405020a-b5a4-469e-81ab-18713fc5198a"
+      "participant_count": 3,
+      "instructor": {
+        "id": "jan-novak",
+        "name": "Jan Novák",
+        "photo": "assets/instructors/jan-novak.jpg"
+      },
+      "booking_id": "2405020a-b5a4-469e-81ab-18713fc5198a",
+      "notes": null
     }
   ],
   "upcoming_lessons": [ ... ]
 }
 ```
 
-**Note**: The `*_key` fields contain raw values from TSV. The frontend looks up translations from dictionaries based on selected language.
+**Field sources**:
+| Field | Source |
+|-------|--------|
+| `start`, `end`, `level_key`, `language_key`, `location_key` | orders TSV |
+| `sponsor`, `participants` | orders TSV (privacy filtered) |
+| `instructor` | instructors/roster + profiles |
+| `notes` | schedule-overrides (if any) |
+
+**Note**: The `*_key` fields contain raw values. The frontend looks up translations from dictionaries based on selected language.
 
 ### Privacy Rules
 
@@ -197,21 +220,28 @@ Translate data values from TSV:
 }
 ```
 
-#### 3. Enrichment Data (`config/enrichment.json`)
-Additional data not in TSV (managed separately):
+#### 3. Static Enrichment (`config/enrichment.json`)
+Default values and fallbacks (operational data comes from input bucket):
 ```json
 {
-  "instructors": {
-    "booking_id_or_pattern": {
-      "name": "Jan Novák",
-      "photo": "instructors/jan.jpg"
+  "defaults": {
+    "instructor": {
+      "name": "GoldSport Team",
+      "photo": "assets/logo.png"
+    },
+    "location": {
+      "name": "Main Meeting Point"
     }
   },
-  "default_instructor": {
-    "name": "GoldSport Team"
+  "display": {
+    "show_instructor": true,
+    "show_language_flag": true,
+    "show_participant_count": true
   }
 }
 ```
+
+**Note**: Instructor assignments and profiles are uploaded to the input bucket (`instructors/` folder), not stored in config. Config only holds defaults and display settings.
 
 ### Extensibility Model
 
@@ -335,12 +365,69 @@ The frontend loads translations based on `lang` parameter and renders all text a
 
 ```
 goldsport-scheduler-input-prod/
-└── uploads/
-    └── orders-YYYY-MM-DD-HHMMSS.tsv    # Uploaded TSV files
+│
+├── orders/                             # Lesson bookings from booking system
+│   └── orders-YYYY-MM-DD-HHMMSS.tsv    # Latest export triggers processing
+│
+├── instructors/                        # Instructor data
+│   ├── roster-YYYY-MM-DD.json          # Daily roster: who's working today
+│   └── profiles.json                   # Instructor profiles (names, photos, etc.)
+│
+├── locations/                          # Location data (optional)
+│   └── locations.json                  # Meeting points, descriptions
+│
+└── schedule-overrides/                 # Manual overrides (optional)
+    └── overrides-YYYY-MM-DD.json       # Cancellations, time changes, notes
 ```
 
-- TSV files uploaded here trigger Lambda processing
-- Old files can be retained or lifecycle-deleted (configurable)
+**Data source types**:
+
+| Folder | Format | Trigger | Purpose |
+|--------|--------|---------|---------|
+| `orders/` | TSV | Yes - triggers Lambda | Main lesson data from booking system |
+| `instructors/` | JSON | Yes - triggers Lambda | Instructor assignments and profiles |
+| `locations/` | JSON | No - loaded on demand | Location details (optional enrichment) |
+| `schedule-overrides/` | JSON | Yes - triggers Lambda | Manual adjustments |
+
+**Processing logic**:
+- Lambda triggers on any file upload in `orders/`, `instructors/`, or `schedule-overrides/`
+- Lambda reads latest file from each folder
+- Combines: orders + instructor assignments + overrides → schedule.json
+
+**Example: instructors/roster-2026-01-28.json**
+```json
+{
+  "date": "2026-01-28",
+  "assignments": [
+    {
+      "instructor_id": "jan-novak",
+      "booking_ids": ["2405020a-b5a4-469e-81ab-18713fc5198a"],
+      "time_slots": [{"start": "09:00", "end": "12:00"}]
+    },
+    {
+      "instructor_id": "petra-svoboda",
+      "booking_ids": ["9ebabe94-626c-48d4-b585-531335c20e3f"],
+      "time_slots": [{"start": "13:00", "end": "16:00"}]
+    }
+  ]
+}
+```
+
+**Example: instructors/profiles.json**
+```json
+{
+  "jan-novak": {
+    "name": "Jan Novák",
+    "photo": "assets/instructors/jan-novak.jpg",
+    "languages": ["cz", "de", "en"]
+  },
+  "petra-svoboda": {
+    "name": "Petra Svobodová",
+    "photo": "assets/instructors/petra-svoboda.jpg",
+    "languages": ["cz", "en"]
+  }
+}
+```
 
 ---
 
@@ -399,9 +486,18 @@ goldsport-scheduler-web-prod/
 
 ```yaml
 Permissions:
-  - s3:GetObject on goldsport-scheduler-input-{env}/*
-  - s3:PutObject on goldsport-scheduler-web-{env}/data/*
+  # Read all input sources
+  - s3:GetObject on goldsport-scheduler-input-{env}/orders/*
+  - s3:GetObject on goldsport-scheduler-input-{env}/instructors/*
+  - s3:GetObject on goldsport-scheduler-input-{env}/locations/*
+  - s3:GetObject on goldsport-scheduler-input-{env}/schedule-overrides/*
+  - s3:ListBucket on goldsport-scheduler-input-{env} (to find latest files)
+
+  # Read config, write data
   - s3:GetObject on goldsport-scheduler-web-{env}/config/*
+  - s3:PutObject on goldsport-scheduler-web-{env}/data/*
+
+  # Logging
   - logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents
 ```
 
@@ -477,12 +573,23 @@ aps-goldsport-scheduler/           # Single repository
 | CloudFront | `goldsport-scheduler-cdn-{env}` | `goldsport-scheduler-cdn-prod` |
 
 ### S3 Object Keys
-| Location | Pattern | Example |
-|----------|---------|---------|
-| Input uploads | `uploads/{filename}.tsv` | `uploads/orders-2026-01-28-120000.tsv` |
-| Generated data | `data/{filename}.json` | `data/schedule.json` |
-| Config files | `config/{name}.json` | `config/dictionaries.json` |
-| Static assets | `assets/{path}` | `assets/logo.png` |
+
+**Input Bucket**:
+| Folder | Pattern | Example |
+|--------|---------|---------|
+| Orders | `orders/orders-{timestamp}.tsv` | `orders/orders-2026-01-28-120000.tsv` |
+| Roster | `instructors/roster-{date}.json` | `instructors/roster-2026-01-28.json` |
+| Profiles | `instructors/profiles.json` | `instructors/profiles.json` |
+| Locations | `locations/locations.json` | `locations/locations.json` |
+| Overrides | `schedule-overrides/overrides-{date}.json` | `schedule-overrides/overrides-2026-01-28.json` |
+
+**Website Bucket**:
+| Folder | Pattern | Example |
+|--------|---------|---------|
+| Static files | `{file}` | `index.html`, `app.js` |
+| Config | `config/{name}.json` | `config/dictionaries.json` |
+| Generated data | `data/schedule.json` | `data/schedule.json` |
+| Assets | `assets/{path}` | `assets/instructors/jan-novak.jpg` |
 
 ### Code
 | Type | Convention | Example |
