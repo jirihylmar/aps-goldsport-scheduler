@@ -1,0 +1,117 @@
+{
+  "version": "2.0",
+  "project": "{{PROJECT_NAME}}",
+  "description": "{{PROJECT_DESCRIPTION}}",
+  "created_at": "{{CREATION_DATE}}",
+  "last_updated": "{{CREATION_DATE}}",
+  "last_session_summary": "Project bootstrapped. Starting Phase 0: Planning.",
+
+  "phases": {
+    "phase_0_planning": {
+      "name": "Planning & Setup",
+      "status": "in_progress",
+      "started_at": "{{CREATION_DATE}}",
+      "completed_at": null,
+      "description": "Create implementation spec, get approval, generate tasks",
+      "tasks": [
+        {
+          "id": "0.1",
+          "name": "Read input materials and explore examples",
+          "status": "pending",
+          "size": "small",
+          "verify": "Key requirements documented in session_notes.md",
+          "notes": "Read all files in input/ folder. Explore playbook examples to find best match."
+        },
+        {
+          "id": "0.2",
+          "name": "Select playbook template and document rationale",
+          "status": "pending",
+          "size": "small",
+          "verify": "Template selection documented with reasons",
+          "depends_on": ["0.1"]
+        },
+        {
+          "id": "0.3",
+          "name": "Draft IMPLEMENTATION_PLAN.md sections 1-3",
+          "status": "pending",
+          "size": "medium",
+          "verify": "IMPLEMENTATION_PLAN.md exists with Overview, Architecture, Technical Specs",
+          "depends_on": ["0.2"],
+          "notes": "Project Overview, Architecture, Technical Specifications. CRITICAL: Only include CONFIRMED items. Speculative content (candidate instances, unverified schemas) belongs in tasks, not spec. 100 lines confirmed > 600 lines speculative."
+        },
+        {
+          "id": "0.4",
+          "name": "Draft IMPLEMENTATION_PLAN.md sections 4-7",
+          "status": "pending",
+          "size": "medium",
+          "verify": "IMPLEMENTATION_PLAN.md complete with all sections",
+          "depends_on": ["0.3"],
+          "notes": "Phases, AWS Resources, Repository Structure, Success Criteria. For unknown domains, use exploration-first: Phase 1 = 'Setup & Exploration' to discover actual structure before defining detailed phases."
+        },
+        {
+          "id": "0.5",
+          "name": "Present spec to user and get approval",
+          "status": "pending",
+          "size": "small",
+          "verify": "User explicitly approved the spec",
+          "depends_on": ["0.4"],
+          "notes": "BLOCKING: Do not proceed until user says 'approved' or equivalent"
+        },
+        {
+          "id": "0.6",
+          "name": "Create project CLAUDE.md",
+          "status": "pending",
+          "size": "small",
+          "verify": "CLAUDE.md exists with filled placeholders",
+          "depends_on": ["0.5"],
+          "notes": "Create CLAUDE.md from template, fill in project-specific values"
+        },
+        {
+          "id": "0.7",
+          "name": "Generate Phase 1 tasks",
+          "status": "pending",
+          "size": "medium",
+          "verify": "tasks/phase_1_*.md exists, progress.json has Phase 1 tasks",
+          "depends_on": ["0.6"]
+        },
+        {
+          "id": "0.8",
+          "name": "Generate remaining phase tasks",
+          "status": "pending",
+          "size": "medium",
+          "verify": "All phase task files exist, progress.json complete",
+          "depends_on": ["0.7"],
+          "notes": "May span multiple sessions if many phases"
+        },
+        {
+          "id": "0.9",
+          "name": "Remove examples repo and commit Phase 0 completion",
+          "status": "pending",
+          "size": "small",
+          "verify": "syndicate-playbooks-examples/ removed, git log shows Phase 0 complete commit",
+          "depends_on": ["0.8"],
+          "notes": "Examples no longer needed. Remove dir, update .gitignore, commit."
+        }
+      ],
+      "artifacts": []
+    }
+  },
+
+  "current_task": "0.1",
+
+  "git_repos": {
+    "orchestration": {
+      "local": ".",
+      "remote": null,
+      "status": "local_only",
+      "notes": "Must be git repo from start. Commit after each task."
+    }
+  },
+
+  "context_hints": {
+    "examples_path": "syndicate-playbooks-examples",
+    "template_path": "syndicate-playbooks-examples/_project-template"
+  },
+
+  "blockers": []
+}
