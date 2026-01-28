@@ -25,6 +25,7 @@ const state = {
     refreshTimer: null,
     debugMode: false,      // ?debug=true shows all lessons
     dateOverride: null,    // ?date=28.01.2026 shows specific date
+    timeOverride: null,    // ?time=09:30 simulates specific time
 };
 
 /**
@@ -36,9 +37,10 @@ async function init() {
     state.language = urlParams.get('lang') || CONFIG.defaultLanguage;
     state.debugMode = urlParams.get('debug') === 'true';
     state.dateOverride = urlParams.get('date') || null;
+    state.timeOverride = urlParams.get('time') || null;  // e.g., "09:30"
 
     // Show debug indicator
-    if (state.debugMode || state.dateOverride) {
+    if (state.debugMode || state.dateOverride || state.timeOverride) {
         showDebugBanner();
     }
 
@@ -181,7 +183,38 @@ function translateValue(value, category) {
 function renderSchedule() {
     if (!state.schedule) return;
 
-    // Debug mode: show all lessons for a specific date
+    // Debug mode with time simulation: filter lessons client-side
+    if (state.timeOverride && state.dateOverride) {
+        const allByDate = state.schedule.all_lessons_by_date || {};
+        const dates = Object.keys(allByDate).sort();
+        const lessons = allByDate[state.dateOverride] || [];
+        const simTime = state.timeOverride;
+
+        // Filter into current/upcoming based on simulated time
+        const current = lessons.filter(l => l.start <= simTime && simTime < l.end);
+        const upcoming = lessons.filter(l => l.start > simTime);
+        const past = lessons.filter(l => l.end <= simTime);
+
+        // Update section titles
+        const currentTitle = document.querySelector('.current-section .section-title');
+        const upcomingTitle = document.querySelector('.upcoming-section .section-title');
+
+        if (currentTitle) {
+            currentTitle.textContent = `Current @ ${simTime} (${current.length})`;
+        }
+        if (upcomingTitle) {
+            upcomingTitle.textContent = `Upcoming (${upcoming.length}) | Past: ${past.length}`;
+        }
+
+        renderLessons('current-lessons', current, 'no_current_lessons');
+        renderLessons('upcoming-lessons', upcoming, 'no_upcoming_lessons');
+
+        // Show time slider
+        renderTimeSlider(state.dateOverride, dates);
+        return;
+    }
+
+    // Debug mode without time: show all lessons for a specific date
     if (state.debugMode || state.dateOverride) {
         const allByDate = state.schedule.all_lessons_by_date || {};
         const dates = Object.keys(allByDate).sort();
@@ -200,10 +233,10 @@ function renderSchedule() {
         const upcomingTitle = document.querySelector('.upcoming-section .section-title');
 
         if (currentTitle) {
-            currentTitle.textContent = `All Lessons: ${targetDate || 'No data'}`;
+            currentTitle.textContent = `All Lessons: ${targetDate || 'No data'} (${lessons.length})`;
         }
         if (upcomingTitle) {
-            upcomingTitle.textContent = `Available dates: ${dates.join(', ') || 'None'}`;
+            upcomingTitle.textContent = `Select date or add &time=09:30 to simulate`;
         }
 
         // Show all lessons in current section
@@ -351,7 +384,8 @@ function showDebugBanner() {
     banner.className = 'debug-banner';
     banner.innerHTML = `
         <strong>DEBUG MODE</strong>
-        ${state.dateOverride ? `| Date: ${state.dateOverride}` : '| Showing all dates'}
+        ${state.dateOverride ? `| Date: ${state.dateOverride}` : ''}
+        ${state.timeOverride ? `| Time: ${state.timeOverride}` : ''}
         | <a href="?">Exit debug</a>
     `;
     banner.style.cssText = `
@@ -369,6 +403,81 @@ function showDebugBanner() {
     banner.querySelector('a').style.color = 'white';
     document.body.prepend(banner);
     document.body.style.paddingTop = '40px';
+}
+
+/**
+ * Render time slider for debugging
+ */
+function renderTimeSlider(currentDate, dates) {
+    // Add time slider to footer
+    const footer = document.querySelector('.footer');
+    if (!footer) return;
+
+    // Remove existing slider
+    const existing = footer.querySelector('.time-slider');
+    if (existing) existing.remove();
+
+    const sliderDiv = document.createElement('div');
+    sliderDiv.className = 'time-slider';
+    sliderDiv.style.cssText = 'margin-top: 16px; padding: 16px; background: #f0f0f0; border-radius: 8px;';
+
+    sliderDiv.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <label><strong>Simulate time:</strong></label>
+            <input type="range" id="time-range" min="0" max="1440" value="${timeToMinutes(state.timeOverride)}" style="flex: 1; min-width: 200px;">
+            <span id="time-display" style="font-weight: bold; min-width: 60px;">${state.timeOverride}</span>
+            <select id="date-select" style="padding: 8px;">
+                ${dates.map(d => `<option value="${d}" ${d === currentDate ? 'selected' : ''}>${d}</option>`).join('')}
+            </select>
+            <button onclick="applyTimeSimulation()" style="padding: 8px 16px; cursor: pointer;">Apply</button>
+        </div>
+        <div style="margin-top: 8px; font-size: 12px; color: #666;">
+            Quick:
+            <a href="#" onclick="setQuickTime('08:00')">08:00</a> |
+            <a href="#" onclick="setQuickTime('09:30')">09:30</a> |
+            <a href="#" onclick="setQuickTime('11:00')">11:00</a> |
+            <a href="#" onclick="setQuickTime('13:00')">13:00</a> |
+            <a href="#" onclick="setQuickTime('14:30')">14:30</a> |
+            <a href="#" onclick="setQuickTime('16:00')">16:00</a>
+        </div>
+    `;
+
+    footer.appendChild(sliderDiv);
+
+    // Add event listener for range input
+    document.getElementById('time-range').addEventListener('input', (e) => {
+        const minutes = parseInt(e.target.value);
+        document.getElementById('time-display').textContent = minutesToTime(minutes);
+    });
+}
+
+function timeToMinutes(time) {
+    if (!time) return 540; // default 9:00
+    const [h, m] = time.split(':').map(Number);
+    return h * 60 + m;
+}
+
+function minutesToTime(minutes) {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+}
+
+function setQuickTime(time) {
+    document.getElementById('time-range').value = timeToMinutes(time);
+    document.getElementById('time-display').textContent = time;
+    applyTimeSimulation();
+    return false;
+}
+
+function applyTimeSimulation() {
+    const time = document.getElementById('time-display').textContent;
+    const date = document.getElementById('date-select').value;
+    const url = new URL(window.location);
+    url.searchParams.set('debug', 'true');
+    url.searchParams.set('date', date);
+    url.searchParams.set('time', time);
+    window.location.href = url.toString();
 }
 
 /**
