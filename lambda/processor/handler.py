@@ -14,6 +14,7 @@ import logging
 import boto3
 
 from pipeline import Pipeline, PipelineBuilder
+from config_loader import ConfigLoader
 from processors import ProcessorError
 from processors.parse_orders import ParseOrdersProcessor
 from processors.parse_instructors import ParseInstructorsProcessor
@@ -34,6 +35,9 @@ INPUT_BUCKET = os.environ.get('INPUT_BUCKET')
 # AWS clients
 s3_client = boto3.client('s3')
 dynamodb = boto3.resource('dynamodb')
+
+# Config loader
+config_loader = ConfigLoader(s3_client=s3_client)
 
 
 def build_pipeline() -> Pipeline:
@@ -60,13 +64,40 @@ def build_pipeline() -> Pipeline:
         .build())
 
 
-def create_initial_data(bucket: str, key: str) -> dict:
+def load_configs() -> dict:
+    """
+    Load configuration files from S3.
+
+    Returns:
+        Dictionary with all configurations
+    """
+    if not WEBSITE_BUCKET:
+        logger.warning("No WEBSITE_BUCKET configured, using defaults")
+        return {
+            'ui_translations': {},
+            'dictionaries': {},
+            'enrichment': {},
+        }
+
+    try:
+        return config_loader.load_all(WEBSITE_BUCKET)
+    except Exception as e:
+        logger.error(f"Failed to load configs: {e}")
+        return {
+            'ui_translations': {},
+            'dictionaries': {},
+            'enrichment': {},
+        }
+
+
+def create_initial_data(bucket: str, key: str, configs: dict) -> dict:
     """
     Create initial data dictionary for the pipeline.
 
     Args:
         bucket: S3 bucket name
         key: S3 object key that triggered the event
+        configs: Loaded configuration files
 
     Returns:
         Initial data dictionary for pipeline processing
@@ -82,6 +113,10 @@ def create_initial_data(bucket: str, key: str) -> dict:
             'data_table': DATA_TABLE,
             'website_bucket': WEBSITE_BUCKET,
             'input_bucket': INPUT_BUCKET,
+            # Loaded configs
+            'ui_translations': configs.get('ui_translations', {}),
+            'dictionaries': configs.get('dictionaries', {}),
+            'enrichment': configs.get('enrichment', {}),
         },
         # Raw data (populated by parse processors)
         'raw': {
@@ -108,6 +143,10 @@ def main(event, context):
     """
     logger.info(f"Processing event: {json.dumps(event)}")
 
+    # Load configs once for all records
+    configs = load_configs()
+    logger.info(f"Loaded configs: {list(configs.keys())}")
+
     results = []
 
     for record in event.get('Records', []):
@@ -117,7 +156,7 @@ def main(event, context):
 
         try:
             # Create initial data for pipeline
-            data = create_initial_data(bucket, key)
+            data = create_initial_data(bucket, key, configs)
 
             # Build and run pipeline
             pipeline = build_pipeline()
