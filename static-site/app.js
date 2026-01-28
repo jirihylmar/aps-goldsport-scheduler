@@ -211,10 +211,6 @@ function renderSchedule() {
     // Render all lessons
     renderLessons('all-lessons', lessons, 'no_lessons');
 
-    // Show date selector in debug mode
-    if (state.debugMode) {
-        renderDebugDateSelector(dates, targetDate);
-    }
 }
 
 /**
@@ -601,39 +597,6 @@ function applyTimeSimulation() {
     url.searchParams.set('time', time);
     window.location.href = url.toString();
 }
-
-/**
- * Render date selector for debug mode (appends to footer)
- */
-function renderDebugDateSelector(dates, currentDate) {
-    const footer = document.querySelector('.footer');
-    if (!footer || dates.length === 0) return;
-
-    // Remove existing selector
-    const existing = footer.querySelector('.date-selector');
-    if (existing) existing.remove();
-
-    const selectorDiv = document.createElement('div');
-    selectorDiv.className = 'date-selector';
-    selectorDiv.style.cssText = 'display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; justify-content: center;';
-
-    dates.forEach(date => {
-        const btn = document.createElement('button');
-        btn.textContent = date;
-        btn.style.cssText = 'padding: 2px 6px; font-size: 10px; cursor: pointer;';
-        if (date === currentDate) btn.style.fontWeight = 'bold';
-        btn.onclick = () => {
-            const url = new URL(window.location);
-            url.searchParams.set('debug', 'true');
-            url.searchParams.set('date', date);
-            window.location.href = url.toString();
-        };
-        selectorDiv.appendChild(btn);
-    });
-
-    footer.appendChild(selectorDiv);
-}
-
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
