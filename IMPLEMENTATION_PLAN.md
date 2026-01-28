@@ -306,29 +306,106 @@ The frontend loads translations based on `lang` parameter and renders all text a
 ## 5. AWS Resources
 
 ### Resource Naming Convention
+
+**Pattern**: `{project}-{component}-{type}-{env}`
+
+| Element | Values | Example |
+|---------|--------|---------|
+| `{project}` | `goldsport` | Fixed prefix |
+| `{component}` | `scheduler` | Application name |
+| `{type}` | `input`, `web`, `proc`, `cdn` | Resource purpose |
+| `{env}` | `dev`, `prod` | Environment |
+
+**Full resource names**:
+
+| Resource Type | Name | Example (prod) |
+|---------------|------|----------------|
+| S3 Input Bucket | `{project}-{component}-input-{env}` | `goldsport-scheduler-input-prod` |
+| S3 Website Bucket | `{project}-{component}-web-{env}` | `goldsport-scheduler-web-prod` |
+| Lambda Function | `{project}-{component}-proc-{env}` | `goldsport-scheduler-proc-prod` |
+| IAM Role | `{project}-{component}-lambda-role-{env}` | `goldsport-scheduler-lambda-role-prod` |
+| CloudFront | `{project}-{component}-cdn-{env}` | `goldsport-scheduler-cdn-prod` |
+| CloudWatch Logs | `/aws/lambda/{lambda-name}` | `/aws/lambda/goldsport-scheduler-proc-prod` |
+
+---
+
+### S3 Bucket Structure
+
+#### Input Bucket: `goldsport-scheduler-input-{env}`
+
 ```
-goldsport-{component}-{env}
+goldsport-scheduler-input-prod/
+└── uploads/
+    └── orders-YYYY-MM-DD-HHMMSS.tsv    # Uploaded TSV files
 ```
 
-Where:
-- `{component}`: input, website, processor, cdn
-- `{env}`: dev, prod
+- TSV files uploaded here trigger Lambda processing
+- Old files can be retained or lifecycle-deleted (configurable)
+
+---
+
+#### Website Bucket: `goldsport-scheduler-web-{env}`
+
+```
+goldsport-scheduler-web-prod/
+│
+├── index.html                          # Main display page
+├── styles.css                          # Styling (vertical display optimized)
+├── app.js                              # Auto-refresh, translation logic
+│
+├── config/                             # Configuration files
+│   ├── ui-translations.json            # UI text (EN/DE/PL/CZ)
+│   ├── dictionaries.json               # Semantic translations
+│   └── enrichment.json                 # Instructors, additional data
+│
+├── data/                               # Generated data (Lambda output)
+│   └── schedule.json                   # Current day's schedule
+│
+└── assets/                             # Static assets (optional)
+    ├── logo.png                        # School logo
+    └── instructors/                    # Instructor photos (if used)
+        └── {name}.jpg
+```
+
+**Access patterns**:
+| Path | Updated By | Frequency |
+|------|------------|-----------|
+| `index.html`, `*.css`, `*.js` | Deployment | Rare |
+| `config/*.json` | Manual/Deployment | Occasional |
+| `data/schedule.json` | Lambda | On each TSV upload |
+| `assets/*` | Manual | Rare |
+
+---
 
 ### Resources by Phase
 
 #### Phase 1 Resources
 | Type | Name | Purpose |
 |------|------|---------|
-| S3 Bucket | goldsport-input-{env} | Receives TSV uploads |
-| S3 Bucket | goldsport-website-{env} | Hosts static site + JSON |
-| Lambda | goldsport-processor-{env} | Processes TSV files |
-| IAM Role | goldsport-lambda-role-{env} | Lambda execution permissions |
+| S3 Bucket | `goldsport-scheduler-input-{env}` | Receives TSV uploads |
+| S3 Bucket | `goldsport-scheduler-web-{env}` | Static site + config + data |
+| Lambda | `goldsport-scheduler-proc-{env}` | Processes TSV → JSON |
+| IAM Role | `goldsport-scheduler-lambda-role-{env}` | Lambda execution permissions |
 
 #### Phase 4 Resources
 | Type | Name | Purpose |
 |------|------|---------|
-| CloudFront | goldsport-cdn-{env} | CDN for website |
-| ACM Certificate | (auto-generated) | HTTPS |
+| CloudFront | `goldsport-scheduler-cdn-{env}` | CDN for website bucket |
+| ACM Certificate | (auto-generated) | HTTPS for CloudFront |
+
+---
+
+### IAM Permissions (Lambda Role)
+
+```yaml
+Permissions:
+  - s3:GetObject on goldsport-scheduler-input-{env}/*
+  - s3:PutObject on goldsport-scheduler-web-{env}/data/*
+  - s3:GetObject on goldsport-scheduler-web-{env}/config/*
+  - logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents
+```
+
+---
 
 ### Estimated Costs (Monthly)
 | Resource | Estimate |
@@ -389,6 +466,24 @@ aps-goldsport-scheduler/           # Single repository
 
 ## 7. Naming Conventions
 
+### AWS Resources
+**Pattern**: `{project}-{component}-{type}-{env}`
+
+| Type | Pattern | Example |
+|------|---------|---------|
+| S3 Buckets | `goldsport-scheduler-{type}-{env}` | `goldsport-scheduler-web-prod` |
+| Lambda | `goldsport-scheduler-proc-{env}` | `goldsport-scheduler-proc-prod` |
+| IAM Role | `goldsport-scheduler-lambda-role-{env}` | `goldsport-scheduler-lambda-role-prod` |
+| CloudFront | `goldsport-scheduler-cdn-{env}` | `goldsport-scheduler-cdn-prod` |
+
+### S3 Object Keys
+| Location | Pattern | Example |
+|----------|---------|---------|
+| Input uploads | `uploads/{filename}.tsv` | `uploads/orders-2026-01-28-120000.tsv` |
+| Generated data | `data/{filename}.json` | `data/schedule.json` |
+| Config files | `config/{name}.json` | `config/dictionaries.json` |
+| Static assets | `assets/{path}` | `assets/logo.png` |
+
 ### Code
 | Type | Convention | Example |
 |------|------------|---------|
@@ -396,15 +491,9 @@ aps-goldsport-scheduler/           # Single repository
 | Functions | snake_case (Python) | `parse_lesson_row` |
 | Classes | PascalCase | `ScheduleProcessor` |
 | Constants | SCREAMING_SNAKE | `DEFAULT_REFRESH_INTERVAL` |
+| Config keys | snake_case | `ui_translations`, `current_lessons` |
 
-### AWS Resources
-| Type | Pattern | Example |
-|------|---------|---------|
-| S3 Buckets | goldsport-{purpose}-{env} | goldsport-website-prod |
-| Lambda | goldsport-{function}-{env} | goldsport-processor-prod |
-| CloudFront | goldsport-cdn-{env} | goldsport-cdn-prod |
-
-### Commits
+### Git Commits
 ```
 {type}: {description}
 
