@@ -505,5 +505,62 @@ S3 Upload → ParseOrders → ParseInstructors → MergeData → Validate → Pr
 - Phase 0: COMPLETE
 - Phase 1: COMPLETE
 - Phase 2: COMPLETE
-- Phase 3: PENDING (next)
-- Current Task: 3.1
+- Phase 3: COMPLETE
+- Phase 4: PENDING (next)
+- Current Task: 4.1
+
+---
+
+## Session 4 - 2026-01-28 (continued)
+
+### Phase 3: Configuration & Dictionaries
+
+**Task 3.1: Create UI translations file** - COMPLETE
+- Created `config/ui-translations.json`
+- 16 UI keys in 4 languages (en, de, cz, pl)
+
+**Task 3.2: Create semantic dictionaries file** - COMPLETE
+- Created `config/dictionaries.json`
+- Levels: 6 (kids ski school, ski/snowboard beginner/advanced, cross-country)
+- Languages: 4 (en, de, cz, pl)
+- Locations: 2 (Rýžoviště, Stone bar)
+
+**Task 3.3: Create enrichment config file** - COMPLETE
+- Created `config/enrichment.json`
+- Default instructor, display settings, sample instructors
+
+**Task 3.4: Implement config loader in Lambda** - COMPLETE
+- Created `lambda/processor/config_loader.py`
+- ConfigLoader class loads configs from S3
+- translate() and get_ui_text() helper functions
+- 15 unit tests
+
+**Task 3.5: Upload config files to S3** - COMPLETE
+- Uploaded to s3://goldsport-scheduler-web-dev/config/
+  - ui-translations.json (2.4 KiB)
+  - dictionaries.json (1.8 KiB)
+  - enrichment.json (720 B)
+
+**Task 3.6: Verify *_key fields in schedule.json** - COMPLETE
+- OutputProcessor already includes level_key, language_key, location_key
+
+---
+
+## Phase 3 COMPLETE
+
+### Summary
+- 3 config files created and uploaded to S3
+- Config loader implemented with translation helpers
+- 60 total unit tests passing (15 new for config loader)
+
+### Next Session
+- Phase 4: Display Frontend
+- Start with Task 4.1: Create HTML structure
+
+### Status
+- Phase 0: COMPLETE
+- Phase 1: COMPLETE
+- Phase 2: COMPLETE
+- Phase 3: COMPLETE
+- Phase 4: PENDING (next)
+- Current Task: 4.1
