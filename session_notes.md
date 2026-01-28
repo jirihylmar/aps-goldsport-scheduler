@@ -507,8 +507,8 @@ S3 Upload → ParseOrders → ParseInstructors → MergeData → Validate → Pr
 - Phase 2: COMPLETE
 - Phase 3: COMPLETE
 - Phase 4: COMPLETE
-- Phase 5: IN PROGRESS (4/8 tasks complete)
-- CloudFront URL: https://d2uodie4uj65pq.cloudfront.net
+- Phase 5: IN PROGRESS (5/9 tasks)
+- Debug URL: https://d2uodie4uj65pq.cloudfront.net?debug=true&date=28.01.2026&time=09:30
 - Current Task: 5.5
 
 ---
@@ -582,6 +582,6 @@ S3 Upload → ParseOrders → ParseInstructors → MergeData → Validate → Pr
 - Phase 2: COMPLETE
 - Phase 3: COMPLETE
 - Phase 4: COMPLETE
-- Phase 5: IN PROGRESS (4/8 tasks complete)
-- CloudFront URL: https://d2uodie4uj65pq.cloudfront.net
+- Phase 5: IN PROGRESS (5/9 tasks)
+- Debug URL: https://d2uodie4uj65pq.cloudfront.net?debug=true&date=28.01.2026&time=09:30
 - Current Task: 5.5
