@@ -5,6 +5,8 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
+import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import { Construct } from 'constructs';
 
 export interface SchedulerStackProps extends cdk.StackProps {
@@ -18,6 +20,7 @@ export class SchedulerStack extends cdk.Stack {
   public readonly dataTable: dynamodb.Table;
   public readonly processorLambda: lambda.Function;
   public readonly fetcherLambda: lambda.Function;
+  public readonly distribution: cloudfront.Distribution;
 
   constructor(scope: Construct, id: string, props: SchedulerStackProps) {
     super(scope, id, props);
@@ -116,6 +119,70 @@ export class SchedulerStack extends cdk.Stack {
       { prefix: 'schedule-overrides/' }
     );
 
+    // Task 5.1 - CloudFront distribution for HTTPS access
+    this.distribution = new cloudfront.Distribution(this, 'Distribution', {
+      comment: `GoldSport Scheduler CDN (${env})`,
+      defaultRootObject: 'index.html',
+      defaultBehavior: {
+        origin: origins.S3BucketOrigin.withOriginAccessControl(this.websiteBucket),
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        cachePolicy: new cloudfront.CachePolicy(this, 'DefaultCachePolicy', {
+          cachePolicyName: `goldsport-scheduler-cache-${env}`,
+          comment: 'Cache policy for static assets',
+          defaultTtl: cdk.Duration.hours(1),
+          maxTtl: cdk.Duration.days(1),
+          minTtl: cdk.Duration.minutes(1),
+          enableAcceptEncodingGzip: true,
+          enableAcceptEncodingBrotli: true,
+        }),
+      },
+      additionalBehaviors: {
+        // Shorter cache for dynamic data
+        'data/*': {
+          origin: origins.S3BucketOrigin.withOriginAccessControl(this.websiteBucket),
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          cachePolicy: new cloudfront.CachePolicy(this, 'DataCachePolicy', {
+            cachePolicyName: `goldsport-scheduler-data-cache-${env}`,
+            comment: 'Short cache for schedule data',
+            defaultTtl: cdk.Duration.minutes(1),
+            maxTtl: cdk.Duration.minutes(5),
+            minTtl: cdk.Duration.seconds(30),
+            enableAcceptEncodingGzip: true,
+            enableAcceptEncodingBrotli: true,
+          }),
+        },
+        // Config files cached longer but not too long
+        'config/*': {
+          origin: origins.S3BucketOrigin.withOriginAccessControl(this.websiteBucket),
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          cachePolicy: new cloudfront.CachePolicy(this, 'ConfigCachePolicy', {
+            cachePolicyName: `goldsport-scheduler-config-cache-${env}`,
+            comment: 'Moderate cache for config files',
+            defaultTtl: cdk.Duration.minutes(15),
+            maxTtl: cdk.Duration.hours(1),
+            minTtl: cdk.Duration.minutes(5),
+            enableAcceptEncodingGzip: true,
+            enableAcceptEncodingBrotli: true,
+          }),
+        },
+      },
+      errorResponses: [
+        {
+          httpStatus: 404,
+          responsePagePath: '/index.html',
+          responseHttpStatus: 200,
+          ttl: cdk.Duration.minutes(1),
+        },
+        {
+          httpStatus: 403,
+          responsePagePath: '/index.html',
+          responseHttpStatus: 200,
+          ttl: cdk.Duration.minutes(1),
+        },
+      ],
+      priceClass: cloudfront.PriceClass.PRICE_CLASS_100, // US, Canada, Europe
+    });
+
     // Outputs for reference
     new cdk.CfnOutput(this, 'InputBucketName', {
       value: this.inputBucket.bucketName,
@@ -140,6 +207,16 @@ export class SchedulerStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'FetcherLambdaName', {
       value: this.fetcherLambda.functionName,
       description: 'Fetcher Lambda function name',
+    });
+
+    new cdk.CfnOutput(this, 'DistributionId', {
+      value: this.distribution.distributionId,
+      description: 'CloudFront distribution ID',
+    });
+
+    new cdk.CfnOutput(this, 'DistributionUrl', {
+      value: `https://${this.distribution.distributionDomainName}`,
+      description: 'CloudFront distribution URL (HTTPS)',
     });
   }
 }
