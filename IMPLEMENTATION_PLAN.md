@@ -8,21 +8,39 @@
 ## 1. Project Overview
 
 ### Description
-A web-based display system for GoldSport ski school that shows current and upcoming lessons on an external vertical display. The system processes lesson data from TSV exports and presents it in a readable format optimized for vertical orientation.
+A scheduling engine for GoldSport ski school that processes lesson bookings, manages instructor assignments, detects conflicts, and provides multiple outputs including a public display. The system is designed to start simple (display) and grow into a full scheduling platform.
+
+### Vision
+**Phase 1 (MVP)**: Display current/upcoming lessons on vertical screen
+**Future**: Full scheduling engine with instructor assignment, conflict detection, optimization, notifications, and integrations
 
 ### Goals
-- Display current lessons in progress
-- Show upcoming lessons for the current day
-- Auto-refresh at configurable intervals
-- Protect participant privacy (given name only)
-- Protect sponsor privacy (given name + 2-letter surname)
-- Simple deployment via file upload
+
+**Immediate (MVP)**:
+- Process lesson data from TSV exports
+- Display current and upcoming lessons
+- Multi-language support (EN/DE/PL/CZ)
+- Privacy-compliant name display
+
+**Future (Extensible Architecture)**:
+- Automatic instructor assignment suggestions
+- Conflict detection (double-bookings, overlaps)
+- Schedule optimization
+- Notifications (instructors, staff)
+- Integration with booking systems
 
 ### Success Criteria
-- Display updates within 5 minutes of TSV upload
+
+**MVP**:
+- Display updates within 5 minutes of data upload
 - Page readable from 3+ meters distance
-- Handles 1000+ lesson records without performance issues
+- Handles 1000+ lesson records
 - Works on vertical display (portrait orientation)
+
+**Architecture**:
+- Modular processing pipeline (easy to add new processors)
+- State storage for scheduling data
+- API-ready for future interactive features
 
 ---
 
@@ -31,22 +49,47 @@ A web-based display system for GoldSport ski school that shows current and upcom
 ### High-Level Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                       DATA FLOW                                  │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌─────────────┐     ┌─────────────┐     ┌─────────────────┐   │
-│  │  TSV File   │────▶│  S3 Input   │────▶│  Lambda         │   │
-│  │  (upload)   │     │  Bucket     │     │  (process TSV)  │   │
-│  └─────────────┘     └─────────────┘     └────────┬────────┘   │
-│                                                    │            │
-│                                                    ▼            │
-│  ┌─────────────┐     ┌─────────────┐     ┌─────────────────┐   │
-│  │  Display    │◀────│ CloudFront  │◀────│  S3 Website     │   │
-│  │  (browser)  │     │  (CDN)      │     │  (HTML + JSON)  │   │
-│  └─────────────┘     └─────────────┘     └─────────────────┘   │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     GOLDSPORT SCHEDULER ENGINE                           │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │                        INPUT LAYER                               │   │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐    │   │
+│  │  │  Orders  │  │Instructors│  │Locations │  │  Overrides   │    │   │
+│  │  │  (TSV)   │  │  (JSON)  │  │  (JSON)  │  │   (JSON)     │    │   │
+│  │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └──────┬───────┘    │   │
+│  └───────┼─────────────┼─────────────┼───────────────┼────────────┘   │
+│          └─────────────┴─────────────┴───────────────┘                 │
+│                                    │                                    │
+│                                    ▼                                    │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │                    PROCESSING PIPELINE                           │   │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐    │   │
+│  │  │  Parse   │─▶│  Merge   │─▶│ Validate │─▶│   Process    │    │   │
+│  │  │  & Load  │  │  Data    │  │  & Clean │  │   (future)   │    │   │
+│  │  └──────────┘  └──────────┘  └──────────┘  └──────────────┘    │   │
+│  │                                               │                  │   │
+│  │  Future processors: ┌─────────────────────────┘                  │   │
+│  │  • ConflictDetector │ • InstructorAssigner │ • Optimizer        │   │
+│  └─────────────────────┼────────────────────────────────────────────┘   │
+│                        ▼                                                │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │                      STATE STORAGE                               │   │
+│  │                      (DynamoDB)                                  │   │
+│  │  • Processed schedules  • Conflicts  • Assignment history       │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                        │                                                │
+│                        ▼                                                │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │                     OUTPUT LAYER                                 │   │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │   │
+│  │  │   Display    │  │     API      │  │    Notifications     │  │   │
+│  │  │  (S3 + CF)   │  │  (future)    │  │     (future)         │  │   │
+│  │  └──────────────┘  └──────────────┘  └──────────────────────┘  │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Components
@@ -54,25 +97,45 @@ A web-based display system for GoldSport ski school that shows current and upcom
 | Component | Technology | Purpose |
 |-----------|------------|---------|
 | Infrastructure | AWS CDK (TypeScript) | Define and deploy AWS resources |
-| Data Processing | Python Lambda | Parse TSV, apply enrichment, generate JSON |
-| Configuration | JSON files | Translations, dictionaries, enrichment data |
-| Static Site | HTML/CSS/JS | Multi-language display on vertical screen |
-| Storage | S3 | Input bucket + website hosting + config |
-| CDN | CloudFront | HTTPS, caching, fast delivery |
+| Processing Engine | Python Lambda | Modular pipeline for data processing |
+| State Storage | DynamoDB | Processed schedules, conflicts, history |
+| Configuration | S3 (JSON) | Translations, dictionaries, settings |
+| Display Output | S3 + CloudFront | Public schedule display |
+| API (future) | API Gateway + Lambda | Interactive features |
+
+### Processing Pipeline (Modular Design)
+
+```python
+# Conceptual structure - each processor is independent
+pipeline = [
+    ParseOrdersProcessor(),      # TSV → internal format
+    ParseInstructorsProcessor(), # JSON → internal format
+    MergeDataProcessor(),        # Combine all sources
+    ValidateProcessor(),         # Clean invalid records
+    PrivacyProcessor(),          # Apply name filtering
+    # Future processors:
+    # ConflictDetectorProcessor(),
+    # InstructorAssignerProcessor(),
+    # OptimizerProcessor(),
+]
+
+for processor in pipeline:
+    data = processor.process(data)
+```
 
 ### Data Flow
 
-1. Staff uploads data to S3 input bucket:
-   - `orders/` - lesson bookings (TSV from booking system)
-   - `instructors/` - daily roster and profiles (JSON)
-   - `schedule-overrides/` - manual adjustments (JSON, optional)
-2. S3 event triggers Lambda function
-3. Lambda reads latest files from each input folder
-4. Lambda combines: orders + instructors + overrides
-5. Lambda applies dictionaries (translations)
-6. Lambda writes schedule.json to S3 website bucket
-7. Display page loads with language parameter (?lang=de)
-8. Page renders using UI translations for selected language
+**MVP Flow**:
+1. Staff uploads data to S3 input bucket (orders, instructors, etc.)
+2. S3 event triggers Processing Lambda
+3. Lambda runs pipeline: Parse → Merge → Validate → Privacy
+4. Lambda stores processed schedule in DynamoDB
+5. Lambda generates schedule.json → S3 website bucket
+6. Display auto-refreshes from S3/CloudFront
+
+**Future Flow** (additions):
+- Step 3 adds: Conflict Detection → Assignment → Optimization
+- Step 5 adds: API endpoints, Notifications
 
 ---
 
@@ -278,34 +341,50 @@ The frontend loads translations based on `lang` parameter and renders all text a
 > and tracked in `progress.json`. Do NOT add task lists here.
 
 ### Phase 1: Infrastructure Foundation
-**Objective**: Set up AWS resources and CDK project
+**Objective**: Set up AWS resources, CDK project, and base architecture
 
 **Deliverables**:
-- CDK project initialized
+- CDK project initialized with modular stack structure
 - S3 buckets (input + website)
-- Lambda function skeleton
+- DynamoDB table for schedule state
+- Lambda function skeleton with pipeline structure
 - S3 trigger configured
 
 **Dependencies**: None
 
 ---
 
-### Phase 2: Data Processing & Configuration
-**Objective**: Implement TSV parsing, dictionaries, and JSON generation
+### Phase 2: Processing Engine (MVP)
+**Objective**: Implement core processing pipeline
 
 **Deliverables**:
-- Lambda function parses TSV
-- Privacy filtering applied
-- Dictionary system (ui-translations, semantic dictionaries)
-- Enrichment data structure (instructors, etc.)
-- schedule.json generated with keys for translation
-- Handles edge cases (invalid dates, missing fields)
+- Pipeline architecture (processor chain)
+- ParseOrdersProcessor (TSV → internal format)
+- ParseInstructorsProcessor (JSON → internal format)
+- MergeDataProcessor (combine sources)
+- ValidateProcessor (filter invalid records)
+- PrivacyProcessor (name filtering)
+- DynamoDB storage of processed schedule
+- schedule.json output generation
 
 **Dependencies**: Phase 1
 
 ---
 
-### Phase 3: Display Frontend
+### Phase 3: Configuration & Dictionaries
+**Objective**: Implement translation and configuration system
+
+**Deliverables**:
+- Dictionary system (ui-translations, semantic dictionaries)
+- Configuration loading from S3
+- Multi-language key resolution
+- Default/fallback handling
+
+**Dependencies**: Phase 2
+
+---
+
+### Phase 4: Display Frontend
 **Objective**: Build the multi-language display page
 
 **Deliverables**:
@@ -314,13 +393,13 @@ The frontend loads translations based on `lang` parameter and renders all text a
 - Large, readable typography
 - Current vs upcoming lesson distinction
 - Multi-language support (EN/DE/PL/CZ via ?lang= param)
-- Dictionary-based rendering (levels, languages, locations)
+- Dictionary-based rendering
 
-**Dependencies**: Phase 2
+**Dependencies**: Phase 3
 
 ---
 
-### Phase 4: CDN & Polish
+### Phase 5: CDN & Production
 **Objective**: Production readiness
 
 **Deliverables**:
@@ -328,8 +407,33 @@ The frontend loads translations based on `lang` parameter and renders all text a
 - HTTPS enabled
 - Cache configuration
 - End-to-end testing
+- Monitoring/alerting setup
 
-**Dependencies**: Phase 3
+**Dependencies**: Phase 4
+
+---
+
+### Future Phases (Post-MVP)
+
+**Phase 6: Conflict Detection**
+- ConflictDetectorProcessor
+- Conflict storage in DynamoDB
+- Conflict display/alerts
+
+**Phase 7: Instructor Assignment**
+- InstructorAssignerProcessor
+- Skills/availability matching
+- Assignment suggestions
+
+**Phase 8: API Layer**
+- API Gateway setup
+- CRUD endpoints
+- Authentication
+
+**Phase 9: Notifications**
+- SNS/SES integration
+- Instructor notifications
+- Schedule change alerts
 
 ---
 
@@ -352,10 +456,11 @@ The frontend loads translations based on `lang` parameter and renders all text a
 |---------------|------|----------------|
 | S3 Input Bucket | `{project}-{component}-input-{env}` | `goldsport-scheduler-input-prod` |
 | S3 Website Bucket | `{project}-{component}-web-{env}` | `goldsport-scheduler-web-prod` |
-| Lambda Function | `{project}-{component}-proc-{env}` | `goldsport-scheduler-proc-prod` |
+| DynamoDB Table | `{project}-{component}-data-{env}` | `goldsport-scheduler-data-prod` |
+| Lambda (Engine) | `{project}-{component}-engine-{env}` | `goldsport-scheduler-engine-prod` |
 | IAM Role | `{project}-{component}-lambda-role-{env}` | `goldsport-scheduler-lambda-role-prod` |
 | CloudFront | `{project}-{component}-cdn-{env}` | `goldsport-scheduler-cdn-prod` |
-| CloudWatch Logs | `/aws/lambda/{lambda-name}` | `/aws/lambda/goldsport-scheduler-proc-prod` |
+| CloudWatch Logs | `/aws/lambda/{lambda-name}` | `/aws/lambda/goldsport-scheduler-engine-prod` |
 
 ---
 
@@ -469,9 +574,10 @@ goldsport-scheduler-web-prod/
 #### Phase 1 Resources
 | Type | Name | Purpose |
 |------|------|---------|
-| S3 Bucket | `goldsport-scheduler-input-{env}` | Receives TSV uploads |
+| S3 Bucket | `goldsport-scheduler-input-{env}` | Receives data uploads |
 | S3 Bucket | `goldsport-scheduler-web-{env}` | Static site + config + data |
-| Lambda | `goldsport-scheduler-proc-{env}` | Processes TSV → JSON |
+| DynamoDB | `goldsport-scheduler-data-{env}` | Processed schedules, state |
+| Lambda | `goldsport-scheduler-engine-{env}` | Processing pipeline |
 | IAM Role | `goldsport-scheduler-lambda-role-{env}` | Lambda execution permissions |
 
 #### Phase 4 Resources
@@ -480,6 +586,48 @@ goldsport-scheduler-web-prod/
 | CloudFront | `goldsport-scheduler-cdn-{env}` | CDN for website bucket |
 | ACM Certificate | (auto-generated) | HTTPS for CloudFront |
 
+#### Future Resources (not in MVP)
+| Type | Name | Purpose |
+|------|------|---------|
+| API Gateway | `goldsport-scheduler-api-{env}` | REST API for interactive features |
+| Lambda | `goldsport-scheduler-api-handler-{env}` | API request handlers |
+| SNS/SES | `goldsport-scheduler-notify-{env}` | Notifications |
+
+---
+
+### DynamoDB Schema
+
+**Table**: `goldsport-scheduler-data-{env}`
+
+```
+Primary Key: PK (partition key), SK (sort key)
+
+Item Types:
+┌─────────────────┬──────────────────┬────────────────────────────────┐
+│ PK              │ SK               │ Purpose                        │
+├─────────────────┼──────────────────┼────────────────────────────────┤
+│ SCHEDULE#date   │ META             │ Schedule metadata for date     │
+│ SCHEDULE#date   │ LESSON#id        │ Individual lesson record       │
+│ CONFLICT#date   │ CONFLICT#id      │ Detected conflict (future)     │
+│ INSTRUCTOR#id   │ PROFILE          │ Instructor profile             │
+│ INSTRUCTOR#id   │ ASSIGN#date      │ Assignment for date            │
+└─────────────────┴──────────────────┴────────────────────────────────┘
+```
+
+**Example: Schedule item**
+```json
+{
+  "PK": "SCHEDULE#2026-01-28",
+  "SK": "LESSON#abc123",
+  "start": "10:00",
+  "end": "11:50",
+  "level_key": "dětská školka",
+  "instructor_id": "jan-novak",
+  "participants": ["Vera", "Eugen"],
+  "booking_id": "2405020a-..."
+}
+```
+
 ---
 
 ### IAM Permissions (Lambda Role)
@@ -487,15 +635,16 @@ goldsport-scheduler-web-prod/
 ```yaml
 Permissions:
   # Read all input sources
-  - s3:GetObject on goldsport-scheduler-input-{env}/orders/*
-  - s3:GetObject on goldsport-scheduler-input-{env}/instructors/*
-  - s3:GetObject on goldsport-scheduler-input-{env}/locations/*
-  - s3:GetObject on goldsport-scheduler-input-{env}/schedule-overrides/*
-  - s3:ListBucket on goldsport-scheduler-input-{env} (to find latest files)
+  - s3:GetObject on goldsport-scheduler-input-{env}/*
+  - s3:ListBucket on goldsport-scheduler-input-{env}
 
-  # Read config, write data
+  # Read config, write data output
   - s3:GetObject on goldsport-scheduler-web-{env}/config/*
   - s3:PutObject on goldsport-scheduler-web-{env}/data/*
+
+  # DynamoDB full access to scheduler table
+  - dynamodb:GetItem, PutItem, UpdateItem, DeleteItem, Query, Scan
+    on goldsport-scheduler-data-{env}
 
   # Logging
   - logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents
@@ -508,6 +657,7 @@ Permissions:
 |----------|----------|
 | S3 (storage + requests) | < $1 |
 | Lambda | < $1 (minimal invocations) |
+| DynamoDB (on-demand) | < $1 (low volume) |
 | CloudFront | < $1 (low traffic) |
 | **Total** | **< $5/month** |
 
@@ -616,19 +766,32 @@ Types: feat, fix, docs, refactor, test, chore, infra
 | 2026-01-28 | Mono-repo structure | Simple project, single deployment unit |
 | 2026-01-28 | Python for Lambda | Better TSV/data processing libraries |
 | 2026-01-28 | S3 trigger (not scheduled) | Updates only when new data uploaded |
-| 2026-01-28 | No database | TSV is source of truth, regenerate on each upload |
 | 2026-01-28 | CloudFront for CDN | HTTPS, caching, professional delivery |
 | 2026-01-28 | JSON config for translations | No code changes needed to add languages/terms |
-| 2026-01-28 | Enrichment file for instructors | Decouples instructor assignment from TSV |
 | 2026-01-28 | Keys in schedule.json | Frontend handles translation, allows runtime language switch |
+| 2026-01-28 | **Scheduling engine architecture** | Not just display - needs processing logic, extensibility |
+| 2026-01-28 | **DynamoDB for state** | Store processed schedules, conflicts, assignments for future features |
+| 2026-01-28 | **Modular pipeline** | Easy to add processors (conflict, assignment) without rewriting |
+| 2026-01-28 | **Multiple input sources** | Orders, instructors, overrides as separate uploads |
 
 ---
 
-## 9. Out of Scope
+## 9. Scope Boundaries
 
-The following are explicitly NOT part of this implementation:
-- User authentication (public display)
-- Data entry/editing (read-only from TSV)
-- Historical data storage (only current day shown)
-- Mobile app (web only)
-- Multi-location support (single display endpoint)
+### MVP Scope (Phases 1-5)
+- Display current/upcoming lessons
+- Multi-language support
+- Basic instructor assignment (from input files)
+- Modular architecture ready for extensions
+
+### Future Scope (Phases 6+)
+- Conflict detection
+- Automatic instructor assignment
+- API for interactive features
+- Notifications
+
+### Out of Scope (Not Planned)
+- User authentication for display (public)
+- Booking system integration (manual upload only)
+- Mobile native app (web responsive only)
+- Multi-tenant (single ski school)
