@@ -56,11 +56,12 @@
         {
           "id": "0.5",
           "name": "Present spec to user and get approval",
-          "status": "pending",
+          "status": "complete",
+          "completed_at": "2026-01-28",
           "size": "small",
           "verify": "User explicitly approved the spec",
           "depends_on": ["0.4"],
-          "notes": "BLOCKING: Do not proceed until user says 'approved' or equivalent"
+          "notes": "Approved after revisions: scheduling engine architecture, DynamoDB, modular pipeline, CloudFront required for HTTPS"
         },
         {
           "id": "0.6",
@@ -102,7 +103,7 @@
     }
   },
 
-  "current_task": "0.5",
+  "current_task": "0.6",
 
   "git_repos": {
     "orchestration": {

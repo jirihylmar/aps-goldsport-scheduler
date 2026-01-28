@@ -244,9 +244,32 @@ Completed IMPLEMENTATION_PLAN.md with:
 
 6. Added extensibility model documentation
 
+---
+
+### Task 0.5: Spec Approval - APPROVED
+
+**Revisions made before approval:**
+1. Added multi-language support (EN/DE/PL/CZ) with dictionary system
+2. Redesigned as scheduling engine (not just display)
+3. Added modular processing pipeline
+4. Added DynamoDB for state storage
+5. Multiple input sources (orders, instructors, overrides)
+6. CloudFront required (display engine expects HTTPS)
+7. Detailed cost analysis (~$0.10-0.50/month)
+
+**Final architecture:**
+- Input: S3 (orders/, instructors/, locations/, schedule-overrides/)
+- Processing: Lambda with modular pipeline
+- State: DynamoDB (schedules, conflicts, assignments)
+- Output: S3 + CloudFront (HTTPS)
+- Display: Windows screensaver-based engine
+
+**User approved**: 2026-01-28
+
 ### Status
 - Task 0.1: COMPLETE
 - Task 0.2: COMPLETE
 - Task 0.3: COMPLETE
 - Task 0.4: COMPLETE
-- Current: Task 0.5 - awaiting user approval (revision 1)
+- Task 0.5: COMPLETE (approved)
+- Current: Ready for Task 0.6
