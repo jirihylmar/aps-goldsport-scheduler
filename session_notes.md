@@ -179,8 +179,41 @@ Created IMPLEMENTATION_PLAN.md with:
 - Privacy rules: sponsor = given + 2 letters, participant = as-is
 - Display requirements: portrait, large font, 60s refresh
 
+---
+
+### Task 0.4: Draft IMPLEMENTATION_PLAN.md sections 4-7
+
+Completed IMPLEMENTATION_PLAN.md with:
+
+**Section 4 - Implementation Phases:**
+- Phase 1: Infrastructure Foundation (CDK, S3, Lambda skeleton)
+- Phase 2: Data Processing (TSV parsing, JSON generation)
+- Phase 3: Display Frontend (HTML/CSS/JS)
+- Phase 4: CDN & Polish (CloudFront, HTTPS)
+
+**Section 5 - AWS Resources:**
+- Naming: goldsport-{component}-{env}
+- Input bucket, website bucket, Lambda, IAM role
+- CloudFront for production
+- Estimated cost: < $5/month
+
+**Section 6 - Repository Structure:**
+- Mono-repo with infrastructure/, lambda/, static-site/
+- Task files in tasks/
+
+**Section 7 - Naming Conventions:**
+- Code: kebab-case files, snake_case functions
+- AWS: goldsport-{purpose}-{env}
+
+**Section 8 - Decision Log:**
+- Documented key architecture decisions
+
+**Section 9 - Out of Scope:**
+- No auth, no data entry, no history, web only
+
 ### Status
 - Task 0.1: COMPLETE
 - Task 0.2: COMPLETE
 - Task 0.3: COMPLETE
-- Current: Ready for Task 0.4
+- Task 0.4: COMPLETE
+- Current: Ready for Task 0.5 (USER APPROVAL REQUIRED)

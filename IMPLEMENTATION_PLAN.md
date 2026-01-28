@@ -144,9 +144,186 @@ Records with these characteristics are filtered out:
 
 ---
 
-## 4-7. [To be completed in Task 0.4]
+## 4. Implementation Phases
 
-- Implementation Phases
-- AWS Resources
-- Repository Structure
-- Naming Conventions
+> **NOTE**: These are high-level phases. Detailed tasks are generated via `/generate-phases`
+> and tracked in `progress.json`. Do NOT add task lists here.
+
+### Phase 1: Infrastructure Foundation
+**Objective**: Set up AWS resources and CDK project
+
+**Deliverables**:
+- CDK project initialized
+- S3 buckets (input + website)
+- Lambda function skeleton
+- S3 trigger configured
+
+**Dependencies**: None
+
+---
+
+### Phase 2: Data Processing
+**Objective**: Implement TSV parsing and JSON generation
+
+**Deliverables**:
+- Lambda function parses TSV
+- Privacy filtering applied
+- schedule.json generated
+- Handles edge cases (invalid dates, missing fields)
+
+**Dependencies**: Phase 1
+
+---
+
+### Phase 3: Display Frontend
+**Objective**: Build the display page
+
+**Deliverables**:
+- HTML/CSS for vertical display
+- JavaScript for auto-refresh
+- Large, readable typography
+- Current vs upcoming lesson distinction
+
+**Dependencies**: Phase 2
+
+---
+
+### Phase 4: CDN & Polish
+**Objective**: Production readiness
+
+**Deliverables**:
+- CloudFront distribution
+- HTTPS enabled
+- Cache configuration
+- End-to-end testing
+
+**Dependencies**: Phase 3
+
+---
+
+## 5. AWS Resources
+
+### Resource Naming Convention
+```
+goldsport-{component}-{env}
+```
+
+Where:
+- `{component}`: input, website, processor, cdn
+- `{env}`: dev, prod
+
+### Resources by Phase
+
+#### Phase 1 Resources
+| Type | Name | Purpose |
+|------|------|---------|
+| S3 Bucket | goldsport-input-{env} | Receives TSV uploads |
+| S3 Bucket | goldsport-website-{env} | Hosts static site + JSON |
+| Lambda | goldsport-processor-{env} | Processes TSV files |
+| IAM Role | goldsport-lambda-role-{env} | Lambda execution permissions |
+
+#### Phase 4 Resources
+| Type | Name | Purpose |
+|------|------|---------|
+| CloudFront | goldsport-cdn-{env} | CDN for website |
+| ACM Certificate | (auto-generated) | HTTPS |
+
+### Estimated Costs (Monthly)
+| Resource | Estimate |
+|----------|----------|
+| S3 (storage + requests) | < $1 |
+| Lambda | < $1 (minimal invocations) |
+| CloudFront | < $1 (low traffic) |
+| **Total** | **< $5/month** |
+
+---
+
+## 6. Repository Structure
+
+### Strategy: Mono-Repository
+
+```
+aps-goldsport-scheduler/           # Single repository
+├── CLAUDE.md                      # Project instructions
+├── IMPLEMENTATION_PLAN.md         # This spec
+├── progress.json                  # Task tracking
+├── session_notes.md               # Session history
+├── tasks/                         # Task details by phase
+│   ├── phase_1_infrastructure.md
+│   ├── phase_2_processing.md
+│   ├── phase_3_frontend.md
+│   └── phase_4_cdn.md
+├── input/                         # Input materials (gitignored after setup)
+│   └── orders-*.tsv
+├── infrastructure/                # CDK project
+│   ├── bin/
+│   │   └── app.ts
+│   ├── lib/
+│   │   └── scheduler-stack.ts
+│   ├── cdk.json
+│   ├── package.json
+│   └── tsconfig.json
+├── lambda/                        # Lambda source
+│   └── processor/
+│       ├── handler.py
+│       └── requirements.txt
+└── static-site/                   # Frontend
+    ├── index.html
+    ├── styles.css
+    └── app.js
+```
+
+### Git Workflow
+| Branch | Purpose |
+|--------|---------|
+| `main` | Production-ready code |
+| `feature/*` | New features (if needed) |
+
+---
+
+## 7. Naming Conventions
+
+### Code
+| Type | Convention | Example |
+|------|------------|---------|
+| Files | kebab-case | `process-tsv.py` |
+| Functions | snake_case (Python) | `parse_lesson_row` |
+| Classes | PascalCase | `ScheduleProcessor` |
+| Constants | SCREAMING_SNAKE | `DEFAULT_REFRESH_INTERVAL` |
+
+### AWS Resources
+| Type | Pattern | Example |
+|------|---------|---------|
+| S3 Buckets | goldsport-{purpose}-{env} | goldsport-website-prod |
+| Lambda | goldsport-{function}-{env} | goldsport-processor-prod |
+| CloudFront | goldsport-cdn-{env} | goldsport-cdn-prod |
+
+### Commits
+```
+{type}: {description}
+
+Types: feat, fix, docs, refactor, test, chore, infra
+```
+
+---
+
+## 8. Decision Log
+
+| Date | Decision | Rationale |
+|------|----------|-----------|
+| 2026-01-28 | Mono-repo structure | Simple project, single deployment unit |
+| 2026-01-28 | Python for Lambda | Better TSV/data processing libraries |
+| 2026-01-28 | S3 trigger (not scheduled) | Updates only when new data uploaded |
+| 2026-01-28 | No database | TSV is source of truth, regenerate on each upload |
+| 2026-01-28 | CloudFront for CDN | HTTPS, caching, professional delivery |
+
+---
+
+## 9. Out of Scope
+
+The following are explicitly NOT part of this implementation:
+- User authentication (public display)
+- Data entry/editing (read-only from TSV)
+- Historical data storage (only current day shown)
+- Mobile app (web only)
+- Multi-location support (single display endpoint)
