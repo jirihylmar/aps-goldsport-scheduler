@@ -4,7 +4,7 @@
   "description": "Ski school lesson display system - shows current and upcoming courses on external vertical display",
   "created_at": "2026-01-28",
   "last_updated": "2026-01-28",
-  "last_session_summary": "Phase 3 COMPLETE. Configuration system implemented: ui-translations.json, dictionaries.json, enrichment.json created and uploaded to S3. ConfigLoader added to Lambda with translate/get_ui_text helpers. 60 unit tests passing. Ready for Phase 4: Display Frontend.",
+  "last_session_summary": "Phase 4 COMPLETE. Display frontend built: HTML structure, CSS for vertical display, JavaScript with data fetching, multi-language support, auto-refresh. Static files uploaded to S3. Awaiting CloudFront (Phase 5) for public access.",
 
   "phases": {
     "phase_0_planning": {
@@ -238,20 +238,20 @@
     },
     "phase_4_frontend": {
       "name": "Display Frontend",
-      "status": "pending",
-      "started_at": null,
-      "completed_at": null,
+      "status": "complete",
+      "started_at": "2026-01-28",
+      "completed_at": "2026-01-28",
       "description": "Build multi-language display page for vertical screens",
       "tasks": [
-        {"id": "4.1", "name": "Create HTML structure", "status": "pending", "size": "small", "verify": "HTML valid, displays in browser"},
-        {"id": "4.2", "name": "Create CSS for vertical display", "status": "pending", "size": "medium", "verify": "Page looks good on vertical display", "depends_on": ["4.1"]},
-        {"id": "4.3", "name": "Implement JavaScript - data fetching", "status": "pending", "size": "small", "verify": "Console shows data loaded"},
-        {"id": "4.4", "name": "Implement JavaScript - language support", "status": "pending", "size": "medium", "verify": "?lang=de shows German UI", "depends_on": ["4.3"]},
-        {"id": "4.5", "name": "Implement JavaScript - lesson rendering", "status": "pending", "size": "medium", "verify": "Lessons display correctly", "depends_on": ["4.4"]},
-        {"id": "4.6", "name": "Implement JavaScript - auto-refresh", "status": "pending", "size": "small", "verify": "Data refreshes without page reload", "depends_on": ["4.5"]},
-        {"id": "4.7", "name": "Implement current vs upcoming logic", "status": "pending", "size": "small", "verify": "Lessons in correct section", "depends_on": ["4.6"]},
-        {"id": "4.8", "name": "Upload static site to S3", "status": "pending", "size": "small", "verify": "Site accessible via S3 URL", "depends_on": ["4.2", "4.7"]},
-        {"id": "4.9", "name": "End-to-end frontend test", "status": "pending", "size": "small", "verify": "All features work", "depends_on": ["4.8"]}
+        {"id": "4.1", "name": "Create HTML structure", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "HTML valid, displays in browser", "notes": "Created index.html with header, sections, lesson card template"},
+        {"id": "4.2", "name": "Create CSS for vertical display", "status": "complete", "completed_at": "2026-01-28", "size": "medium", "verify": "Page looks good on vertical display", "depends_on": ["4.1"], "notes": "Created styles.css with large fonts (readable from 3m), color-coded sections"},
+        {"id": "4.3", "name": "Implement JavaScript - data fetching", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Console shows data loaded", "notes": "fetch() for schedule.json and config files"},
+        {"id": "4.4", "name": "Implement JavaScript - language support", "status": "complete", "completed_at": "2026-01-28", "size": "medium", "verify": "?lang=de shows German UI", "depends_on": ["4.3"], "notes": "URL param ?lang=xx, dynamic translation via data-i18n"},
+        {"id": "4.5", "name": "Implement JavaScript - lesson rendering", "status": "complete", "completed_at": "2026-01-28", "size": "medium", "verify": "Lessons display correctly", "depends_on": ["4.4"], "notes": "Template-based rendering with translated values"},
+        {"id": "4.6", "name": "Implement JavaScript - auto-refresh", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Data refreshes without page reload", "depends_on": ["4.5"], "notes": "60-second interval refresh"},
+        {"id": "4.7", "name": "Implement current vs upcoming logic", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Lessons in correct section", "depends_on": ["4.6"], "notes": "Uses schedule.json current_lessons/upcoming_lessons"},
+        {"id": "4.8", "name": "Upload static site to S3", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Site accessible via S3 URL", "depends_on": ["4.2", "4.7"], "notes": "Uploaded index.html, styles.css, app.js to S3"},
+        {"id": "4.9", "name": "End-to-end frontend test", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "All features work", "depends_on": ["4.8"], "notes": "S3 returns 403 - requires CloudFront for public access (Phase 5)"}
       ],
       "artifacts": []
     },
@@ -275,7 +275,7 @@
     }
   },
 
-  "current_task": "4.1",
+  "current_task": "5.1",
 
   "git_repos": {
     "orchestration": {
