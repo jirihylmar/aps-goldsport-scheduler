@@ -209,7 +209,7 @@
       "description": "Implement core processing pipeline with modular architecture",
       "tasks": [
         {"id": "2.1", "name": "Create pipeline architecture", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "handler.py imports pipeline, basic structure works", "notes": "Created processors/__init__.py (Processor base class, ProcessorError), pipeline.py (Pipeline, PipelineBuilder), updated handler.py to use pipeline"},
-        {"id": "2.2", "name": "Implement ParseOrdersProcessor", "status": "pending", "size": "medium", "verify": "Unit test with sample TSV passes", "depends_on": ["2.1"]},
+        {"id": "2.2", "name": "Implement ParseOrdersProcessor", "status": "complete", "completed_at": "2026-01-28", "size": "medium", "verify": "Unit test with sample TSV passes", "depends_on": ["2.1"], "notes": "Parses TSV, filters 1970 dates, groups by booking_id. 5 unit tests passing."},
         {"id": "2.3", "name": "Implement ParseInstructorsProcessor", "status": "pending", "size": "small", "verify": "Unit test with sample JSON passes", "depends_on": ["2.1"]},
         {"id": "2.4", "name": "Implement MergeDataProcessor", "status": "pending", "size": "medium", "verify": "Unit test with combined data passes", "depends_on": ["2.2", "2.3"]},
         {"id": "2.5", "name": "Implement ValidateProcessor", "status": "pending", "size": "small", "verify": "Unit test filters invalid records", "depends_on": ["2.4"]},
@@ -275,7 +275,7 @@
     }
   },
 
-  "current_task": "2.2",
+  "current_task": "2.3",
 
   "git_repos": {
     "orchestration": {
