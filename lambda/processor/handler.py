@@ -15,6 +15,13 @@ import boto3
 
 from pipeline import Pipeline, PipelineBuilder
 from processors import ProcessorError
+from processors.parse_orders import ParseOrdersProcessor
+from processors.parse_instructors import ParseInstructorsProcessor
+from processors.merge_data import MergeDataProcessor
+from processors.validate import ValidateProcessor
+from processors.privacy import PrivacyProcessor
+from processors.storage import StorageProcessor
+from processors.output import OutputProcessor
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -42,9 +49,15 @@ def build_pipeline() -> Pipeline:
     6. StorageProcessor - save to DynamoDB
     7. OutputProcessor - generate schedule.json
     """
-    # TODO: Add processors as they are implemented in Phase 2
-    # For now, return empty pipeline
-    return PipelineBuilder().build()
+    return (PipelineBuilder()
+        .add(ParseOrdersProcessor())
+        .add(ParseInstructorsProcessor())
+        .add(MergeDataProcessor())
+        .add(ValidateProcessor())
+        .add(PrivacyProcessor())
+        .add(StorageProcessor())
+        .add(OutputProcessor())
+        .build())
 
 
 def create_initial_data(bucket: str, key: str) -> dict:

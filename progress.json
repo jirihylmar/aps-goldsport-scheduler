@@ -215,7 +215,7 @@
         {"id": "2.5", "name": "Implement ValidateProcessor", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Unit test filters invalid records", "depends_on": ["2.4"], "notes": "Validates required fields, time formats. 8 unit tests passing."},
         {"id": "2.6", "name": "Implement PrivacyProcessor", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Unit test transforms names correctly", "depends_on": ["2.5"], "notes": "Sponsor: given + 2 letters surname. Participants: as-is. 8 unit tests passing."},
         {"id": "2.7", "name": "Implement DynamoDB storage", "status": "complete", "completed_at": "2026-01-28", "size": "medium", "verify": "Data appears in DynamoDB after Lambda run", "depends_on": ["2.6"], "notes": "Stores lessons grouped by date, batch writes, metadata tracking. 7 unit tests passing."},
-        {"id": "2.8", "name": "Implement JSON output generation", "status": "pending", "size": "small", "verify": "schedule.json appears in website bucket", "depends_on": ["2.7"]},
+        {"id": "2.8", "name": "Implement JSON output generation", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "schedule.json appears in website bucket", "depends_on": ["2.7"], "notes": "Generates schedule.json with current/upcoming separation. Wired up all processors in handler. 7 unit tests, 44 total passing."},
         {"id": "2.9", "name": "Integration test with real data", "status": "pending", "size": "medium", "verify": "End-to-end flow works with real TSV", "depends_on": ["2.8"]}
       ],
       "artifacts": []
@@ -275,7 +275,7 @@
     }
   },
 
-  "current_task": "2.8",
+  "current_task": "2.9",
 
   "git_repos": {
     "orchestration": {
