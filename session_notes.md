@@ -614,3 +614,60 @@ User requested extensive UI tuning work via `/add-work` command.
 - Phase 5: IN PROGRESS (5/9 tasks, current: 5.5)
 - Phase 6: PENDING (8 tasks added)
 - Debug URL: https://d2uodie4uj65pq.cloudfront.net?debug=true&date=28.01.2026&time=09:30
+
+---
+
+## Session 6 - 2026-01-28
+
+### Phase 6: UI/UX Improvements - Compact Card Layout
+
+**Task 6.1: Analyze display requirements** - COMPLETE
+- Created `docs/display-analysis.md` with screen capacity analysis
+- Screen: 1080x1920 portrait, current cards ~280px = only 4 visible
+- Max lessons at same time: 17 concurrent lessons possible
+- Recommendation: compact cards + page rotation
+
+**Task 6.4: Fix data grouping issues** - COMPLETE
+- Changed grouping from `booking_id` to `date + start + level + location`
+- All same-type lessons now grouped together (e.g., kids school 09:00-10:50 at Stone Bar)
+- Updated: parse_orders.py, merge_data.py, storage.py
+
+**Task 6.5: Sponsor display decision** - COMPLETE
+- Format: "Ir.Sc." (first 2 letters of given name + first 2 letters of surname)
+- Shown per-person in parentheses: "Anna 🇩🇪 (Ir.Sc.)"
+- Updated: privacy.py `_filter_sponsor_name()`
+
+**Task 6.6: Participant language indicator** - COMPLETE
+- Per-person language flags instead of per-lesson
+- Data model changed: `people: [{name, language, sponsor}, ...]`
+- Format: "Anna 🇩🇪 (Ir.Sc.), Max 🇬🇧 (Ma.Mü.)"
+- Updated: parse_orders.py, privacy.py, merge_data.py, validate.py, storage.py, output.py, app.js
+
+**Implemented compact 3-line card layout:**
+```
+11:00-12:50 | Ski Beginner | 2 | Stone Bar
+Lily 🇨🇿 (An.Hr.), Amy 🇨🇿 (An.Hr.)
+Instructor: GoldSport Team
+```
+
+**Files modified:**
+- `lambda/processor/processors/parse_orders.py` - grouping logic, people array
+- `lambda/processor/processors/privacy.py` - Ir.Sc. sponsor format
+- `lambda/processor/processors/merge_data.py` - people field passthrough
+- `lambda/processor/processors/validate.py` - people validation
+- `lambda/processor/processors/storage.py` - new ID generation
+- `lambda/processor/processors/output.py` - people in output
+- `static-site/index.html` - compact card template
+- `static-site/styles.css` - compact styles
+- `static-site/app.js` - formatParticipant function
+
+**Bugs fixed:**
+- DynamoDB BatchWriteItem duplicate key error - fixed lesson ID to use new grouping fields
+- Lambda not deploying in time - waited for update status before triggering
+
+### Status
+- Phase 0-4: COMPLETE
+- Phase 5: IN PROGRESS (5/9 tasks)
+- Phase 6: IN PROGRESS (4/8 tasks: 6.1✓, 6.4✓, 6.5✓, 6.6✓)
+- Current task: 6.2 (page rotation)
+- Test URL: https://d2uodie4uj65pq.cloudfront.net?debug=true&date=02.01.2026&time=11:00

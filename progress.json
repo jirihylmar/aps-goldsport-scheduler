@@ -4,7 +4,7 @@
   "description": "Ski school lesson display system - shows current and upcoming courses on external vertical display",
   "created_at": "2026-01-28",
   "last_updated": "2026-01-28",
-  "last_session_summary": "Phase 6 (UI/UX Improvements) ADDED with 8 tasks for passive display optimization: page rotation, language-specific views, data grouping fixes, sponsor handling, language indicators, format tuning. Phase 5 still in progress (Task 5.5 pending).",
+  "last_session_summary": "Phase 6 progress: Tasks 6.1, 6.4, 6.5, 6.6 complete. Compact 3-line card layout deployed. Grouping changed to date+start+level+location. Sponsor format: Ir.Sc. Per-person language flags working. Next: 6.2 (rotation), 6.7 (final tuning).",
 
   "phases": {
     "phase_0_planning": {
@@ -284,9 +284,9 @@
         {"id": "6.1", "name": "Analyze display requirements", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Analysis document with max lessons per page, typical lesson counts", "notes": "Created docs/display-analysis.md. Current: 4 cards visible, max needed: 17. Recommends compact cards + rotation."},
         {"id": "6.2", "name": "Implement page rotation system", "status": "pending", "size": "medium", "verify": "Demo with 20+ lessons shows rotation working", "depends_on": ["6.1"]},
         {"id": "6.3", "name": "Language-specific views", "status": "pending", "size": "medium", "verify": "Each language has optimized view", "depends_on": ["6.1"]},
-        {"id": "6.4", "name": "Fix data grouping issues", "status": "pending", "size": "medium", "verify": "Related lessons (kids school) appear together"},
-        {"id": "6.5", "name": "Sponsor display decision", "status": "pending", "size": "small", "verify": "Sponsor display matches agreed approach"},
-        {"id": "6.6", "name": "Participant language indicator", "status": "pending", "size": "small", "verify": "Language indicators are clear and unambiguous"},
+        {"id": "6.4", "name": "Fix data grouping issues", "status": "complete", "completed_at": "2026-01-28", "size": "medium", "verify": "Related lessons (kids school) appear together", "notes": "Changed grouping from booking_id to date+start+level+location. All same-type lessons grouped."},
+        {"id": "6.5", "name": "Sponsor display decision", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Sponsor display matches agreed approach", "notes": "Format: Ir.Sc. (first 2 letters of each name). Shown per-person in parentheses."},
+        {"id": "6.6", "name": "Participant language indicator", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Language indicators are clear and unambiguous", "notes": "Per-person language flags: Anna 🇩🇪 (Ir.Sc.). Data model changed to store language per person."},
         {"id": "6.7", "name": "Format and layout tuning", "status": "pending", "size": "medium", "verify": "User approves final layout", "depends_on": ["6.2", "6.3"]},
         {"id": "6.8", "name": "Implement no-scroll safeguards", "status": "pending", "size": "small", "verify": "No scrollbars appear, all content accessible via rotation", "depends_on": ["6.2"]}
       ],
@@ -294,7 +294,7 @@
     }
   },
 
-  "current_task": "5.5",
+  "current_task": "6.2",
 
   "git_repos": {
     "orchestration": {
