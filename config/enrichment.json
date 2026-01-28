@@ -1,0 +1,32 @@
+{
+  "defaults": {
+    "instructor": {
+      "id": "goldsport-team",
+      "name": "GoldSport Team",
+      "photo": "assets/logo.png"
+    },
+    "location": {
+      "name": "Main Meeting Point"
+    }
+  },
+  "display": {
+    "show_instructor": true,
+    "show_language_flag": true,
+    "show_level": true,
+    "show_participant_count": true,
+    "show_sponsor": true,
+    "show_participants": true,
+    "max_participants_shown": 5,
+    "refresh_interval_seconds": 60
+  },
+  "instructors": {
+    "jan-novak": {
+      "name": "Jan Novák",
+      "photo": "assets/instructors/jan-novak.jpg"
+    },
+    "petra-svobodova": {
+      "name": "Petra Svobodová",
+      "photo": "assets/instructors/petra-svobodova.jpg"
+    }
+  }
+}
