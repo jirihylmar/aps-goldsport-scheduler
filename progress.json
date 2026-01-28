@@ -1,23 +1,24 @@
 {
   "version": "2.0",
-  "project": "{{PROJECT_NAME}}",
-  "description": "{{PROJECT_DESCRIPTION}}",
-  "created_at": "{{CREATION_DATE}}",
-  "last_updated": "{{CREATION_DATE}}",
-  "last_session_summary": "Project bootstrapped. Starting Phase 0: Planning.",
+  "project": "GoldSport Scheduler",
+  "description": "Ski school lesson display system - shows current and upcoming courses on external vertical display",
+  "created_at": "2026-01-28",
+  "last_updated": "2026-01-28",
+  "last_session_summary": "Task 0.1 complete: Read input materials (idea.md, orders TSV), explored playbook examples. Recommending simplified aws-serverless approach.",
 
   "phases": {
     "phase_0_planning": {
       "name": "Planning & Setup",
       "status": "in_progress",
-      "started_at": "{{CREATION_DATE}}",
+      "started_at": "2026-01-28",
       "completed_at": null,
       "description": "Create implementation spec, get approval, generate tasks",
       "tasks": [
         {
           "id": "0.1",
           "name": "Read input materials and explore examples",
-          "status": "pending",
+          "status": "complete",
+          "completed_at": "2026-01-28",
           "size": "small",
           "verify": "Key requirements documented in session_notes.md",
           "notes": "Read all files in input/ folder. Explore playbook examples to find best match."
@@ -97,7 +98,7 @@
     }
   },
 
-  "current_task": "0.1",
+  "current_task": "0.2",
 
   "git_repos": {
     "orchestration": {
