@@ -158,12 +158,12 @@ html, body {
     gap: var(--spacing-md);
 }
 
-/* Lesson card */
+/* Lesson card - Compact 3-line layout */
 .lesson-card {
-    display: grid;
-    grid-template-columns: 140px 1fr 1fr;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
     background: var(--color-background);
     border-radius: var(--card-radius);
     border: 1px solid var(--color-border);
@@ -179,93 +179,73 @@ html, body {
     border-color: var(--color-upcoming-border);
 }
 
-/* Time column */
-.lesson-time {
+/* Line 1: Time | Level | Count | Location */
+.lesson-header {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    font-size: var(--font-size-large);
-    font-weight: 700;
+    gap: var(--spacing-md);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+}
+
+.lesson-time {
     color: var(--color-primary);
-}
-
-.time-separator {
-    font-size: var(--font-size-small);
-    color: var(--color-text-light);
-}
-
-/* Details column */
-.lesson-details {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
+    font-weight: 700;
+    min-width: 100px;
 }
 
 .lesson-level {
-    font-size: var(--font-size-large);
-    font-weight: 600;
     color: var(--color-secondary);
+    flex: 1;
 }
 
-.lesson-info {
-    display: flex;
-    gap: var(--spacing-md);
-    font-size: var(--font-size-small);
+.lesson-count {
+    color: var(--color-text);
+    min-width: 60px;
+    text-align: center;
+}
+
+.lesson-location {
     color: var(--color-text-light);
+    min-width: 120px;
+    text-align: right;
 }
 
-.lesson-location::before {
-    content: '\1F4CD';
-    margin-right: var(--spacing-xs);
-}
-
-.lesson-language::before {
-    content: '\1F30D';
-    margin-right: var(--spacing-xs);
-}
-
-/* People column */
-.lesson-people {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-}
-
-.lesson-instructor {
+/* Line 2: Language + Participants */
+.lesson-participants {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
+    font-size: var(--font-size-small);
+    color: var(--color-text);
+    padding-left: var(--spacing-sm);
 }
 
-.instructor-photo {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--color-primary);
+.lesson-language {
+    font-size: var(--font-size-base);
+    min-width: 28px;
+}
+
+.participant-list {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Line 3: Instructor */
+.lesson-instructor {
+    font-size: var(--font-size-small);
+    color: var(--color-text-light);
+    padding-left: var(--spacing-sm);
+}
+
+.instructor-label {
+    font-weight: 500;
 }
 
 .instructor-name {
     font-weight: 600;
-}
-
-.lesson-participants {
-    font-size: var(--font-size-small);
-    color: var(--color-text-light);
-}
-
-.participant-label {
-    font-weight: 500;
-}
-
-.participant-list {
-    color: var(--color-text);
-}
-
-.participant-count {
-    font-weight: 600;
-    color: var(--color-secondary);
+    color: var(--color-primary);
 }
 
 /* Empty state */

@@ -45,31 +45,25 @@
         </footer>
     </div>
 
-    <!-- Lesson card template -->
+    <!-- Lesson card template - Compact 3-line layout -->
     <template id="lesson-template">
         <article class="lesson-card">
-            <div class="lesson-time">
-                <span class="time-start"></span>
-                <span class="time-separator">-</span>
-                <span class="time-end"></span>
+            <!-- Line 1: Time | Level | Count | Location -->
+            <div class="lesson-header">
+                <span class="lesson-time"></span>
+                <span class="lesson-level"></span>
+                <span class="lesson-count"></span>
+                <span class="lesson-location"></span>
             </div>
-            <div class="lesson-details">
-                <div class="lesson-level"></div>
-                <div class="lesson-info">
-                    <span class="lesson-location"></span>
-                    <span class="lesson-language"></span>
-                </div>
+            <!-- Line 2: Language + Participants -->
+            <div class="lesson-participants">
+                <span class="lesson-language"></span>
+                <span class="participant-list"></span>
             </div>
-            <div class="lesson-people">
-                <div class="lesson-instructor">
-                    <img class="instructor-photo" src="" alt="" onerror="this.style.display='none'">
-                    <span class="instructor-name"></span>
-                </div>
-                <div class="lesson-participants">
-                    <span class="participant-label" data-i18n="participants">Participants</span>:
-                    <span class="participant-list"></span>
-                    <span class="participant-count"></span>
-                </div>
+            <!-- Line 3: Instructor -->
+            <div class="lesson-instructor">
+                <span class="instructor-label" data-i18n="instructor">Instructor</span>:
+                <span class="instructor-name"></span>
             </div>
         </article>
     </template>

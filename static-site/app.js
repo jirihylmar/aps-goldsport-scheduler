@@ -253,6 +253,16 @@ function renderSchedule() {
 }
 
 /**
+ * Language flag mapping
+ */
+const LANGUAGE_FLAGS = {
+    'cz': '🇨🇿',
+    'de': '🇩🇪',
+    'en': '🇬🇧',
+    'pl': '🇵🇱',
+};
+
+/**
  * Render lessons to a container
  */
 function renderLessons(containerId, lessons, emptyMessageKey) {
@@ -277,49 +287,42 @@ function renderLessons(containerId, lessons, emptyMessageKey) {
     lessons.forEach(lesson => {
         const card = template.content.cloneNode(true);
 
-        // Time
-        card.querySelector('.time-start').textContent = lesson.start || '--:--';
-        card.querySelector('.time-end').textContent = lesson.end || '--:--';
-
-        // Level (translated)
+        // Line 1: Time | Level | Count | Location
+        card.querySelector('.lesson-time').textContent = lesson.start || '--:--';
         card.querySelector('.lesson-level').textContent =
             translateValue(lesson.level_key, 'levels');
+
+        // Participant count
+        const count = lesson.participant_count || (lesson.participants ? lesson.participants.length : 0);
+        card.querySelector('.lesson-count').textContent = count > 0 ? `${count} pax` : '';
 
         // Location (translated)
         card.querySelector('.lesson-location').textContent =
             translateValue(lesson.location_key, 'locations');
 
-        // Language (translated)
-        card.querySelector('.lesson-language').textContent =
-            translateValue(lesson.language_key, 'languages');
+        // Line 2: Language flag + Participants
+        const langKey = lesson.language_key || '';
+        const flag = LANGUAGE_FLAGS[langKey] || langKey.toUpperCase();
+        card.querySelector('.lesson-language').textContent = flag;
 
-        // Instructor
-        const instructorEl = card.querySelector('.lesson-instructor');
-        if (lesson.instructor && lesson.instructor.name) {
-            card.querySelector('.instructor-name').textContent = lesson.instructor.name;
-            if (lesson.instructor.photo) {
-                card.querySelector('.instructor-photo').src = lesson.instructor.photo;
-                card.querySelector('.instructor-photo').alt = lesson.instructor.name;
-            }
-        } else {
-            instructorEl.style.display = 'none';
+        // Participant names
+        if (lesson.participants && lesson.participants.length > 0) {
+            card.querySelector('.participant-list').textContent = lesson.participants.join(', ');
+        } else if (lesson.sponsor) {
+            card.querySelector('.participant-list').textContent = lesson.sponsor;
         }
 
-        // Participants
-        const participantsEl = card.querySelector('.lesson-participants');
-        card.querySelector('.participant-label').textContent = getUIText('participants');
+        // Line 3: Instructor
+        const instructorEl = card.querySelector('.lesson-instructor');
+        const instructorLabel = card.querySelector('.instructor-label');
+        if (instructorLabel) {
+            instructorLabel.textContent = getUIText('instructor');
+        }
 
-        if (lesson.participants && lesson.participants.length > 0) {
-            // Show participant names
-            card.querySelector('.participant-list').textContent = lesson.participants.join(', ');
-            card.querySelector('.participant-count').textContent = '';
-        } else if (lesson.participant_count > 0) {
-            // Show count only
-            card.querySelector('.participant-list').textContent = '';
-            card.querySelector('.participant-count').textContent =
-                `(${lesson.participant_count})`;
+        if (lesson.instructor && lesson.instructor.name) {
+            card.querySelector('.instructor-name').textContent = lesson.instructor.name;
         } else {
-            participantsEl.style.display = 'none';
+            instructorEl.style.display = 'none';
         }
 
         container.appendChild(card);
