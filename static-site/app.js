@@ -193,8 +193,10 @@ function renderSchedule() {
         const now = new Date();
         targetDate = `${now.getDate().toString().padStart(2, '0')}.${(now.getMonth() + 1).toString().padStart(2, '0')}.${now.getFullYear()}`;
     }
-    // If no data for today, use first available date
-    if (!allByDate[targetDate] && dates.length > 0) {
+
+    // Only fall back to first available date if no date override specified
+    // When user explicitly selects a date, show empty state if no data
+    if (!state.dateOverride && !allByDate[targetDate] && dates.length > 0) {
         targetDate = dates[0];
     }
 
