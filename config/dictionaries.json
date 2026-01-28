@@ -1,4 +1,24 @@
 {
+  "group_types": {
+    "privát": {
+      "en": "Private",
+      "de": "Privat",
+      "cz": "Privát",
+      "pl": "Prywatny"
+    },
+    "malá skupina": {
+      "en": "Small Group",
+      "de": "Kleine Gruppe",
+      "cz": "Malá skupina",
+      "pl": "Mała grupa"
+    },
+    "velká skupina": {
+      "en": "Large Group",
+      "de": "Große Gruppe",
+      "cz": "Velká skupina",
+      "pl": "Duża grupa"
+    }
+  },
   "levels": {
     "dětská školka": {
       "en": "Kids Ski School",

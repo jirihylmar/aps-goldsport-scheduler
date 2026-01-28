@@ -32,6 +32,7 @@ class ParseOrdersProcessor(Processor):
         'timestamp_start_lesson',
         'timestamp_end_lesson',
         'level',
+        'group_size',  # Actually group type: privát, malá skupina, velká skupina
         'name_sponsor',
         'name_participant',
         'language',
@@ -160,20 +161,21 @@ class ParseOrdersProcessor(Processor):
         """
         Group records into lessons.
 
-        Group by: date + start time + level + location
+        Group by: date + start time + level + group_type + location
         This puts all people in the same lesson type together.
         """
         lessons_map: Dict[str, Dict] = {}
 
         for record in records:
-            # Create grouping key: date + start + level + location
+            # Create grouping key: date + start + level + group_type + location
             date = record.get('date_lesson', '')
             start = record.get('timestamp_start_lesson', '')
             end = record.get('timestamp_end_lesson', '')
             level = record.get('level', '').strip()
+            group_type = record.get('group_size', '').strip()  # TSV column is misnamed
             location = record.get('location_meeting', '').strip()
 
-            key = f"{date}_{start}_{level}_{location}"
+            key = f"{date}_{start}_{level}_{group_type}_{location}"
 
             if key not in lessons_map:
                 # Create new lesson
@@ -182,8 +184,9 @@ class ParseOrdersProcessor(Processor):
                     'timestamp_start': start,
                     'timestamp_end': end,
                     'level': level,
+                    'group_type': group_type,  # privát, malá skupina, velká skupina
                     'location_meeting': location,
-                    'group_size': 0,  # Will count actual people
+                    'people_count': 0,  # Will count actual people
                     'people': [],  # [{name, language, sponsor}, ...]
                 }
 
@@ -200,7 +203,7 @@ class ParseOrdersProcessor(Processor):
                     'language': person_lang,
                     'sponsor': sponsor_name,  # Full sponsor name (filtered by privacy processor)
                 })
-                lessons_map[key]['group_size'] += 1
+                lessons_map[key]['people_count'] += 1
 
         return list(lessons_map.values())
 

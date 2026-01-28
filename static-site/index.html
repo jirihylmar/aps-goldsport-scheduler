@@ -22,16 +22,9 @@
         </header>
 
         <main class="content">
-            <section class="lessons-section current-section">
-                <h2 class="section-title" data-i18n="current_lessons">Current Lessons</h2>
-                <div class="lessons-container" id="current-lessons">
-                    <div class="loading" data-i18n="loading">Loading...</div>
-                </div>
-            </section>
-
-            <section class="lessons-section upcoming-section">
-                <h2 class="section-title" data-i18n="upcoming_lessons">Upcoming Lessons</h2>
-                <div class="lessons-container" id="upcoming-lessons">
+            <section class="lessons-section">
+                <h2 class="section-title" id="day-title">Today's Lessons</h2>
+                <div class="lessons-container" id="all-lessons">
                     <div class="loading" data-i18n="loading">Loading...</div>
                 </div>
             </section>
@@ -45,26 +38,20 @@
         </footer>
     </div>
 
-    <!-- Lesson card template - Compact 3-line layout -->
+    <!-- Lesson card template - Single line with pipes -->
     <template id="lesson-template">
         <article class="lesson-card">
-            <!-- Line 1: Time | Level | Count | Location -->
-            <div class="lesson-header">
-                <span class="lesson-time"></span>
-                <span class="lesson-level"></span>
-                <span class="lesson-count"></span>
-                <span class="lesson-location"></span>
-            </div>
-            <!-- Line 2: Language + Participants -->
-            <div class="lesson-participants">
-                <span class="lesson-language"></span>
-                <span class="participant-list"></span>
-            </div>
-            <!-- Line 3: Instructor -->
-            <div class="lesson-instructor">
-                <span class="instructor-label" data-i18n="instructor">Instructor</span>:
-                <span class="instructor-name"></span>
-            </div>
+            <span class="lesson-time"></span>
+            <span class="pipe">|</span>
+            <span class="lesson-group-type"></span>
+            <span class="pipe">|</span>
+            <span class="lesson-level"></span>
+            <span class="pipe">|</span>
+            <span class="lesson-location"></span>
+            <span class="pipe">|</span>
+            <span class="participant-list"></span>
+            <span class="pipe">|</span>
+            <span class="instructor-name"></span>
         </article>
     </template>
 
@@ -75,6 +62,7 @@
         </div>
     </template>
 
+    <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

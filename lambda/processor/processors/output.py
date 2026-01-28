@@ -187,8 +187,9 @@ class OutputProcessor(Processor):
             'start': lesson.get('start', ''),
             'end': lesson.get('end', ''),
             'level_key': lesson.get('level_key', ''),
+            'group_type_key': lesson.get('group_type_key', ''),
             'location_key': lesson.get('location_key', ''),
-            'group_size': lesson.get('group_size', 0),
+            'people_count': lesson.get('people_count', 0),
             'people': lesson.get('people', []),  # [{name, language, sponsor}, ...]
             'instructor': {
                 'id': instructor.get('id'),

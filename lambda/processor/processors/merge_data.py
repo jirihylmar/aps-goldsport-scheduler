@@ -111,8 +111,9 @@ class MergeDataProcessor(Processor):
             'start': start_time,
             'end': end_time,
             'level_key': order.get('level', ''),
+            'group_type_key': order.get('group_type', ''),  # privát, malá skupina, velká skupina
             'location_key': order.get('location_meeting', ''),
-            'group_size': order.get('group_size', len(people)),
+            'people_count': order.get('people_count', len(people)),
             'people': people,  # [{name, language, sponsor}, ...]
             'instructor': instructor,
             'notes': None,

@@ -11,28 +11,31 @@
     --color-text: #1a1a1a;
     --color-text-light: #666666;
     --color-border: #e0e4e8;
-    --color-current: #e8f5e9;
-    --color-current-border: #4caf50;
-    --color-upcoming: #fff8e1;
-    --color-upcoming-border: #ffc107;
+
+    /* Time slot colors */
+    --color-slot-1: #e3f2fd;  /* 08:00-09:59 - light blue */
+    --color-slot-2: #e8f5e9;  /* 10:00-11:59 - light green */
+    --color-slot-3: #fff8e1;  /* 12:00-13:59 - light yellow */
+    --color-slot-4: #fce4ec;  /* 14:00-15:59 - light pink */
+    --color-slot-5: #f3e5f5;  /* 16:00+ - light purple */
 
     /* Typography */
     --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    --font-size-base: 24px;
-    --font-size-large: 32px;
-    --font-size-xlarge: 40px;
-    --font-size-small: 20px;
+    --font-size-base: 16px;
+    --font-size-large: 21px;
+    --font-size-xlarge: 26px;
+    --font-size-small: 13px;
 
-    /* Spacing */
-    --spacing-xs: 8px;
-    --spacing-sm: 16px;
-    --spacing-md: 24px;
-    --spacing-lg: 32px;
-    --spacing-xl: 48px;
+    /* Spacing - reduced */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 24px;
 
     /* Card */
-    --card-radius: 12px;
-    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --card-radius: 6px;
+    --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Reset and base */
@@ -58,31 +61,31 @@ html, body {
     padding: var(--spacing-md);
 }
 
-/* Header */
+/* Header - compact */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-md);
+    padding: var(--spacing-xs) var(--spacing-sm);
     background: var(--color-primary);
     color: white;
     border-radius: var(--card-radius);
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
 }
 
 .logo {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
 }
 
 .logo img {
-    height: 60px;
+    height: 30px;
     width: auto;
 }
 
 .logo h1 {
-    font-size: var(--font-size-xlarge);
+    font-size: var(--font-size-large);
     font-weight: 600;
 }
 
@@ -123,129 +126,75 @@ html, body {
 .lessons-section {
     background: var(--color-card);
     border-radius: var(--card-radius);
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
     box-shadow: var(--card-shadow);
-}
-
-.current-section {
-    border-left: 6px solid var(--color-current-border);
-}
-
-.upcoming-section {
-    border-left: 6px solid var(--color-upcoming-border);
 }
 
 .section-title {
     font-size: var(--font-size-large);
     font-weight: 600;
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 2px solid var(--color-border);
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-primary);
 }
 
-.current-section .section-title {
-    color: var(--color-current-border);
-}
-
-.upcoming-section .section-title {
-    color: var(--color-upcoming-border);
-}
-
-/* Lessons container */
+/* Lessons container - flow left to right, top to bottom */
 .lessons-container {
     display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
 }
 
-/* Lesson card - Compact 3-line layout */
+/* Lesson card - wraps on narrow displays */
 .lesson-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-sm) var(--spacing-md);
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1px var(--spacing-xs);
+    padding: 2px var(--spacing-xs);
     background: var(--color-background);
     border-radius: var(--card-radius);
-    border: 1px solid var(--color-border);
-}
-
-.current-section .lesson-card {
-    background: var(--color-current);
-    border-color: var(--color-current-border);
-}
-
-.upcoming-section .lesson-card {
-    background: var(--color-upcoming);
-    border-color: var(--color-upcoming-border);
-}
-
-/* Line 1: Time | Level | Count | Location */
-.lesson-header {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
+    border-left: 3px solid var(--color-border);
     font-size: var(--font-size-base);
-    font-weight: 600;
+    max-width: 100%;
 }
 
+/* Time group separator - forces new line */
+.time-break {
+    flex-basis: 100%;
+    height: 0;
+}
+
+/* Time slot colors */
+.lesson-card[data-slot="1"] { background: var(--color-slot-1); border-left-color: #2196f3; }
+.lesson-card[data-slot="2"] { background: var(--color-slot-2); border-left-color: #4caf50; }
+.lesson-card[data-slot="3"] { background: var(--color-slot-3); border-left-color: #ff9800; }
+.lesson-card[data-slot="4"] { background: var(--color-slot-4); border-left-color: #e91e63; }
+.lesson-card[data-slot="5"] { background: var(--color-slot-5); border-left-color: #9c27b0; }
+
+/* Plain text - no labels */
 .lesson-time {
-    color: var(--color-primary);
     font-weight: 700;
-    min-width: 100px;
+}
+
+.pipe {
+    color: var(--color-text-light);
+}
+
+.lesson-group-type {
 }
 
 .lesson-level {
-    color: var(--color-secondary);
-    flex: 1;
-}
-
-.lesson-count {
-    color: var(--color-text);
-    min-width: 60px;
-    text-align: center;
 }
 
 .lesson-location {
-    color: var(--color-text-light);
-    min-width: 120px;
-    text-align: right;
-}
-
-/* Line 2: Language + Participants */
-.lesson-participants {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    font-size: var(--font-size-small);
-    color: var(--color-text);
-    padding-left: var(--spacing-sm);
-}
-
-.lesson-language {
-    font-size: var(--font-size-base);
-    min-width: 28px;
 }
 
 .participant-list {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Line 3: Instructor */
-.lesson-instructor {
-    font-size: var(--font-size-small);
-    color: var(--color-text-light);
-    padding-left: var(--spacing-sm);
-}
-
-.instructor-label {
-    font-weight: 500;
 }
 
 .instructor-name {
-    font-weight: 600;
-    color: var(--color-primary);
 }
 
 /* Empty state */
@@ -295,40 +244,19 @@ html, body {
     gap: var(--spacing-xs);
 }
 
-/* Responsive adjustments for very large displays */
-@media (min-width: 1200px) {
-    :root {
-        --font-size-base: 28px;
-        --font-size-large: 36px;
-        --font-size-xlarge: 48px;
-        --font-size-small: 24px;
-    }
-
-    .lesson-card {
-        grid-template-columns: 160px 1fr 1fr;
-    }
+/* No scrolling - fit everything on page */
+html, body {
+    overflow: hidden;
 }
 
-/* Portrait orientation optimization */
-@media (orientation: portrait) {
-    .lesson-card {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto;
-    }
-
-    .lesson-time {
-        flex-direction: row;
-        gap: var(--spacing-xs);
-        justify-content: flex-start;
-    }
-}
-
-/* Hide scrollbar but allow scrolling */
 .content {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    overflow: hidden;
 }
 
-.content::-webkit-scrollbar {
-    display: none;
+/* Twemoji flag sizing */
+img.emoji {
+    height: 1em;
+    width: 1em;
+    margin: 0 .05em 0 .1em;
+    vertical-align: -0.1em;
 }

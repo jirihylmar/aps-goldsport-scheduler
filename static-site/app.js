@@ -178,88 +178,60 @@ function translateValue(value, category) {
 }
 
 /**
- * Render the schedule
+ * Render the schedule - always shows entire day
  */
 function renderSchedule() {
     if (!state.schedule) return;
 
-    // Debug mode with time simulation: filter lessons client-side
-    if (state.timeOverride && state.dateOverride) {
-        const allByDate = state.schedule.all_lessons_by_date || {};
-        const dates = Object.keys(allByDate).sort();
-        const lessons = allByDate[state.dateOverride] || [];
-        const simTime = state.timeOverride;
+    const allByDate = state.schedule.all_lessons_by_date || {};
+    const dates = Object.keys(allByDate).sort();
 
-        // Filter into current/upcoming based on simulated time
-        const current = lessons.filter(l => l.start <= simTime && simTime < l.end);
-        const upcoming = lessons.filter(l => l.start > simTime);
-        const past = lessons.filter(l => l.end <= simTime);
-
-        // Update section titles
-        const currentTitle = document.querySelector('.current-section .section-title');
-        const upcomingTitle = document.querySelector('.upcoming-section .section-title');
-
-        if (currentTitle) {
-            currentTitle.textContent = `Current @ ${simTime} (${current.length})`;
-        }
-        if (upcomingTitle) {
-            upcomingTitle.textContent = `Upcoming (${upcoming.length}) | Past: ${past.length}`;
-        }
-
-        renderLessons('current-lessons', current, 'no_current_lessons');
-        renderLessons('upcoming-lessons', upcoming, 'no_upcoming_lessons');
-
-        // Show time slider
-        renderTimeSlider(state.dateOverride, dates);
-        return;
+    // Determine which date to show
+    let targetDate = state.dateOverride;
+    if (!targetDate) {
+        // Use today's date in DD.MM.YYYY format
+        const now = new Date();
+        targetDate = `${now.getDate().toString().padStart(2, '0')}.${(now.getMonth() + 1).toString().padStart(2, '0')}.${now.getFullYear()}`;
+    }
+    // If no data for today, use first available date
+    if (!allByDate[targetDate] && dates.length > 0) {
+        targetDate = dates[0];
     }
 
-    // Debug mode without time: show all lessons for a specific date
-    if (state.debugMode || state.dateOverride) {
-        const allByDate = state.schedule.all_lessons_by_date || {};
-        const dates = Object.keys(allByDate).sort();
+    const lessons = targetDate ? (allByDate[targetDate] || []) : [];
 
-        // Find which date to show
-        let targetDate = state.dateOverride;
-        if (!targetDate && dates.length > 0) {
-            // Default to first date with data
-            targetDate = dates[0];
-        }
-
-        const lessons = targetDate ? (allByDate[targetDate] || []) : [];
-
-        // Update section titles for debug mode
-        const currentTitle = document.querySelector('.current-section .section-title');
-        const upcomingTitle = document.querySelector('.upcoming-section .section-title');
-
-        if (currentTitle) {
-            currentTitle.textContent = `All Lessons: ${targetDate || 'No data'} (${lessons.length})`;
-        }
-        if (upcomingTitle) {
-            upcomingTitle.textContent = `Select date or add &time=09:30 to simulate`;
-        }
-
-        // Show all lessons in current section
-        renderLessons('current-lessons', lessons, 'no_lessons');
-
-        // Show date selector in upcoming section
-        renderDateSelector('upcoming-lessons', dates, targetDate);
-        return;
+    // Update title
+    const titleEl = document.getElementById('day-title');
+    if (titleEl) {
+        titleEl.textContent = `${targetDate} (${lessons.length} lessons)`;
     }
 
-    // Normal mode: current and upcoming lessons
-    renderLessons('current-lessons', state.schedule.current_lessons, 'no_current_lessons');
-    renderLessons('upcoming-lessons', state.schedule.upcoming_lessons, 'no_upcoming_lessons');
+    // Render all lessons
+    renderLessons('all-lessons', lessons, 'no_lessons');
+
+    // Show date selector in debug mode
+    if (state.debugMode) {
+        renderDebugDateSelector(dates, targetDate);
+    }
 }
 
 /**
- * Language flag mapping
+ * Language labels (flags don't work in Chrome/Windows)
  */
 const LANGUAGE_FLAGS = {
     'cz': '🇨🇿',
     'de': '🇩🇪',
     'en': '🇬🇧',
     'pl': '🇵🇱',
+};
+
+/**
+ * Group type symbols
+ */
+const GROUP_TYPE_SYMBOLS = {
+    'privát': '👤',
+    'malá skupina': '👤👤',
+    'velká skupina': '👤👤👤',
 };
 
 /**
@@ -287,6 +259,19 @@ function formatParticipant(participant) {
 }
 
 /**
+ * Get time slot number for color coding (1-5 based on hour)
+ */
+function getTimeSlot(startTime) {
+    if (!startTime) return 1;
+    const hour = parseInt(startTime.split(':')[0], 10);
+    if (hour < 10) return 1;      // 08:00-09:59 - blue
+    if (hour < 12) return 2;      // 10:00-11:59 - green
+    if (hour < 14) return 3;      // 12:00-13:59 - yellow
+    if (hour < 16) return 4;      // 14:00-15:59 - pink
+    return 5;                     // 16:00+ - purple
+}
+
+/**
  * Render lessons to a container
  */
 function renderLessons(containerId, lessons, emptyMessageKey) {
@@ -307,67 +292,81 @@ function renderLessons(containerId, lessons, emptyMessageKey) {
     }
 
     const template = document.getElementById('lesson-template');
+    let lastStartTime = null;
 
     lessons.forEach(lesson => {
-        const card = template.content.cloneNode(true);
+        // Add line break when start time changes
+        if (lastStartTime !== null && lesson.start !== lastStartTime) {
+            const lineBreak = document.createElement('div');
+            lineBreak.className = 'time-break';
+            container.appendChild(lineBreak);
+        }
+        lastStartTime = lesson.start;
 
-        // Line 1: Time range | Level | Group size | Location
+        const card = template.content.cloneNode(true);
+        const cardEl = card.querySelector('.lesson-card');
+
+        // Set time slot for color coding
+        const slot = getTimeSlot(lesson.start);
+        if (cardEl) cardEl.setAttribute('data-slot', slot);
+
+        // Line 1: Time | Group Type | Level | Location
         const timeRange = `${lesson.start || '--:--'}-${lesson.end || '--:--'}`;
         card.querySelector('.lesson-time').textContent = timeRange;
 
+        // Group type (privát, malá skupina, velká skupina)
+        card.querySelector('.lesson-group-type').textContent =
+            translateValue(lesson.group_type_key, 'group_types');
+
         card.querySelector('.lesson-level').textContent =
             translateValue(lesson.level_key, 'levels');
-
-        // Group size
-        const count = lesson.group_size || (lesson.people ? lesson.people.length : 0);
-        card.querySelector('.lesson-count').textContent = count > 0 ? count : '';
 
         // Location (translated)
         card.querySelector('.lesson-location').textContent =
             translateValue(lesson.location_key, 'locations');
 
-        // Line 2: People with individual language flags and sponsors
-        // Format: "Anna 🇩🇪 (Ir.Sc.), Max 🇬🇧 (Ma.Mü.)"
+        // Participants - sorted by sponsor, then name
         const participantList = card.querySelector('.participant-list');
-        const langEl = card.querySelector('.lesson-language');
-
-        // Hide the lesson-level language element (we show per-person now)
-        if (langEl) langEl.style.display = 'none';
-
         if (lesson.people && lesson.people.length > 0) {
-            const formatted = lesson.people.map(formatParticipant).join(', ');
-            participantList.textContent = formatted;
+            const sortedPeople = [...lesson.people].sort((a, b) => {
+                const sponsorCompare = (a.sponsor || '').localeCompare(b.sponsor || '');
+                if (sponsorCompare !== 0) return sponsorCompare;
+                return (a.name || '').localeCompare(b.name || '');
+            });
+            participantList.textContent = sortedPeople.map(formatParticipant).join(', ');
         }
 
-        // Line 3: Instructor
-        const instructorEl = card.querySelector('.lesson-instructor');
-        const instructorLabel = card.querySelector('.instructor-label');
-        if (instructorLabel) {
-            instructorLabel.textContent = getUIText('instructor');
-        }
-
-        if (lesson.instructor && lesson.instructor.name) {
-            card.querySelector('.instructor-name').textContent = lesson.instructor.name;
+        // Instructor - only show if assigned (not default)
+        const instructorEl = card.querySelector('.instructor-name');
+        const instructorName = lesson.instructor?.name;
+        if (instructorName && instructorName !== 'GoldSport Team') {
+            instructorEl.textContent = instructorName;
         } else {
-            instructorEl.style.display = 'none';
+            // Remove instructor and its preceding pipe
+            instructorEl.remove();
+            const pipes = card.querySelectorAll('.pipe');
+            if (pipes.length > 0) {
+                pipes[pipes.length - 1].remove();
+            }
         }
 
         container.appendChild(card);
     });
+
+    // Convert emoji flags to images for cross-browser support
+    if (typeof twemoji !== 'undefined') {
+        twemoji.parse(container, { folder: 'svg', ext: '.svg' });
+    }
 }
 
 /**
  * Show error message
  */
 function showError(messageKey) {
-    const containers = ['current-lessons', 'upcoming-lessons'];
-
-    containers.forEach(id => {
-        const container = document.getElementById(id);
-        if (container) {
-            container.innerHTML = `<div class="error">${getUIText(messageKey)}</div>`;
-        }
-    });
+    const container = document.getElementById('all-lessons');
+    if (container) {
+        container.innerHTML = `<div class="error">${getUIText(messageKey)}</div>`;
+    }
 }
 
 /**
@@ -412,11 +411,40 @@ function stopAutoRefresh() {
 function showDebugBanner() {
     const banner = document.createElement('div');
     banner.className = 'debug-banner';
+
+    // Generate date buttons: 7 days ahead + today + 14 days back
+    const dateButtons = [];
+    const today = new Date();
+
+    // Future dates (7 days ahead, sorted furthest first)
+    for (let i = 7; i >= 1; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        const dateStr = formatDateForUrl(date);
+        const displayStr = formatDateShort(date);
+        const isActive = state.dateOverride === dateStr;
+        dateButtons.push(`<a href="?debug=true&date=${dateStr}" class="date-btn future${isActive ? ' active' : ''}">${displayStr}</a>`);
+    }
+
+    // Past dates (today + 14 days back)
+    for (let i = 0; i < 14; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        const dateStr = formatDateForUrl(date);
+        const displayStr = formatDateShort(date);
+        const isActive = state.dateOverride === dateStr;
+        dateButtons.push(`<a href="?debug=true&date=${dateStr}" class="date-btn${isActive ? ' active' : ''}">${displayStr}</a>`);
+    }
+
     banner.innerHTML = `
-        <strong>DEBUG MODE</strong>
-        ${state.dateOverride ? `| Date: ${state.dateOverride}` : ''}
-        ${state.timeOverride ? `| Time: ${state.timeOverride}` : ''}
-        | <a href="?">Exit debug</a>
+        <div class="debug-header">
+            <strong>DEBUG MODE</strong>
+            ${state.timeOverride ? `| Time: ${state.timeOverride}` : ''}
+            | <a href="?" class="exit-link">Exit debug</a>
+        </div>
+        <div class="date-selector">
+            ${dateButtons.join('')}
+        </div>
     `;
     banner.style.cssText = `
         position: fixed;
@@ -425,14 +453,76 @@ function showDebugBanner() {
         right: 0;
         background: #ff5722;
         color: white;
-        padding: 8px 16px;
+        padding: 4px 16px 8px;
         text-align: center;
         font-size: 14px;
         z-index: 9999;
     `;
-    banner.querySelector('a').style.color = 'white';
+
+    // Style the date selector
+    const style = document.createElement('style');
+    style.textContent = `
+        .debug-banner .debug-header { margin-bottom: 6px; }
+        .debug-banner a { color: white; }
+        .debug-banner .date-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: center;
+        }
+        .debug-banner .date-btn {
+            padding: 2px 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        .debug-banner .date-btn:hover {
+            background: rgba(255,255,255,0.4);
+        }
+        .debug-banner .date-btn.active {
+            background: white;
+            color: #ff5722;
+            font-weight: bold;
+        }
+        .debug-banner .date-btn.future {
+            background: rgba(76,175,80,0.3);
+        }
+        .debug-banner .date-btn.future:hover {
+            background: rgba(76,175,80,0.5);
+        }
+        .debug-banner .date-btn.future.active {
+            background: #4caf50;
+            color: white;
+        }
+    `;
+    document.head.appendChild(style);
+
     document.body.prepend(banner);
-    document.body.style.paddingTop = '40px';
+    document.body.style.paddingTop = '70px';
+}
+
+/**
+ * Format date for URL parameter (DD.MM.YYYY)
+ */
+function formatDateForUrl(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
+}
+
+/**
+ * Format date for display (DD.MM or "Today")
+ */
+function formatDateShort(date) {
+    const today = new Date();
+    if (date.toDateString() === today.toDateString()) {
+        return 'Today';
+    }
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${day}.${month}`;
 }
 
 /**
@@ -511,27 +601,25 @@ function applyTimeSimulation() {
 }
 
 /**
- * Render date selector for debug mode
+ * Render date selector for debug mode (appends to footer)
  */
-function renderDateSelector(containerId, dates, currentDate) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
+function renderDebugDateSelector(dates, currentDate) {
+    const footer = document.querySelector('.footer');
+    if (!footer || dates.length === 0) return;
 
-    container.innerHTML = '';
-
-    if (dates.length === 0) {
-        container.innerHTML = '<div class="empty-state">No dates available</div>';
-        return;
-    }
+    // Remove existing selector
+    const existing = footer.querySelector('.date-selector');
+    if (existing) existing.remove();
 
     const selectorDiv = document.createElement('div');
     selectorDiv.className = 'date-selector';
-    selectorDiv.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px; padding: 16px;';
+    selectorDiv.style.cssText = 'display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; justify-content: center;';
 
     dates.forEach(date => {
         const btn = document.createElement('button');
         btn.textContent = date;
-        btn.className = date === currentDate ? 'lang-btn active' : 'lang-btn';
+        btn.style.cssText = 'padding: 2px 6px; font-size: 10px; cursor: pointer;';
+        if (date === currentDate) btn.style.fontWeight = 'bold';
         btn.onclick = () => {
             const url = new URL(window.location);
             url.searchParams.set('debug', 'true');
@@ -541,7 +629,7 @@ function renderDateSelector(containerId, dates, currentDate) {
         selectorDiv.appendChild(btn);
     });
 
-    container.appendChild(selectorDiv);
+    footer.appendChild(selectorDiv);
 }
 
 // Initialize when DOM is ready

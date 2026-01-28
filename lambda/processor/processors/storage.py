@@ -146,15 +146,16 @@ class StorageProcessor(Processor):
         """
         Generate unique ID for a lesson.
 
-        Uses: date + start + level + location for uniqueness.
+        Uses: date + start + level + group_type + location for uniqueness.
         """
         date = lesson.get('date', '')
         start = lesson.get('start', '')
         level = lesson.get('level_key', '')
+        group_type = lesson.get('group_type_key', '')
         location = lesson.get('location_key', '')
 
         # Generate hash from grouping fields
-        key_data = f"{date}_{start}_{level}_{location}"
+        key_data = f"{date}_{start}_{level}_{group_type}_{location}"
         return hashlib.md5(key_data.encode()).hexdigest()[:16]
 
     def _prepare_lesson_item(self, lesson: Dict) -> Dict:
@@ -169,8 +170,9 @@ class StorageProcessor(Processor):
             'start': lesson.get('start'),
             'end': lesson.get('end'),
             'level_key': lesson.get('level_key'),
+            'group_type_key': lesson.get('group_type_key'),
             'location_key': lesson.get('location_key'),
-            'group_size': lesson.get('group_size', 0),
+            'people_count': lesson.get('people_count', 0),
             'people': lesson.get('people', []),
             'notes': lesson.get('notes'),
         }

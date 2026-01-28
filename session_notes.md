@@ -671,3 +671,75 @@ Instructor: GoldSport Team
 - Phase 6: IN PROGRESS (4/8 tasks: 6.1✓, 6.4✓, 6.5✓, 6.6✓)
 - Current task: 6.2 (page rotation)
 - Test URL: https://d2uodie4uj65pq.cloudfront.net?debug=true&date=02.01.2026&time=11:00
+
+---
+
+## Session 7 - 2026-01-28
+
+### Major UI Overhaul
+
+**Task 6.6a: Add group_type to data model** - COMPLETE
+- Added `group_type` field (privát, malá skupina, velká skupina)
+- Updated dictionaries.json with translations for all 4 languages
+- Changed grouping key to: `date + start + level + group_type + location`
+- Updated processors: parse_orders.py, merge_data.py, storage.py, output.py
+
+**Task 6.7: Format and layout tuning** - IN PROGRESS
+Implemented single-page layout with many iterations:
+
+1. **Single-line cards with pipe separators**
+   - Format: `11:00-12:50 | Private | Kids Ski | Stone Bar | Anna CZ (Ir.Sc.) | Instructor`
+   - Cards flow left-to-right, wrap to next line
+
+2. **Time-slot colors** (border-left + background)
+   - 08:00-09:59: Blue (#e3f2fd)
+   - 10:00-11:59: Green (#e8f5e9)
+   - 12:00-13:59: Yellow (#fff8e1)
+   - 14:00-15:59: Pink (#fce4ec)
+   - 16:00+: Purple (#f3e5f5)
+
+3. **Time breaks** - New line between different start times
+
+4. **Font sizing** - Reduced 50%, then increased 30%
+   - Base: 16px, Large: 21px, Small: 13px
+
+5. **Tested and rejected:**
+   - Emoji symbols for group types (👤👤👤) - looked bad
+   - Colored label badges - too busy
+   - Max-width cards - uneven layout
+
+6. **Deferred:** Graphics tuning for later phase
+
+**Task 5.4b: Add date selector to debug mode (+7/-14 days)** - COMPLETE
+- Debug banner shows 21 clickable date buttons
+- 7 days ahead (green background) + today + 14 days back
+- "Today" label for current day
+- Active state highlighting for selected date
+- Easy inspection of historical and future schedules
+
+**Cross-browser flag fix:**
+- Chrome/Windows doesn't render flag emojis natively
+- Implemented Twemoji (Twitter's emoji library)
+- Flags now render as SVG images across all browsers
+- Added `<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js">`
+
+### Files Modified
+- `config/dictionaries.json` - added group_types translations
+- `lambda/processor/processors/parse_orders.py` - group_type field, grouping key
+- `lambda/processor/processors/merge_data.py` - group_type_key passthrough
+- `lambda/processor/processors/storage.py` - updated ID generation
+- `lambda/processor/processors/output.py` - group_type_key output
+- `static-site/app.js` - flags via Twemoji, 14-day selector, time breaks, hide GoldSport Team instructor
+- `static-site/index.html` - Twemoji script, pipe-separated template
+- `static-site/styles.css` - time-slot colors, compact layout, emoji sizing
+
+### Status
+- Phase 0-4: COMPLETE
+- Phase 5: IN PROGRESS (6/10 tasks: 5.1-5.4a✓, 5.4b✓)
+- Phase 6: IN PROGRESS (5/9 tasks: 6.1✓, 6.4✓, 6.5✓, 6.6✓, 6.6a✓, 6.7 in progress)
+- Test URL: https://d2uodie4uj65pq.cloudfront.net?debug=true&date=02.01.2026
+
+### Next Steps
+- Deploy Lambda with updated processors (group_type changes)
+- Continue 6.7 (format tuning) when graphics phase begins
+- Consider 6.2 (rotation) if content doesn't fit single page
