@@ -3,8 +3,8 @@
   "project": "GoldSport Scheduler",
   "description": "Ski school lesson display system - shows current and upcoming courses on external vertical display",
   "created_at": "2026-01-28",
-  "last_updated": "2026-01-29T08:05:00Z",
-  "last_session_summary": "Session 9: Phase 7 complete. Private lessons group by booking_id+start (not just booking_id). Fixed bug where same booking at different times merged. DynamoDB versioning added. Live site now shows 12 lessons for today (was 6).",
+  "last_updated": "2026-01-29T09:20:00Z",
+  "last_session_summary": "Session 10: Fixed private lesson grouping properly. Added preprocessing to deduplicate conflicting orders (same participant+sponsor+time, multiple order_ids) by keeping latest order_id. Group by order_id+start_time. 29.01.2026: 4→12 lessons, 26.01.2026: 21→20 lessons.",
 
   "phases": {
     "phase_0_planning": {
@@ -304,7 +304,7 @@
       "completed_at": "2026-01-29",
       "description": "Fix private lesson grouping, add DynamoDB versioning",
       "tasks": [
-        {"id": "7.1", "name": "Change private lesson grouping to use order_id", "status": "complete", "completed_at": "2026-01-29", "size": "medium", "verify": "Private lessons from same sponsor show as separate cards", "notes": "For private lessons, groups by booking_id + start time (not just booking_id). Fixed bug where same booking at different time slots was merged."},
+        {"id": "7.1", "name": "Change private lesson grouping to use order_id", "status": "complete", "completed_at": "2026-01-29", "size": "medium", "verify": "Private lessons from same sponsor show as separate cards", "notes": "Added _deduplicate_orders preprocessing: when same participant+sponsor+time has multiple order_ids (source data quality issue), keeps only latest order_id. Private lessons group by order_id+start_time. Handles 33 duplicate orders and 82 conflicting orders in source data."},
         {"id": "7.2", "name": "Clean current DynamoDB entries", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "DynamoDB table scan returns 0 items", "depends_on": ["7.1"], "notes": "Deleted 1241 items using batch_writer script. Table now empty."},
         {"id": "7.3", "name": "Add versioning to DynamoDB storage", "status": "complete", "completed_at": "2026-01-29", "size": "medium", "verify": "Multiple snapshots stored per day with timestamps in SK", "depends_on": ["7.2"], "notes": "SK format: META#{timestamp} and LESSON#{timestamp}#{lesson_id}. Each run creates new versioned entries."},
         {"id": "7.4", "name": "Reprocess data with new logic", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "Fresh data in DynamoDB with correct grouping and versioning", "depends_on": ["7.3"], "notes": "Deployed Lambda via CDK, invoked fetcher. 334 items stored with versioned SK format."}

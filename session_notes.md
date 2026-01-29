@@ -834,3 +834,64 @@ Implemented single-page layout with many iterations:
 - 7.4: Reprocess data with new logic
 
 **Reason:** Private lessons need separate grouping - one sponsor can have multiple independent private lessons at same time. Also adding DynamoDB versioning to keep historical snapshots.
+
+---
+
+## Session 10 - 2026-01-29
+
+### Phase 7: Data & Storage Improvements - Fixed Properly
+
+**Problem identified:**
+Source booking system (`kurzy.classicskischool.cz`) has data quality issues:
+- **33 duplicate orders**: Same participant + same sponsor + same time + same lesson type → multiple order_ids
+- **82 conflicting orders**: Same participant + same sponsor + same time + different lesson type → multiple order_ids
+
+Example: Orders 4438 and 4439 both have Alex and Maxmilian from Vichr Petr at 09:00 on 26.01.2026.
+
+**Initial wrong approach (Session 9):**
+- Grouped by sponsor name instead of order_id
+- This was unstable and semantically incorrect
+
+**Correct systemic solution (Session 10):**
+1. **Added deduplication preprocessing** (`_deduplicate_orders`):
+   - Groups records by: participant + sponsor + date + start_time
+   - When multiple order_ids exist → keeps only the latest (highest) order_id
+   - Logged: 33 duplicate + 82 conflicting = 115 cases in source data
+
+2. **Fixed grouping key bug:**
+   - Initially: `private_{order_id}` - WRONG (merged all time slots for same order)
+   - Fixed to: `private_{order_id}_{start}` - CORRECT (one order can have 09:00 AND 13:00)
+
+3. **Storage lesson ID**: Uses same key pattern for consistency
+
+**Results:**
+| Date | Before (wrong) | After (correct) |
+|------|----------------|-----------------|
+| 29.01.2026 | 4 lessons | 12 lessons |
+| 26.01.2026 | 21 lessons | 20 lessons |
+
+### Files Modified
+- `lambda/processor/processors/parse_orders.py`:
+  - Added `_deduplicate_orders()` method
+  - Changed grouping key to `order_id + start_time`
+- `lambda/processor/processors/storage.py`:
+  - Updated `_generate_lesson_id()` to match grouping logic
+  - Removed unused `_get_sponsor()` method
+
+### Commits This Session
+| Hash | Description |
+|------|-------------|
+| 2461104 | fix: Group private lessons by sponsor instead of order_id |
+| b56da8a | fix: Deduplicate conflicting orders using latest order_id |
+| 75e47a8 | fix: Group private lessons by order_id + start time |
+
+### Key Learning
+**Problem:** Source data has duplicate/conflicting orders (data quality issue upstream)
+**Solution:** Preprocessing to deduplicate by keeping latest order_id, then group by order_id + start_time
+**Why order_id + start_time:** One order can span multiple time slots (e.g., order 4442 has lessons at 09:00 AND 13:00)
+
+### Status
+- Phase 0-6: COMPLETE
+- Phase 7: COMPLETE
+- Phase 5: IN PROGRESS (4 tasks remaining: 5.5, 5.6, 5.7, 5.8)
+- Live URL: https://d2uodie4uj65pq.cloudfront.net
