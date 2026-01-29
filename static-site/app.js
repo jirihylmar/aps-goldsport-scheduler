@@ -117,22 +117,21 @@ const DAY_NAMES = {
 
 /**
  * Update the date/time display in the header
- * Format: "Thursday, 29.1.2026 07:51"
+ * Format: "Current Date and Time: 29.1.2026 07:51"
  */
 function updateDateTimeDisplay() {
     const el = document.getElementById('datetime-display');
     if (!el) return;
 
     const now = new Date();
-    const dayNames = DAY_NAMES[state.language] || DAY_NAMES['en'];
-    const dayName = dayNames[now.getDay()];
     const day = now.getDate();
     const month = now.getMonth() + 1;
     const year = now.getFullYear();
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
 
-    el.textContent = `${dayName}, ${day}.${month}.${year} ${hours}:${minutes}`;
+    const label = getUIText('current_datetime');
+    el.textContent = `${label}: ${day}.${month}.${year} ${hours}:${minutes}`;
 }
 
 /**
@@ -192,10 +191,22 @@ function renderSchedule() {
 
     const lessons = targetDate ? (allByDate[targetDate] || []) : [];
 
-    // Update title
+    // Update title with translated text
+    // Format: "Schedule for Friday, 30.01.2026. This day we give 11 lessons."
     const titleEl = document.getElementById('day-title');
-    if (titleEl) {
-        titleEl.textContent = `${targetDate} (${lessons.length} lessons)`;
+    if (titleEl && targetDate) {
+        // Parse date from DD.MM.YYYY format
+        const [day, month, year] = targetDate.split('.');
+        const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        const dayNames = DAY_NAMES[state.language] || DAY_NAMES['en'];
+        const dayName = dayNames[dateObj.getDay()];
+
+        const scheduleFor = getUIText('schedule_for');
+        const lessonsText = getUIText('lessons_on_day').replace('{n}', lessons.length);
+
+        titleEl.textContent = `${scheduleFor} ${dayName}, ${targetDate}. ${lessonsText}`;
+    } else if (titleEl) {
+        titleEl.textContent = getUIText('no_lessons');
     }
 
     // Render all lessons
