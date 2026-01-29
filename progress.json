@@ -3,8 +3,8 @@
   "project": "GoldSport Scheduler",
   "description": "Ski school lesson display system - shows current and upcoming courses on external vertical display",
   "created_at": "2026-01-28",
-  "last_updated": "2026-01-29T08:15:00Z",
-  "last_session_summary": "Session 9: Task 7.1 complete - changed private lesson grouping to use booking_id instead of date+start+level. Updated storage to use MD5 hash of booking_id for private lesson IDs. Fixed 8 failing tests for new data model (people array, group_type_key).",
+  "last_updated": "2026-01-29T08:00:00Z",
+  "last_session_summary": "Session 9: Phase 7 complete. Private lessons now group by booking_id. DynamoDB storage has versioning (SK includes timestamp). Cleaned old entries and reprocessed with new logic. 334 items stored.",
 
   "phases": {
     "phase_0_planning": {
@@ -299,21 +299,21 @@
     },
     "phase_7_data_storage": {
       "name": "Data & Storage Improvements",
-      "status": "in_progress",
+      "status": "complete",
       "started_at": "2026-01-29",
-      "completed_at": null,
+      "completed_at": "2026-01-29",
       "description": "Fix private lesson grouping, add DynamoDB versioning",
       "tasks": [
         {"id": "7.1", "name": "Change private lesson grouping to use order_id", "status": "complete", "completed_at": "2026-01-29", "size": "medium", "verify": "Private lessons from same sponsor show as separate cards", "notes": "For private lessons (group_type='privát'), now groups by booking_id. Storage uses MD5 hash of booking_id. All 60 tests passing."},
-        {"id": "7.2", "name": "Clean current DynamoDB entries", "status": "pending", "size": "small", "verify": "DynamoDB table scan returns 0 items", "depends_on": ["7.1"]},
-        {"id": "7.3", "name": "Add versioning to DynamoDB storage", "status": "pending", "size": "medium", "verify": "Multiple snapshots stored per day with timestamps in SK", "depends_on": ["7.2"], "notes": "Add timestamp to SK: LESSON#2026-01-29T09:00#abc123 to keep history"},
-        {"id": "7.4", "name": "Reprocess data with new logic", "status": "pending", "size": "small", "verify": "Fresh data in DynamoDB with correct grouping and versioning", "depends_on": ["7.3"]}
+        {"id": "7.2", "name": "Clean current DynamoDB entries", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "DynamoDB table scan returns 0 items", "depends_on": ["7.1"], "notes": "Deleted 1241 items using batch_writer script. Table now empty."},
+        {"id": "7.3", "name": "Add versioning to DynamoDB storage", "status": "complete", "completed_at": "2026-01-29", "size": "medium", "verify": "Multiple snapshots stored per day with timestamps in SK", "depends_on": ["7.2"], "notes": "SK format: META#{timestamp} and LESSON#{timestamp}#{lesson_id}. Each run creates new versioned entries."},
+        {"id": "7.4", "name": "Reprocess data with new logic", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "Fresh data in DynamoDB with correct grouping and versioning", "depends_on": ["7.3"], "notes": "Deployed Lambda via CDK, invoked fetcher. 334 items stored with versioned SK format."}
       ],
       "artifacts": []
     }
   },
 
-  "current_task": "7.2",
+  "current_task": null,
 
   "git_repos": {
     "orchestration": {
