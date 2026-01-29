@@ -75,12 +75,12 @@ html, body {
     background: var(--color-background);
 }
 
-/* Header - company style dark with yellow accent */
+/* Header - centered logo with time underneath */
 .header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-md);
     background: var(--color-secondary);
     color: var(--color-text);
     border-radius: var(--card-radius);
@@ -88,21 +88,16 @@ html, body {
     border-bottom: 3px solid var(--color-primary);
 }
 
-.logo {
+.header-content {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
 }
 
-.logo img {
-    height: 40px;
+.header-logo {
+    height: 60px;
     width: auto;
-}
-
-.logo h1 {
-    font-size: var(--font-size-large);
-    font-weight: 700;
-    color: var(--color-text);
 }
 
 /* Date/time display */
