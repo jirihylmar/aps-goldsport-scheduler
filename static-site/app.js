@@ -116,19 +116,8 @@ const DAY_NAMES = {
 };
 
 /**
- * Get ISO week number
- */
-function getWeekNumber(date) {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    const dayNum = d.getUTCDay() || 7;
-    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-}
-
-/**
  * Update the date/time display in the header
- * Format: "Thursday, 29.1.2026 14:06:30 (Week 5)"
+ * Format: "Thursday, 29.1.2026 14:06:30"
  */
 function updateDateTimeDisplay() {
     const el = document.getElementById('datetime-display');
@@ -143,9 +132,8 @@ function updateDateTimeDisplay() {
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
-    const weekNum = getWeekNumber(now);
 
-    el.textContent = `${dayName}, ${day}.${month}.${year} ${hours}:${minutes}:${seconds} (Week ${weekNum})`;
+    el.textContent = `${dayName}, ${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
 }
 
 /**
