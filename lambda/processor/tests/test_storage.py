@@ -15,6 +15,9 @@ from processors.storage import StorageProcessor
 class TestStorageProcessor(unittest.TestCase):
     """Tests for StorageProcessor."""
 
+    # Fixed timestamp for predictable test results
+    TEST_TIMESTAMP = '2026-01-29T10:00:00Z'
+
     def setUp(self):
         """Set up test fixtures."""
         self.mock_dynamodb = MagicMock()
@@ -26,7 +29,11 @@ class TestStorageProcessor(unittest.TestCase):
         self.mock_table.batch_writer.return_value.__enter__ = MagicMock(return_value=self.mock_batch)
         self.mock_table.batch_writer.return_value.__exit__ = MagicMock(return_value=False)
 
-        self.processor = StorageProcessor(dynamodb_resource=self.mock_dynamodb)
+        # Use fixed timestamp for predictable SK values
+        self.processor = StorageProcessor(
+            dynamodb_resource=self.mock_dynamodb,
+            timestamp_override=self.TEST_TIMESTAMP
+        )
 
     def _make_lesson(self, **overrides):
         """Create a lesson with optional overrides."""
@@ -54,7 +61,7 @@ class TestStorageProcessor(unittest.TestCase):
         return base
 
     def test_stores_lessons(self):
-        """Test that lessons are stored in DynamoDB."""
+        """Test that lessons are stored in DynamoDB with versioning."""
         data = {
             'config': {'data_table': 'test-table'},
             'lessons': [self._make_lesson()],
@@ -66,11 +73,11 @@ class TestStorageProcessor(unittest.TestCase):
         # Should have called Table
         self.mock_dynamodb.Table.assert_called_once_with('test-table')
 
-        # Should have stored metadata
+        # Should have stored metadata with versioned SK
         self.mock_table.put_item.assert_called_once()
         meta_call = self.mock_table.put_item.call_args
         self.assertEqual(meta_call[1]['Item']['PK'], 'SCHEDULE#28.12.2025')
-        self.assertEqual(meta_call[1]['Item']['SK'], 'META')
+        self.assertEqual(meta_call[1]['Item']['SK'], f'META#{self.TEST_TIMESTAMP}')
 
         # Should have stored lesson via batch writer
         self.mock_batch.put_item.assert_called_once()
@@ -172,13 +179,15 @@ class TestStorageProcessor(unittest.TestCase):
         batch_call = self.mock_batch.put_item.call_args
         item = batch_call[1]['Item']
 
-        # Should have a generated ID (hash)
-        self.assertTrue(item['SK'].startswith('LESSON#'))
-        lesson_id = item['SK'].replace('LESSON#', '')
+        # Should have versioned SK: LESSON#{timestamp}#{hash}
+        self.assertTrue(item['SK'].startswith(f'LESSON#{self.TEST_TIMESTAMP}#'))
+        # Extract just the hash part (after timestamp#)
+        parts = item['SK'].split('#')
+        lesson_id = parts[-1]  # Last part is the hash
         self.assertEqual(len(lesson_id), 16)  # MD5 truncated
 
     def test_lesson_id_is_hash(self):
-        """Test that lesson ID is a 16-char hash for uniqueness."""
+        """Test that lesson ID includes timestamp and 16-char hash."""
         lesson = self._make_lesson(booking_id='same-booking', start='09:00')
         data = {
             'config': {'data_table': 'test-table'},
@@ -191,9 +200,11 @@ class TestStorageProcessor(unittest.TestCase):
         batch_call = self.mock_batch.put_item.call_args
         item = batch_call[1]['Item']
 
-        # Should have a 16-char hash ID
-        self.assertTrue(item['SK'].startswith('LESSON#'))
-        lesson_id = item['SK'].replace('LESSON#', '')
+        # Should have versioned SK: LESSON#{timestamp}#{hash}
+        self.assertTrue(item['SK'].startswith(f'LESSON#{self.TEST_TIMESTAMP}#'))
+        # Extract just the hash part (after timestamp#)
+        parts = item['SK'].split('#')
+        lesson_id = parts[-1]  # Last part is the hash
         self.assertEqual(len(lesson_id), 16)  # MD5 truncated to 16 chars
 
 

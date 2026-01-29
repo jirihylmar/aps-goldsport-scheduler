@@ -19,28 +19,34 @@ logger = logging.getLogger(__name__)
 
 class StorageProcessor(Processor):
     """
-    Store processed lessons in DynamoDB.
+    Store processed lessons in DynamoDB with versioning.
 
-    Schema:
-    - PK: SCHEDULE#{date}, SK: META - Schedule metadata
-    - PK: SCHEDULE#{date}, SK: LESSON#{id} - Individual lessons
+    Schema (with versioning):
+    - PK: SCHEDULE#{date}, SK: META#{timestamp} - Schedule metadata
+    - PK: SCHEDULE#{date}, SK: LESSON#{timestamp}#{id} - Individual lessons
+
+    Each processing run creates new entries with unique timestamps,
+    preserving history for auditing and debugging.
     """
 
     BATCH_SIZE = 25  # DynamoDB batch write limit
 
-    def __init__(self, dynamodb_resource=None):
+    def __init__(self, dynamodb_resource=None, timestamp_override=None):
         """
         Initialize the processor.
 
         Args:
             dynamodb_resource: Optional boto3 DynamoDB resource (for testing)
+            timestamp_override: Optional timestamp string for testing
         """
         self.dynamodb = dynamodb_resource or boto3.resource('dynamodb')
         self._table = None
+        self._timestamp_override = timestamp_override
+        self._processing_timestamp = None
 
     def process(self, data: dict) -> dict:
         """
-        Store lessons in DynamoDB.
+        Store lessons in DynamoDB with versioning.
 
         Args:
             data: Pipeline data with lessons
@@ -60,6 +66,12 @@ class StorageProcessor(Processor):
 
         try:
             self._table = self.dynamodb.Table(table_name)
+
+            # Generate processing timestamp (once per run for consistency)
+            self._processing_timestamp = (
+                self._timestamp_override or
+                datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+            )
 
             # Group lessons by date
             lessons_by_date = self._group_by_date(lessons)
@@ -108,14 +120,15 @@ class StorageProcessor(Processor):
             Number of items stored
         """
         pk = f"SCHEDULE#{date}"
+        ts = self._processing_timestamp
 
-        # Store metadata item
+        # Store metadata item with versioned SK
         meta_item = {
             'PK': pk,
-            'SK': 'META',
+            'SK': f'META#{ts}',
             'date': date,
             'lesson_count': len(lessons),
-            'generated_at': datetime.now(timezone.utc).isoformat(),
+            'generated_at': ts,
             'data_sources': metadata.get('data_sources', {}),
             'records_filtered': metadata.get('records_filtered', 0),
         }
@@ -126,7 +139,7 @@ class StorageProcessor(Processor):
             logger.error(f"Failed to store metadata: {e}")
             raise
 
-        # Store lesson items in batches
+        # Store lesson items in batches with versioned SK
         items_stored = 1  # Count metadata item
 
         with self._table.batch_writer() as batch:
@@ -134,7 +147,7 @@ class StorageProcessor(Processor):
                 lesson_id = self._generate_lesson_id(lesson)
                 item = {
                     'PK': pk,
-                    'SK': f"LESSON#{lesson_id}",
+                    'SK': f'LESSON#{ts}#{lesson_id}',
                     **self._prepare_lesson_item(lesson)
                 }
                 batch.put_item(Item=item)
