@@ -36,11 +36,13 @@ class TestStorageProcessor(unittest.TestCase):
             'start': '09:00',
             'end': '10:50',
             'level_key': 'dětská školka',
-            'language_key': 'de',
+            'group_type_key': 'privát',
             'location_key': 'Stone bar',
-            'sponsor': 'Test Pe',
-            'participants': ['Child1', 'Child2'],
-            'participant_count': 2,
+            'people': [
+                {'name': 'Child1', 'language': 'de', 'sponsor': 'Te.Pe.'},
+                {'name': 'Child2', 'language': 'de', 'sponsor': 'Te.Pe.'},
+            ],
+            'people_count': 2,
             'instructor': {
                 'id': 'jan-novak',
                 'name': 'Jan Novák',
@@ -175,8 +177,8 @@ class TestStorageProcessor(unittest.TestCase):
         lesson_id = item['SK'].replace('LESSON#', '')
         self.assertEqual(len(lesson_id), 16)  # MD5 truncated
 
-    def test_lesson_id_includes_time(self):
-        """Test that lesson ID includes time for uniqueness."""
+    def test_lesson_id_is_hash(self):
+        """Test that lesson ID is a 16-char hash for uniqueness."""
         lesson = self._make_lesson(booking_id='same-booking', start='09:00')
         data = {
             'config': {'data_table': 'test-table'},
@@ -189,8 +191,10 @@ class TestStorageProcessor(unittest.TestCase):
         batch_call = self.mock_batch.put_item.call_args
         item = batch_call[1]['Item']
 
-        # Should include time in ID
-        self.assertEqual(item['SK'], 'LESSON#same-booking_09:00')
+        # Should have a 16-char hash ID
+        self.assertTrue(item['SK'].startswith('LESSON#'))
+        lesson_id = item['SK'].replace('LESSON#', '')
+        self.assertEqual(len(lesson_id), 16)  # MD5 truncated to 16 chars
 
 
 if __name__ == '__main__':

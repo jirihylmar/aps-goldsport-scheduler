@@ -70,7 +70,7 @@ class TestParseOrdersProcessor(unittest.TestCase):
             self.assertNotIn('1970', order['timestamp_start'])
 
     def test_groups_by_booking_id(self):
-        """Test that records are grouped by booking_id."""
+        """Test that private lessons are grouped by booking_id."""
         self._mock_s3_response(SAMPLE_TSV)
 
         data = {
@@ -91,7 +91,8 @@ class TestParseOrdersProcessor(unittest.TestCase):
 
         # Should exist and have Vera as participant
         self.assertIsNotNone(vera_booking)
-        self.assertIn('Vera', vera_booking['participants'])
+        people_names = [p['name'] for p in vera_booking.get('people', [])]
+        self.assertIn('Vera', people_names)
 
     def test_skips_non_orders_files(self):
         """Test that non-orders files are skipped."""
@@ -123,8 +124,8 @@ class TestParseOrdersProcessor(unittest.TestCase):
 
         required_fields = [
             'date_lesson', 'timestamp_start', 'timestamp_end',
-            'level', 'language', 'location_meeting',
-            'name_sponsor', 'participants'
+            'level', 'group_type', 'location_meeting',
+            'people', 'people_count'
         ]
 
         for order in orders:

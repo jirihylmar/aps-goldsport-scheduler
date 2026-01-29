@@ -161,25 +161,33 @@ class ParseOrdersProcessor(Processor):
         """
         Group records into lessons.
 
-        Group by: date + start time + level + group_type + location
-        This puts all people in the same lesson type together.
+        For PRIVATE lessons (privát): group by booking_id (order_id)
+          - Each booking is independent, even from same sponsor
+        For GROUP lessons: group by date + start + level + group_type + location
+          - All people in same lesson type grouped together
         """
         lessons_map: Dict[str, Dict] = {}
 
         for record in records:
-            # Create grouping key: date + start + level + group_type + location
             date = record.get('date_lesson', '')
             start = record.get('timestamp_start_lesson', '')
             end = record.get('timestamp_end_lesson', '')
             level = record.get('level', '').strip()
             group_type = record.get('group_size', '').strip()  # TSV column is misnamed
             location = record.get('location_meeting', '').strip()
+            booking_id = record.get('booking_id', '').strip()
 
-            key = f"{date}_{start}_{level}_{group_type}_{location}"
+            # For private lessons: group by booking_id (each booking separate)
+            # For group lessons: group by time/level/location (all people together)
+            if group_type == 'privát' and booking_id:
+                key = f"private_{booking_id}"
+            else:
+                key = f"group_{date}_{start}_{level}_{group_type}_{location}"
 
             if key not in lessons_map:
                 # Create new lesson
                 lessons_map[key] = {
+                    'booking_id': booking_id,  # Store booking_id for reference
                     'date_lesson': date,
                     'timestamp_start': start,
                     'timestamp_end': end,

@@ -146,15 +146,22 @@ class StorageProcessor(Processor):
         """
         Generate unique ID for a lesson.
 
-        Uses: date + start + level + group_type + location for uniqueness.
+        For private lessons with booking_id: use booking_id
+        For group lessons: hash of date + start + level + group_type + location
         """
+        booking_id = lesson.get('booking_id', '')
+        group_type = lesson.get('group_type_key', '')
+
+        # Private lessons with booking_id get unique ID per booking
+        if group_type == 'privát' and booking_id:
+            return hashlib.md5(booking_id.encode()).hexdigest()[:16]
+
+        # Group lessons: hash from grouping fields
         date = lesson.get('date', '')
         start = lesson.get('start', '')
         level = lesson.get('level_key', '')
-        group_type = lesson.get('group_type_key', '')
         location = lesson.get('location_key', '')
 
-        # Generate hash from grouping fields
         key_data = f"{date}_{start}_{level}_{group_type}_{location}"
         return hashlib.md5(key_data.encode()).hexdigest()[:16]
 

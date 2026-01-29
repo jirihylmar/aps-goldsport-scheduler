@@ -18,11 +18,10 @@ SAMPLE_ORDERS = [
         'timestamp_start': '2025-12-28T09:00:00+01:00',
         'timestamp_end': '2025-12-28T10:50:00+01:00',
         'level': 'dětská školka',
-        'language': 'de',
+        'group_type': 'privát',
         'location_meeting': 'Stone bar',
-        'name_sponsor': 'Iryna Schröder',
-        'participants': ['Vera'],
-        'group_size': 1,
+        'people_count': 1,
+        'people': [{'name': 'Vera', 'language': 'de', 'sponsor': 'Iryna Schröder'}],
     },
     {
         'booking_id': 'no-instructor-booking',
@@ -30,11 +29,13 @@ SAMPLE_ORDERS = [
         'timestamp_start': '2025-12-28T11:00:00+01:00',
         'timestamp_end': '2025-12-28T12:50:00+01:00',
         'level': 'lyže začátečník',
-        'language': 'cz',
+        'group_type': 'malá skupina',
         'location_meeting': 'Stone bar',
-        'name_sponsor': 'Test Person',
-        'participants': ['Child1', 'Child2'],
-        'group_size': 2,
+        'people_count': 2,
+        'people': [
+            {'name': 'Child1', 'language': 'cz', 'sponsor': 'Test Person'},
+            {'name': 'Child2', 'language': 'cz', 'sponsor': 'Test Person'},
+        ],
     },
 ]
 
@@ -137,8 +138,8 @@ class TestMergeDataProcessor(unittest.TestCase):
 
         required_fields = [
             'booking_id', 'date', 'start', 'end',
-            'level_key', 'language_key', 'location_key',
-            'sponsor', 'participants', 'participant_count',
+            'level_key', 'group_type_key', 'location_key',
+            'people', 'people_count',
             'instructor', 'notes'
         ]
 

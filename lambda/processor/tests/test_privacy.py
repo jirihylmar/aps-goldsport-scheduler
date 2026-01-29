@@ -18,21 +18,21 @@ class TestPrivacyProcessor(unittest.TestCase):
         """Set up test fixtures."""
         self.processor = PrivacyProcessor()
 
-    def _make_lesson(self, sponsor='Test Person', participants=None):
-        """Create a lesson with given sponsor and participants."""
-        if participants is None:
-            participants = ['Child1']
+    def _make_lesson(self, sponsor='Test Person', people=None):
+        """Create a lesson with given sponsor and people."""
+        if people is None:
+            people = [{'name': 'Child1', 'language': 'cz', 'sponsor': sponsor}]
         return {
             'booking_id': 'test-123',
             'date': '28.12.2025',
             'start': '09:00',
             'end': '10:50',
             'level_key': 'test',
-            'language_key': 'cz',
+            'group_type_key': 'privát',
             'location_key': 'Stone bar',
-            'sponsor': sponsor,
-            'participants': participants,
-            'participant_count': len(participants),
+            'sponsor': sponsor,  # Legacy field, may still be used
+            'people': people,
+            'people_count': len(people),
             'instructor': {'name': 'Test'},
             'notes': None,
         }
@@ -46,7 +46,10 @@ class TestPrivacyProcessor(unittest.TestCase):
 
         result = self.processor.process(data)
 
-        self.assertEqual(result['lessons'][0]['sponsor'], 'Iryna Sc')
+        # Privacy filter abbreviates: "Iryna Schröder" -> "Ir.Sc."
+        self.assertEqual(result['lessons'][0]['sponsor'], 'Ir.Sc.')
+        # Also verify people array has filtered sponsor
+        self.assertEqual(result['lessons'][0]['people'][0]['sponsor'], 'Ir.Sc.')
 
     def test_sponsor_multiple_names(self):
         """Test sponsor with multiple name parts."""
@@ -57,8 +60,8 @@ class TestPrivacyProcessor(unittest.TestCase):
 
         result = self.processor.process(data)
 
-        # Should use first and last parts
-        self.assertEqual(result['lessons'][0]['sponsor'], 'Maria Sc')
+        # Should use first and last parts: "Ma.Sc."
+        self.assertEqual(result['lessons'][0]['sponsor'], 'Ma.Sc.')
 
     def test_sponsor_single_name(self):
         """Test sponsor with single name (no surname)."""
@@ -69,8 +72,8 @@ class TestPrivacyProcessor(unittest.TestCase):
 
         result = self.processor.process(data)
 
-        # Single name returned as-is
-        self.assertEqual(result['lessons'][0]['sponsor'], 'Madonna')
+        # Single name gets abbreviated: "Madonna" -> "Ma."
+        self.assertEqual(result['lessons'][0]['sponsor'], 'Ma.')
 
     def test_sponsor_short_surname(self):
         """Test sponsor with very short surname."""
@@ -81,7 +84,8 @@ class TestPrivacyProcessor(unittest.TestCase):
 
         result = self.processor.process(data)
 
-        self.assertEqual(result['lessons'][0]['sponsor'], 'Jan Li')
+        # Short surname still gets abbreviated: "Jan Li" -> "Ja.Li."
+        self.assertEqual(result['lessons'][0]['sponsor'], 'Ja.Li.')
 
     def test_sponsor_empty(self):
         """Test with empty sponsor name."""
@@ -96,31 +100,38 @@ class TestPrivacyProcessor(unittest.TestCase):
 
     def test_participants_unchanged(self):
         """Test that participant names are unchanged (already given names)."""
+        people = [
+            {'name': 'Vera', 'language': 'de', 'sponsor': 'Test'},
+            {'name': 'Eugen', 'language': 'de', 'sponsor': 'Test'},
+            {'name': 'Gerda', 'language': 'de', 'sponsor': 'Test'},
+        ]
         data = {
-            'lessons': [self._make_lesson(participants=['Vera', 'Eugen', 'Gerda'])],
+            'lessons': [self._make_lesson(people=people)],
             'metadata': {},
         }
 
         result = self.processor.process(data)
 
-        self.assertEqual(
-            result['lessons'][0]['participants'],
-            ['Vera', 'Eugen', 'Gerda']
-        )
+        # Names should be unchanged, sponsors abbreviated
+        names = [p['name'] for p in result['lessons'][0]['people']]
+        self.assertEqual(names, ['Vera', 'Eugen', 'Gerda'])
 
     def test_participants_whitespace_stripped(self):
         """Test that participant names have whitespace stripped."""
+        people = [
+            {'name': '  Vera  ', 'language': 'de', 'sponsor': 'Test'},
+            {'name': ' Eugen', 'language': 'de', 'sponsor': 'Test'},
+        ]
         data = {
-            'lessons': [self._make_lesson(participants=['  Vera  ', ' Eugen'])],
+            'lessons': [self._make_lesson(people=people)],
             'metadata': {},
         }
 
         result = self.processor.process(data)
 
-        self.assertEqual(
-            result['lessons'][0]['participants'],
-            ['Vera', 'Eugen']
-        )
+        # Names should have whitespace stripped
+        names = [p['name'] for p in result['lessons'][0]['people']]
+        self.assertEqual(names, ['Vera', 'Eugen'])
 
     def test_empty_lessons(self):
         """Test with empty lessons list."""
