@@ -793,3 +793,35 @@ Implemented single-page layout with many iterations:
 - 6.11: Apply dark background layout
 - Source: User request to align with aps-goldsport-booking branding
 - Reference: /home/hylmarj/aps-goldsport-booking/src/styles/company-theme.css
+
+### Branding Implementation
+**Tasks 6.9-6.11 completed:**
+- Company theme CSS: Inter font, yellow #ffed00, dark #1a1a1a
+- Background image: vyuka-bg-4.jpg from booking app S3
+- Header: datetime only (no logo), semi-transparent overlay
+- Content section: 85% opacity with backdrop blur (frosted glass)
+- Increased margins/padding throughout
+- Default language changed to English
+
+### Architecture Diagram
+- Created docs/architecture/generate.py
+- Generated goldsport_scheduler_architecture.png
+- Added root README.md
+
+### Commits This Session
+| Hash | Description |
+|------|-------------|
+| 57701cf | Session 8: Phase 6 complete - UI/UX improvements done |
+| 7e7d73d | Add architecture diagram and README |
+| b154dbc | Apply company branding - yellow/dark theme with logo |
+| f693298 | Header: centered logo (bigger) with time underneath |
+| d660c3a | Use background image, remove logo |
+| 81c90ea | Increase margins, translucent content section |
+| ed5ee5c | Default language changed to English |
+| 0842874 | Content section: 85% opacity + blur effect |
+
+### Status
+- Phase 0-5: See below
+- Phase 6: COMPLETE (all 12 tasks)
+- Next: Phase 5 remaining tasks (5.5, 5.6, 5.7, 5.8)
+- Live URL: https://d2uodie4uj65pq.cloudfront.net
