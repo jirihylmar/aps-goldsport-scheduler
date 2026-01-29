@@ -175,19 +175,22 @@ class ParseOrdersProcessor(Processor):
             level = record.get('level', '').strip()
             group_type = record.get('group_size', '').strip()  # TSV column is misnamed
             location = record.get('location_meeting', '').strip()
+            order_id = record.get('id_order', '').strip()  # Always present for private lessons
             booking_id = record.get('booking_id', '').strip()
 
-            # For private lessons: group by booking_id + start time (each time slot separate)
-            # For group lessons: group by time/level/location (all people together)
-            if group_type == 'privát' and booking_id:
-                key = f"private_{booking_id}_{start}"
+            # Grouping logic:
+            # - Private lessons: group by order_id + date + start (each order's time slot)
+            # - Group lessons: group by date + start + level + group_type + location
+            if group_type == 'privát':
+                key = f"private_{order_id}_{date}_{start}"
             else:
                 key = f"group_{date}_{start}_{level}_{group_type}_{location}"
 
             if key not in lessons_map:
                 # Create new lesson
                 lessons_map[key] = {
-                    'booking_id': booking_id,  # Store booking_id for reference
+                    'order_id': order_id,  # Always present for private lessons
+                    'booking_id': booking_id,  # UUID reference (may be empty)
                     'date_lesson': date,
                     'timestamp_start': start,
                     'timestamp_end': end,

@@ -106,6 +106,7 @@ class MergeDataProcessor(Processor):
         people = order.get('people', [])
 
         return {
+            'order_id': order.get('order_id', ''),  # Always present for private lessons
             'booking_id': booking_id,
             'date': order.get('date_lesson', ''),
             'start': start_time,
