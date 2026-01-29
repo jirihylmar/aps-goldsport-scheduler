@@ -64,19 +64,19 @@ with Diagram(
     with Cluster("AWS Account (299025166536, eu-central-1)"):
 
         # Data Acquisition
-        with Cluster("Data Acquisition"):
-            eventbridge = Eventbridge("EventBridge\n(5 min schedule)")
+        with Cluster("Data Acquisition (every 5 min)"):
+            eventbridge = Eventbridge("EventBridge\nSchedule")
             fetcher = Lambda("Fetcher\nLambda")
 
         # Storage
         with Cluster("Storage"):
-            input_bucket = S3("Input Bucket\n(orders/)")
-            web_bucket = S3("Web Bucket\n(static site)")
+            input_bucket = S3("Input Bucket\n(TSV files)")
+            web_bucket = S3("Web Bucket\n(schedule.json)")
             config = S3("Config\n(translations)")
-            dynamodb = Dynamodb("DynamoDB\n(schedules)")
+            dynamodb = Dynamodb("DynamoDB\n(backup - unused)")
 
         # Processing
-        with Cluster("Processing Pipeline"):
+        with Cluster("Processing (regenerates ALL schedules)"):
             processor = Lambda("Processor\nLambda")
 
         # Delivery
@@ -84,13 +84,13 @@ with Diagram(
 
     # Data flow
     eventbridge >> Edge(label="trigger") >> fetcher
-    external_api >> Edge(label="fetch TSV") >> fetcher
+    external_api >> Edge(label="fetch TSV\n(~3 weeks data)") >> fetcher
     fetcher >> Edge(label="save") >> input_bucket
 
     input_bucket >> Edge(label="S3 trigger") >> processor
     processor >> Edge(label="read") >> config
-    processor >> Edge(label="store") >> dynamodb
-    processor >> Edge(label="generate JSON") >> web_bucket
+    processor >> Edge(label="backup", style="dashed") >> dynamodb
+    processor >> Edge(label="ALL dates\nschedule.json") >> web_bucket
 
     web_bucket >> cloudfront
     config >> cloudfront
