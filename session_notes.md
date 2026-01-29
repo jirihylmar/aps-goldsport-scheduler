@@ -895,3 +895,59 @@ Example: Orders 4438 and 4439 both have Alex and Maxmilian from Vichr Petr at 09
 - Phase 7: COMPLETE
 - Phase 5: IN PROGRESS (4 tasks remaining: 5.5, 5.6, 5.7, 5.8)
 - Live URL: https://d2uodie4uj65pq.cloudfront.net
+
+---
+
+## Session 11 - 2026-01-29
+
+### Task 5.9: Configure scheduled fetch times
+
+**Goal:** Change from continuous 5-minute polling to targeted fetches around lesson times.
+
+**Before:**
+- EventBridge rule: `rate(5 minutes)` = 288 fetches/day
+- Runs continuously 24/7
+
+**After:**
+- 14 EventBridge rules with specific cron times
+- Fetches aligned with lesson start times
+
+**Schedule (CET → UTC in winter):**
+| Local Time | UTC Cron | Purpose |
+|------------|----------|---------|
+| 06:00 | cron(0 5 * * ? *) | Morning start |
+| 08:55 | cron(55 7 * * ? *) | Before 09:00 lessons |
+| 09:00 | cron(0 8 * * ? *) | 09:00 lessons start |
+| 09:05 | cron(5 8 * * ? *) | After 09:00 lessons |
+| 10:00 | cron(0 9 * * ? *) | Mid-morning |
+| 10:05 | cron(5 9 * * ? *) | Mid-morning |
+| 10:55 | cron(55 9 * * ? *) | Before 11:00 lessons |
+| 12:55 | cron(55 11 * * ? *) | Before 13:00 lessons |
+| 13:00 | cron(0 12 * * ? *) | 13:00 lessons start |
+| 13:05 | cron(5 12 * * ? *) | After 13:00 lessons |
+| 14:25 | cron(25 13 * * ? *) | Before 14:30 lessons |
+| 14:30 | cron(30 13 * * ? *) | 14:30 lessons start |
+| 14:35 | cron(35 13 * * ? *) | After 14:30 lessons |
+| 17:25 | cron(25 16 * * ? *) | End of day |
+
+**DST Note:** UTC times need adjustment when clocks change:
+- Last Sunday March: CET → CEST (UTC+1 → UTC+2)
+- Last Sunday October: CEST → CET (UTC+2 → UTC+1)
+
+**Technical:**
+- Fixed AWS credentials issue: Use `AWS_PROFILE=JiHy__vsb__299` for CDK deploys
+- MCP tool already configured with correct profile
+
+### Files Modified
+- `infrastructure/lib/scheduler-stack.ts` - Changed from rate() to cron() schedules
+
+### Commits This Session
+| Hash | Description |
+|------|-------------|
+| 3d132e3 | feat: Change data fetch schedule from 5-min rate to 14 specific times |
+
+### Status
+- Phase 0-7: COMPLETE
+- Phase 5: IN PROGRESS (4 tasks remaining: 5.5, 5.6, 5.7, 5.8)
+- Task 5.9: COMPLETE (added this session)
+- Live URL: https://d2uodie4uj65pq.cloudfront.net

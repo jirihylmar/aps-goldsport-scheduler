@@ -3,8 +3,8 @@
   "project": "GoldSport Scheduler",
   "description": "Ski school lesson display system - shows current and upcoming courses on external vertical display",
   "created_at": "2026-01-28",
-  "last_updated": "2026-01-29T09:20:00Z",
-  "last_session_summary": "Session 10: Fixed private lesson grouping properly. Added preprocessing to deduplicate conflicting orders (same participant+sponsor+time, multiple order_ids) by keeping latest order_id. Group by order_id+start_time. 29.01.2026: 4→12 lessons, 26.01.2026: 21→20 lessons.",
+  "last_updated": "2026-01-29T12:55:00Z",
+  "last_session_summary": "Session 11: Changed data fetch schedule from 5-min rate to 14 specific times around lesson start times. Properly configured AWS credentials for CDK deployment.",
 
   "phases": {
     "phase_0_planning": {
@@ -271,7 +271,8 @@
         {"id": "5.5", "name": "Test with display engine", "status": "pending", "size": "medium", "verify": "Display engine shows schedule", "depends_on": ["5.4a"]},
         {"id": "5.6", "name": "Add CloudWatch monitoring", "status": "pending", "size": "small", "verify": "CloudWatch dashboard shows metrics", "depends_on": ["5.3"]},
         {"id": "5.7", "name": "Create deployment documentation", "status": "pending", "size": "small", "verify": "Documentation in docs/ folder"},
-        {"id": "5.8", "name": "Production deployment", "status": "pending", "size": "medium", "verify": "Production environment functional", "depends_on": ["5.5"]}
+        {"id": "5.8", "name": "Production deployment", "status": "pending", "size": "medium", "verify": "Production environment functional", "depends_on": ["5.5"]},
+        {"id": "5.9", "name": "Configure scheduled fetch times", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "aws events list-rules shows 14 rules at specific times", "notes": "Changed from 5-min rate to 14 specific times: 06:00, 08:55-09:05, 10:00-10:05, 10:55, 12:55-13:05, 14:25-14:35, 17:25 CET. Note: UTC cron needs DST adjustment.", "added_reason": "Reduce unnecessary fetches, align with lesson times"}
       ],
       "artifacts": []
     },
