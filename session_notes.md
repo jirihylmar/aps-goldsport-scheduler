@@ -823,5 +823,14 @@ Implemented single-page layout with many iterations:
 ### Status
 - Phase 0-5: See below
 - Phase 6: COMPLETE (all 12 tasks)
-- Next: Phase 5 remaining tasks (5.5, 5.6, 5.7, 5.8)
+- Phase 7: PENDING (4 tasks added)
 - Live URL: https://d2uodie4uj65pq.cloudfront.net
+
+### Phase 7 Added: Data & Storage Improvements
+**Tasks:**
+- 7.1: Change private lesson grouping to use order_id
+- 7.2: Clean current DynamoDB entries
+- 7.3: Add versioning to DynamoDB storage
+- 7.4: Reprocess data with new logic
+
+**Reason:** Private lessons need separate grouping - one sponsor can have multiple independent private lessons at same time. Also adding DynamoDB versioning to keep historical snapshots.

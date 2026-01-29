@@ -296,10 +296,24 @@
         {"id": "6.11", "name": "Apply dark background layout", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "Dark bg, white text, yellow accents match booking app", "depends_on": ["6.9"], "added_reason": "Align with company branding", "notes": "Dark background #1a1a1a, white content cards, yellow datetime display"}
       ],
       "artifacts": []
+    },
+    "phase_7_data_storage": {
+      "name": "Data & Storage Improvements",
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "description": "Fix private lesson grouping, add DynamoDB versioning",
+      "tasks": [
+        {"id": "7.1", "name": "Change private lesson grouping to use order_id", "status": "pending", "size": "medium", "verify": "Private lessons from same sponsor show as separate cards", "notes": "Currently groups by date+start+level+group_type+location. For private lessons, should group by order_id instead so one sponsor's multiple private bookings stay separate."},
+        {"id": "7.2", "name": "Clean current DynamoDB entries", "status": "pending", "size": "small", "verify": "DynamoDB table scan returns 0 items", "depends_on": ["7.1"]},
+        {"id": "7.3", "name": "Add versioning to DynamoDB storage", "status": "pending", "size": "medium", "verify": "Multiple snapshots stored per day with timestamps in SK", "depends_on": ["7.2"], "notes": "Add timestamp to SK: LESSON#2026-01-29T09:00#abc123 to keep history"},
+        {"id": "7.4", "name": "Reprocess data with new logic", "status": "pending", "size": "small", "verify": "Fresh data in DynamoDB with correct grouping and versioning", "depends_on": ["7.3"]}
+      ],
+      "artifacts": []
     }
   },
 
-  "current_task": "5.5",
+  "current_task": "7.1",
 
   "git_repos": {
     "orchestration": {
