@@ -177,10 +177,10 @@ class ParseOrdersProcessor(Processor):
             location = record.get('location_meeting', '').strip()
             booking_id = record.get('booking_id', '').strip()
 
-            # For private lessons: group by booking_id (each booking separate)
+            # For private lessons: group by booking_id + start time (each time slot separate)
             # For group lessons: group by time/level/location (all people together)
             if group_type == 'privát' and booking_id:
-                key = f"private_{booking_id}"
+                key = f"private_{booking_id}_{start}"
             else:
                 key = f"group_{date}_{start}_{level}_{group_type}_{location}"
 
