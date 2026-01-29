@@ -97,7 +97,7 @@ html, body {
     font-size: var(--font-size-xlarge);
     font-weight: 700;
     color: var(--color-primary);
-    font-variant-numeric: tabular-nums;
+    font-family: 'Courier New', Consolas, monospace;
 }
 
 /* Main content */
