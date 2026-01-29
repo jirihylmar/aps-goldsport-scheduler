@@ -35,6 +35,8 @@ async function init() {
     // Get parameters from URL
     const urlParams = new URLSearchParams(window.location.search);
     state.language = urlParams.get('lang') || CONFIG.defaultLanguage;
+    // Normalize Czech language code: 'cs' (ISO 639-1) → 'cz' (used in translations)
+    if (state.language === 'cs') state.language = 'cz';
     state.debugMode = urlParams.get('debug') === 'true';
     state.dateOverride = urlParams.get('date') || null;
     state.timeOverride = urlParams.get('time') || null;  // e.g., "09:30"
@@ -109,7 +111,6 @@ async function loadSchedule() {
  */
 const DAY_NAMES = {
     'cz': ['Neděle', 'Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota'],
-    'cs': ['Neděle', 'Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota'],
     'de': ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
     'en': ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
     'pl': ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'],
