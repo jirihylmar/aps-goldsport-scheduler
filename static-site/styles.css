@@ -110,10 +110,11 @@ html, body {
 
 /* Sections */
 .lessons-section {
-    background: rgba(255, 255, 255, 0.92);
+    background: rgba(255, 255, 255, 0.85);
     border-radius: var(--card-radius);
     padding: var(--spacing-lg);
     box-shadow: var(--card-shadow);
+    backdrop-filter: blur(4px);
 }
 
 .section-title {
