@@ -371,11 +371,16 @@ function showError(messageKey) {
 }
 
 /**
- * Update last update time display
+ * Update last update time display - shows when schedule data was generated
  */
 function updateLastUpdateTime() {
     const el = document.getElementById('last-update');
-    if (el && state.lastUpdate) {
+    if (el && state.schedule && state.schedule.generated_at) {
+        // Parse ISO timestamp from Lambda processor
+        const generatedAt = new Date(state.schedule.generated_at);
+        el.textContent = generatedAt.toLocaleTimeString(state.language === 'cz' ? 'cs' : state.language);
+    } else if (el && state.lastUpdate) {
+        // Fallback to page refresh time if no schedule timestamp
         el.textContent = state.lastUpdate.toLocaleTimeString(state.language === 'cz' ? 'cs' : state.language);
     }
 }

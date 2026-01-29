@@ -16,6 +16,7 @@
     "level": "Level",
     "time": "Time",
     "last_updated": "Last updated",
+    "schedule_updated": "Schedule updated",
     "loading": "Loading...",
     "error_loading": "Error loading data",
     "refresh": "Refresh"
@@ -37,6 +38,7 @@
     "level": "Niveau",
     "time": "Zeit",
     "last_updated": "Zuletzt aktualisiert",
+    "schedule_updated": "Stundenplan aktualisiert",
     "loading": "Laden...",
     "error_loading": "Fehler beim Laden",
     "refresh": "Aktualisieren"
@@ -58,6 +60,7 @@
     "level": "Úroveň",
     "time": "Čas",
     "last_updated": "Poslední aktualizace",
+    "schedule_updated": "Rozvrh aktualizován",
     "loading": "Načítání...",
     "error_loading": "Chyba při načítání",
     "refresh": "Obnovit"
@@ -79,6 +82,7 @@
     "level": "Poziom",
     "time": "Czas",
     "last_updated": "Ostatnia aktualizacja",
+    "schedule_updated": "Harmonogram zaktualizowany",
     "loading": "Ładowanie...",
     "error_loading": "Błąd ładowania",
     "refresh": "Odśwież"
