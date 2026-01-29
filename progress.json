@@ -3,8 +3,8 @@
   "project": "GoldSport Scheduler",
   "description": "Ski school lesson display system - shows current and upcoming courses on external vertical display",
   "created_at": "2026-01-28",
-  "last_updated": "2026-01-29T13:25:00Z",
-  "last_session_summary": "Session 11: Changed fetch schedule to 14 specific times. Updated header/section translations. Added monospace clock. Updated README documentation.",
+  "last_updated": "2026-01-29T14:45:00Z",
+  "last_session_summary": "Session 12: Fixed translation loading in embedded iframe (absolute URLs). Footer now shows schedule update time (generated_at). Fixed Czech language code normalization (cs→cz).",
 
   "phases": {
     "phase_0_planning": {
@@ -295,7 +295,10 @@
         {"id": "6.9", "name": "Apply company theme CSS", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "Colors match booking app (yellow #ffed00, dark #1a1a1a)", "added_reason": "Align with company branding from aps-goldsport-booking", "notes": "Inter font, yellow #ffed00, dark #1a1a1a, yellow accents on header/titles"},
         {"id": "6.10", "name": "Add company logo to header", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "Logo displays in header from S3 URL", "depends_on": ["6.9"], "added_reason": "Align with company branding", "notes": "Using S3 logo URL from booking app"},
         {"id": "6.11", "name": "Apply dark background layout", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "Dark bg, white text, yellow accents match booking app", "depends_on": ["6.9"], "added_reason": "Align with company branding", "notes": "Dark background #1a1a1a, white content cards, yellow datetime display"},
-        {"id": "6.12", "name": "Update header and section title translations", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "Header shows day+date+time, section shows translated schedule text", "added_reason": "Improve display text clarity", "notes": "Header: 'Thursday, 29.1.2026 14:21:03' (monospace for clock). Section: 'Schedule for Thursday, 30.01.2026. 11 lessons scheduled.' Translations for en/de/cz/pl."}
+        {"id": "6.12", "name": "Update header and section title translations", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "Header shows day+date+time, section shows translated schedule text", "added_reason": "Improve display text clarity", "notes": "Header: 'Thursday, 29.1.2026 14:21:03' (monospace for clock). Section: 'Schedule for Thursday, 30.01.2026. 11 lessons scheduled.' Translations for en/de/cz/pl."},
+        {"id": "6.12a", "name": "Fix translations in embedded iframe context", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "Embedded page loads translations correctly", "added_reason": "Translations failed when page embedded in iframe due to relative URLs", "notes": "Changed relative URLs (config/...) to absolute URLs (/config/...). Root cause fix instead of fallback workaround."},
+        {"id": "6.12b", "name": "Show schedule update time in footer", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "Footer shows 'Schedule updated: HH:MM:SS' from generated_at timestamp", "added_reason": "Footer showed page refresh time, not actual data update time", "notes": "Changed footer to read state.schedule.generated_at instead of state.lastUpdate. Added schedule_updated translation key in all 4 languages."},
+        {"id": "6.12c", "name": "Fix Czech language code normalization", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "?lang=cs shows Czech translations", "added_reason": "URL param ?lang=cs didn't match translation key 'cz'", "notes": "Added normalization: if (state.language === 'cs') state.language = 'cz'; Removed duplicate 'cs' from DAY_NAMES."}
       ],
       "artifacts": []
     },

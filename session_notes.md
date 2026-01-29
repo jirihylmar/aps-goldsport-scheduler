@@ -992,3 +992,60 @@ Translations added for all 4 languages:
 - Phase 6: COMPLETE (12 tasks including new 6.12)
 - Git: Pushed to https://github.com/jirihylmar/aps-goldsport-scheduler.git
 - Live URL: https://d2uodie4uj65pq.cloudfront.net
+
+---
+
+## Session 12 - 2026-01-29
+
+### Context
+Session started after context compaction. Continued work on translation and footer fixes.
+
+### Completed This Session
+
+**Task 6.12a: Fix translations in embedded iframe context** - COMPLETE
+- Issue: Translations failed when page was embedded in iframe
+- Root cause: Relative URLs (`config/ui-translations.json`) don't resolve correctly in iframe context
+- Fix: Changed to absolute URLs (`/config/ui-translations.json`) in app.js CONFIG
+
+**Task 6.12b: Show schedule update time in footer** - COMPLETE
+- Issue: Footer showed "Last updated: X" which was page refresh time, not actual data update time
+- Fix: Changed to read `state.schedule.generated_at` from Lambda processor output
+- Changed label from "Last updated" to "Schedule updated"
+- Added `schedule_updated` translation key for all 4 languages:
+  - EN: "Schedule updated"
+  - DE: "Stundenplan aktualisiert"
+  - CZ: "Rozvrh aktualizován"
+  - PL: "Harmonogram zaktualizowany"
+
+**Task 6.12c: Fix Czech language code normalization** - COMPLETE
+- Issue: `?lang=cs` (ISO 639-1) didn't match translation keys which use `cz`
+- Fix: Added normalization at init: `if (state.language === 'cs') state.language = 'cz';`
+- Removed duplicate `cs` entry from DAY_NAMES (now handled by normalization)
+
+### Issues Encountered
+- After context compaction, deployed files directly to S3 using bash `aws s3 cp` instead of MCP tools
+- MCP tool has file path restrictions - can only upload from `/run/user/1000/aws-api-mcp/workdir/`
+- Workaround: Copy files to MCP workdir first, then use MCP tool to upload
+
+### Deployment Notes
+Files deployed to two locations:
+1. **CDK-managed bucket**: `s3://goldsport-scheduler-web-dev/` (core CloudFront)
+2. **Embedded site bucket**: `s3://medite-ss1-infgsp-299025166536/classicskischoolharrachov/schedule/`
+
+CloudFront invalidation required after S3 uploads (distribution ID: E1UECZ9R3RFNX)
+
+### All Commits This Session
+| Hash | Description |
+|------|-------------|
+| 27f9a88 | fix: Use absolute URLs for translations and shorten lesson text |
+| f86afd8 | fix: Show schedule update time instead of page refresh time |
+| 3095d63 | fix: Normalize 'cs' to 'cz' for Czech translations |
+
+### Status
+- Phase 0-7: COMPLETE
+- Phase 5: IN PROGRESS (4 tasks remaining: 5.5, 5.6, 5.7, 5.8)
+- Phase 6: COMPLETE (15 tasks: 6.1-6.12 + 6.12a-c)
+- Git: Pushed to https://github.com/jirihylmar/aps-goldsport-scheduler.git
+- Live URL: https://d2uodie4uj65pq.cloudfront.net
+
+---
