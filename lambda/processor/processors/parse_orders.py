@@ -179,10 +179,12 @@ class ParseOrdersProcessor(Processor):
             booking_id = record.get('booking_id', '').strip()
 
             # Grouping logic:
-            # - Private lessons: group by order_id + date + start (each order's time slot)
+            # - Private lessons: group by sponsor + date + start + level + location
+            #   (handles multiple orders for same sponsor at same time)
             # - Group lessons: group by date + start + level + group_type + location
+            sponsor = record.get('name_sponsor', '').strip()
             if group_type == 'privát':
-                key = f"private_{order_id}_{date}_{start}"
+                key = f"private_{sponsor}_{date}_{start}_{level}_{location}"
             else:
                 key = f"group_{date}_{start}_{level}_{group_type}_{location}"
 
