@@ -7,10 +7,10 @@
 // Configuration
 const CONFIG = {
     refreshInterval: 60000,  // 60 seconds
-    dataUrl: 'data/schedule.json',
+    dataUrl: '/data/schedule.json',
     configUrl: {
-        translations: 'config/ui-translations.json',
-        dictionaries: 'config/dictionaries.json',
+        translations: '/config/ui-translations.json',
+        dictionaries: '/config/dictionaries.json',
     },
     defaultLanguage: 'en',
 };
@@ -79,7 +79,7 @@ async function loadConfigs() {
         // Apply translations to UI
         applyTranslations();
     } catch (error) {
-        console.warn('Failed to load configs, using defaults:', error);
+        console.error('Failed to load configs:', error);
     }
 }
 

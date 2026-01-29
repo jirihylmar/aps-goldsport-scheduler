@@ -2,7 +2,7 @@
   "en": {
     "current_datetime": "Current Date and Time",
     "schedule_for": "Schedule for",
-    "lessons_on_day": "{n} lessons scheduled.",
+    "lessons_on_day": "{n} lessons.",
     "current_lessons": "Current Lessons",
     "upcoming_lessons": "Upcoming Lessons",
     "no_lessons": "No lessons scheduled",
@@ -23,7 +23,7 @@
   "de": {
     "current_datetime": "Aktuelles Datum und Uhrzeit",
     "schedule_for": "Stundenplan für",
-    "lessons_on_day": "Insgesamt {n} Kurse.",
+    "lessons_on_day": "{n} Kurse.",
     "current_lessons": "Aktuelle Kurse",
     "upcoming_lessons": "Kommende Kurse",
     "no_lessons": "Keine Kurse geplant",
@@ -44,7 +44,7 @@
   "cz": {
     "current_datetime": "Aktuální datum a čas",
     "schedule_for": "Rozvrh na",
-    "lessons_on_day": "Celkem {n} lekcí.",
+    "lessons_on_day": "{n} lekcí.",
     "current_lessons": "Probíhající lekce",
     "upcoming_lessons": "Nadcházející lekce",
     "no_lessons": "Žádné naplánované lekce",
@@ -65,7 +65,7 @@
   "pl": {
     "current_datetime": "Aktualna data i godzina",
     "schedule_for": "Harmonogram na",
-    "lessons_on_day": "Łącznie {n} lekcji.",
+    "lessons_on_day": "{n} lekcji.",
     "current_lessons": "Aktualne lekcje",
     "upcoming_lessons": "Nadchodzące lekcje",
     "no_lessons": "Brak zaplanowanych lekcji",
