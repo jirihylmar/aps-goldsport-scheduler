@@ -12,7 +12,7 @@ const CONFIG = {
         translations: 'config/ui-translations.json',
         dictionaries: 'config/dictionaries.json',
     },
-    defaultLanguage: 'cz',
+    defaultLanguage: 'en',
 };
 
 // Application state
