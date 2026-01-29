@@ -1,18 +1,31 @@
-/* GoldSport Scheduler - Vertical Display Styles */
+/* Classic Ski School Scheduler - Company Theme */
 /* Optimized for portrait orientation, readable from 3m distance */
 
-:root {
-    /* Colors */
-    --color-primary: #1e3a5f;
-    --color-secondary: #2e5c8a;
-    --color-accent: #f0b800;
-    --color-background: #f5f7fa;
-    --color-card: #ffffff;
-    --color-text: #1a1a1a;
-    --color-text-light: #666666;
-    --color-border: #e0e4e8;
+/* Import Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    /* Time slot colors */
+:root {
+    /* Company Colors - Classic Ski School Yellow & Black */
+    --color-primary: #ffed00;        /* Bright yellow (logo color) */
+    --color-secondary: #1a1a1a;      /* Dark black/gray */
+    --color-accent: #ffed00;         /* Yellow for accents */
+
+    /* Background Colors */
+    --color-background: #1a1a1a;     /* Dark background */
+    --color-card: #2a2a2a;           /* Slightly lighter for cards */
+    --color-card-content: #ffffff;   /* White cards for lesson content */
+
+    /* Text Colors */
+    --color-text: #ffffff;           /* White text on dark */
+    --color-text-dark: #1a1a1a;      /* Dark text on light */
+    --color-text-light: #cccccc;     /* Light gray */
+    --color-text-muted: #999999;     /* Muted gray */
+
+    /* Border */
+    --color-border: #333333;
+    --color-border-light: #e5e7eb;
+
+    /* Time slot colors - adjusted for visibility */
     --color-slot-1: #e3f2fd;  /* 08:00-09:59 - light blue */
     --color-slot-2: #e8f5e9;  /* 10:00-11:59 - light green */
     --color-slot-3: #fff8e1;  /* 12:00-13:59 - light yellow */
@@ -20,13 +33,13 @@
     --color-slot-5: #f3e5f5;  /* 16:00+ - light purple */
 
     /* Typography */
-    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-size-base: 16px;
     --font-size-large: 21px;
     --font-size-xlarge: 26px;
     --font-size-small: 13px;
 
-    /* Spacing - reduced */
+    /* Spacing */
     --spacing-xs: 4px;
     --spacing-sm: 8px;
     --spacing-md: 12px;
@@ -35,7 +48,7 @@
 
     /* Card */
     --card-radius: 6px;
-    --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 /* Reset and base */
@@ -59,18 +72,20 @@ html, body {
     display: flex;
     flex-direction: column;
     padding: var(--spacing-md);
+    background: var(--color-background);
 }
 
-/* Header - compact */
+/* Header - company style dark with yellow accent */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    background: var(--color-primary);
-    color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-secondary);
+    color: var(--color-text);
     border-radius: var(--card-radius);
     margin-bottom: var(--spacing-sm);
+    border-bottom: 3px solid var(--color-primary);
 }
 
 .logo {
@@ -80,20 +95,21 @@ html, body {
 }
 
 .logo img {
-    height: 30px;
+    height: 40px;
     width: auto;
 }
 
 .logo h1 {
     font-size: var(--font-size-large);
-    font-weight: 600;
+    font-weight: 700;
+    color: var(--color-text);
 }
 
 /* Date/time display */
 .datetime-display {
     font-size: var(--font-size-large);
     font-weight: 600;
-    color: white;
+    color: var(--color-primary);
 }
 
 /* Main content */
@@ -107,7 +123,7 @@ html, body {
 
 /* Sections */
 .lessons-section {
-    background: var(--color-card);
+    background: var(--color-card-content);
     border-radius: var(--card-radius);
     padding: var(--spacing-sm);
     box-shadow: var(--card-shadow);
@@ -118,8 +134,8 @@ html, body {
     font-weight: 600;
     margin-bottom: var(--spacing-sm);
     padding-bottom: var(--spacing-xs);
-    border-bottom: 1px solid var(--color-border);
-    color: var(--color-primary);
+    border-bottom: 2px solid var(--color-primary);
+    color: var(--color-text-dark);
 }
 
 /* Lessons container - flow left to right, top to bottom */
@@ -136,11 +152,12 @@ html, body {
     align-items: center;
     gap: 1px var(--spacing-xs);
     padding: 2px var(--spacing-xs);
-    background: var(--color-background);
+    background: #f5f5f5;
     border-radius: var(--card-radius);
-    border-left: 3px solid var(--color-border);
+    border-left: 3px solid var(--color-border-light);
     font-size: var(--font-size-base);
     max-width: 100%;
+    color: var(--color-text-dark);
 }
 
 /* Time group separator - forces new line */
@@ -162,7 +179,7 @@ html, body {
 }
 
 .pipe {
-    color: var(--color-text-light);
+    color: var(--color-text-muted);
 }
 
 .lesson-group-type {
@@ -185,7 +202,7 @@ html, body {
     text-align: center;
     padding: var(--spacing-xl);
     font-size: var(--font-size-large);
-    color: var(--color-text-light);
+    color: var(--color-text-muted);
 }
 
 /* Loading state */
@@ -193,7 +210,7 @@ html, body {
     text-align: center;
     padding: var(--spacing-xl);
     font-size: var(--font-size-large);
-    color: var(--color-text-light);
+    color: var(--color-text-muted);
     animation: pulse 1.5s ease-in-out infinite;
 }
 
@@ -207,7 +224,7 @@ html, body {
     text-align: center;
     padding: var(--spacing-xl);
     font-size: var(--font-size-large);
-    color: #d32f2f;
+    color: #ef4444;
 }
 
 /* Footer */

@@ -784,5 +784,12 @@ Implemented single-page layout with many iterations:
 ### Status
 - Phase 0-4: COMPLETE
 - Phase 5: IN PROGRESS (4/8 tasks remaining: 5.5, 5.6, 5.7, 5.8)
-- Phase 6: COMPLETE
+- Phase 6: IN PROGRESS (3 new branding tasks added)
 - Live URL: https://d2uodie4uj65pq.cloudfront.net
+
+### Work Added
+- 6.9: Apply company theme CSS
+- 6.10: Add company logo to header
+- 6.11: Apply dark background layout
+- Source: User request to align with aps-goldsport-booking branding
+- Reference: /home/hylmarj/aps-goldsport-booking/src/styles/company-theme.css
