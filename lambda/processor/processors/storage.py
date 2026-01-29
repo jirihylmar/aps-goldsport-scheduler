@@ -159,32 +159,24 @@ class StorageProcessor(Processor):
         """
         Generate unique ID for a lesson.
 
-        For private lessons: hash of sponsor + date + start + level + location
+        For private lessons: hash of order_id
         For group lessons: hash of date + start + level + group_type + location
         """
         group_type = lesson.get('group_type_key', '')
-        start = lesson.get('start', '')
-        date = lesson.get('date', '')
-        level = lesson.get('level_key', '')
-        location = lesson.get('location_key', '')
+        order_id = lesson.get('order_id', '')
 
         if group_type == 'privát':
-            # Private lessons: use sponsor + date + start + level + location
-            # (matches grouping in parse_orders.py)
-            sponsor = self._get_sponsor(lesson)
-            key_data = f"{sponsor}_{date}_{start}_{level}_{location}"
+            # Private lessons: use order_id (after deduplication in parse_orders.py)
+            key_data = f"private_{order_id}"
         else:
             # Group lessons: use all grouping fields
+            start = lesson.get('start', '')
+            date = lesson.get('date', '')
+            level = lesson.get('level_key', '')
+            location = lesson.get('location_key', '')
             key_data = f"{date}_{start}_{level}_{group_type}_{location}"
 
         return hashlib.md5(key_data.encode()).hexdigest()[:16]
-
-    def _get_sponsor(self, lesson: Dict) -> str:
-        """Extract sponsor name from lesson (first person's sponsor)."""
-        people = lesson.get('people', [])
-        if people and len(people) > 0:
-            return people[0].get('sponsor', '')
-        return ''
 
     def _prepare_lesson_item(self, lesson: Dict) -> Dict:
         """

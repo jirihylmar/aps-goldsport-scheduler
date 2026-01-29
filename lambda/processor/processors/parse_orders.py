@@ -2,7 +2,11 @@
 GoldSport Scheduler - Parse Orders Processor
 
 Parses TSV orders file from S3 into internal format.
-Groups records by booking_id and lesson time slot.
+Groups records by order_id and lesson time slot.
+
+Preprocessing: Deduplicates conflicting orders where the same participant
+from the same sponsor has multiple order_ids for the same time slot.
+Resolution: keeps only the latest (highest) order_id.
 """
 
 import csv
@@ -22,8 +26,8 @@ class ParseOrdersProcessor(Processor):
     """
     Parse TSV orders file and convert to internal lesson format.
 
-    Reads TSV from S3, groups participants by booking_id and time slot,
-    filters out invalid records (1970 dates).
+    Reads TSV from S3, deduplicates conflicting orders, groups participants
+    by order_id and time slot, filters out invalid records (1970 dates).
     """
 
     # Required TSV columns
@@ -82,8 +86,12 @@ class ParseOrdersProcessor(Processor):
             valid_records = self._filter_invalid(records)
             logger.info(f"Filtered to {len(valid_records)} valid records")
 
-            # Group by booking and time slot
-            lessons = self._group_into_lessons(valid_records)
+            # Deduplicate conflicting orders (same participant+sponsor+time, different order_id)
+            deduped_records = self._deduplicate_orders(valid_records)
+            logger.info(f"After deduplication: {len(deduped_records)} records")
+
+            # Group by order_id and time slot
+            lessons = self._group_into_lessons(deduped_records)
             logger.info(f"Grouped into {len(lessons)} lessons")
 
             # Store in data
@@ -157,6 +165,52 @@ class ParseOrdersProcessor(Processor):
 
         return valid
 
+    def _deduplicate_orders(self, records: List[Dict]) -> List[Dict]:
+        """
+        Deduplicate conflicting orders.
+
+        When the same participant from the same sponsor has multiple order_ids
+        for the same time slot, keep only the latest (highest) order_id.
+        """
+        from collections import defaultdict
+
+        # Group by participant + sponsor + date + start_time
+        groups = defaultdict(list)
+        for record in records:
+            key = (
+                record.get('name_participant', '').strip(),
+                record.get('name_sponsor', '').strip(),
+                record.get('date_lesson', ''),
+                record.get('timestamp_start_lesson', ''),
+            )
+            groups[key].append(record)
+
+        # For each group, keep only records with the latest order_id
+        deduped = []
+        duplicates_removed = 0
+
+        for key, group_records in groups.items():
+            # Find all unique order_ids in this group
+            order_ids = set(r.get('id_order', '') for r in group_records)
+
+            if len(order_ids) > 1:
+                # Multiple order_ids for same participant+sponsor+time
+                # Keep only records with the highest (latest) order_id
+                latest_order_id = max(order_ids, key=lambda x: int(x) if x.isdigit() else 0)
+                for r in group_records:
+                    if r.get('id_order', '') == latest_order_id:
+                        deduped.append(r)
+                    else:
+                        duplicates_removed += 1
+            else:
+                # No conflict, keep all records
+                deduped.extend(group_records)
+
+        if duplicates_removed > 0:
+            logger.info(f"Removed {duplicates_removed} records from older duplicate orders")
+
+        return deduped
+
     def _group_into_lessons(self, records: List[Dict]) -> List[Dict]:
         """
         Group records into lessons.
@@ -179,12 +233,10 @@ class ParseOrdersProcessor(Processor):
             booking_id = record.get('booking_id', '').strip()
 
             # Grouping logic:
-            # - Private lessons: group by sponsor + date + start + level + location
-            #   (handles multiple orders for same sponsor at same time)
+            # - Private lessons: group by order_id (after deduplication)
             # - Group lessons: group by date + start + level + group_type + location
-            sponsor = record.get('name_sponsor', '').strip()
             if group_type == 'privát':
-                key = f"private_{sponsor}_{date}_{start}_{level}_{location}"
+                key = f"private_{order_id}"
             else:
                 key = f"group_{date}_{start}_{level}_{group_type}_{location}"
 
