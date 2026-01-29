@@ -3,8 +3,8 @@
   "project": "GoldSport Scheduler",
   "description": "Ski school lesson display system - shows current and upcoming courses on external vertical display",
   "created_at": "2026-01-28",
-  "last_updated": "2026-01-29T12:55:00Z",
-  "last_session_summary": "Session 11: Changed data fetch schedule from 5-min rate to 14 specific times around lesson start times. Properly configured AWS credentials for CDK deployment.",
+  "last_updated": "2026-01-29T13:25:00Z",
+  "last_session_summary": "Session 11: Changed fetch schedule to 14 specific times. Updated header/section translations. Added monospace clock. Updated README documentation.",
 
   "phases": {
     "phase_0_planning": {
@@ -294,7 +294,8 @@
         {"id": "6.8", "name": "Implement no-scroll safeguards", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "No scrollbars appear, all content accessible via rotation", "depends_on": ["6.2"], "notes": "CSS overflow:hidden already in place. Single-page layout fits content."},
         {"id": "6.9", "name": "Apply company theme CSS", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "Colors match booking app (yellow #ffed00, dark #1a1a1a)", "added_reason": "Align with company branding from aps-goldsport-booking", "notes": "Inter font, yellow #ffed00, dark #1a1a1a, yellow accents on header/titles"},
         {"id": "6.10", "name": "Add company logo to header", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "Logo displays in header from S3 URL", "depends_on": ["6.9"], "added_reason": "Align with company branding", "notes": "Using S3 logo URL from booking app"},
-        {"id": "6.11", "name": "Apply dark background layout", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "Dark bg, white text, yellow accents match booking app", "depends_on": ["6.9"], "added_reason": "Align with company branding", "notes": "Dark background #1a1a1a, white content cards, yellow datetime display"}
+        {"id": "6.11", "name": "Apply dark background layout", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "Dark bg, white text, yellow accents match booking app", "depends_on": ["6.9"], "added_reason": "Align with company branding", "notes": "Dark background #1a1a1a, white content cards, yellow datetime display"},
+        {"id": "6.12", "name": "Update header and section title translations", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "Header shows day+date+time, section shows translated schedule text", "added_reason": "Improve display text clarity", "notes": "Header: 'Thursday, 29.1.2026 14:21:03' (monospace for clock). Section: 'Schedule for Thursday, 30.01.2026. 11 lessons scheduled.' Translations for en/de/cz/pl."}
       ],
       "artifacts": []
     },
@@ -319,8 +320,8 @@
   "git_repos": {
     "orchestration": {
       "local": ".",
-      "remote": null,
-      "status": "local_only",
+      "remote": "https://github.com/jirihylmar/aps-goldsport-scheduler.git",
+      "status": "pushed",
       "notes": "Must be git repo from start. Commit after each task."
     }
   },

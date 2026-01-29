@@ -951,3 +951,44 @@ Example: Orders 4438 and 4439 both have Alex and Maxmilian from Vichr Petr at 09
 - Phase 5: IN PROGRESS (4 tasks remaining: 5.5, 5.6, 5.7, 5.8)
 - Task 5.9: COMPLETE (added this session)
 - Live URL: https://d2uodie4uj65pq.cloudfront.net
+
+### Additional Work This Session
+
+**Task 6.12: Update header and section title translations** - COMPLETE
+
+Header format changed:
+- Before: `Current Date and Time: 29.1.2026 14:00`
+- After: `Thursday, 29.1.2026 14:21:03` (with monospace font for clock)
+
+Section title format changed:
+- Before: `30.01.2026 (11 lessons)`
+- After: `Schedule for Thursday, 30.01.2026. 11 lessons scheduled.`
+
+Translations added for all 4 languages:
+- EN: "Schedule for", "{n} lessons scheduled."
+- DE: "Stundenplan für", "Insgesamt {n} Kurse."
+- CZ: "Rozvrh na", "Celkem {n} lekcí."
+- PL: "Harmonogram na", "Łącznie {n} lekcji."
+
+**Documentation updated:**
+- README.md - comprehensive developer/user guide
+- docs/architecture/README.md - updated with fetch schedule details
+
+### All Commits This Session
+| Hash | Description |
+|------|-------------|
+| 3d132e3 | feat: Change data fetch schedule from 5-min rate to 14 specific times |
+| f55d328 | progress: Session 11 - Scheduled fetch times configured |
+| 59a78a1 | feat: Update header and section title with translations |
+| 0d13c76 | fix: Improve lesson count translations |
+| 403744c | feat: Update header datetime format |
+| d81542f | fix: Remove week number, fix time display jumping |
+| 8bdd65a | docs: Comprehensive README update for developers and users |
+| 1ac7f7a | fix: Use monospace font for clock to prevent jumping |
+
+### Final Status
+- Phase 0-7: COMPLETE
+- Phase 5: IN PROGRESS (4 tasks remaining: 5.5, 5.6, 5.7, 5.8)
+- Phase 6: COMPLETE (12 tasks including new 6.12)
+- Git: Pushed to https://github.com/jirihylmar/aps-goldsport-scheduler.git
+- Live URL: https://d2uodie4uj65pq.cloudfront.net
