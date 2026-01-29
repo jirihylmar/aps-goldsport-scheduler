@@ -233,10 +233,10 @@ class ParseOrdersProcessor(Processor):
             booking_id = record.get('booking_id', '').strip()
 
             # Grouping logic:
-            # - Private lessons: group by order_id (after deduplication)
+            # - Private lessons: group by order_id + start (one order can have multiple time slots)
             # - Group lessons: group by date + start + level + group_type + location
             if group_type == 'privát':
-                key = f"private_{order_id}"
+                key = f"private_{order_id}_{start}"
             else:
                 key = f"group_{date}_{start}_{level}_{group_type}_{location}"
 

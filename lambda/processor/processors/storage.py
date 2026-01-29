@@ -166,8 +166,9 @@ class StorageProcessor(Processor):
         order_id = lesson.get('order_id', '')
 
         if group_type == 'privát':
-            # Private lessons: use order_id (after deduplication in parse_orders.py)
-            key_data = f"private_{order_id}"
+            # Private lessons: use order_id + start (one order can have multiple time slots)
+            start = lesson.get('start', '')
+            key_data = f"private_{order_id}_{start}"
         else:
             # Group lessons: use all grouping fields
             start = lesson.get('start', '')
