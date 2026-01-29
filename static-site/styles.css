@@ -66,44 +66,36 @@ html, body {
     color: var(--color-text);
 }
 
-/* Container - full height layout */
+/* Container - full height layout with background image */
 .container {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     padding: var(--spacing-md);
-    background: var(--color-background);
+    background-image: url('https://medite-ss1-infgsp-299025166536.s3.eu-central-1.amazonaws.com/assets/vyuka-bg-4.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
-/* Header - centered logo with time underneath */
+/* Header - datetime display */
 .header {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: var(--spacing-md) var(--spacing-md);
-    background: var(--color-secondary);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(26, 26, 26, 0.85);
     color: var(--color-text);
     border-radius: var(--card-radius);
     margin-bottom: var(--spacing-sm);
     border-bottom: 3px solid var(--color-primary);
 }
 
-.header-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xs);
-}
-
-.header-logo {
-    height: 60px;
-    width: auto;
-}
-
 /* Date/time display */
 .datetime-display {
-    font-size: var(--font-size-large);
-    font-weight: 600;
+    font-size: var(--font-size-xlarge);
+    font-weight: 700;
     color: var(--color-primary);
 }
 
