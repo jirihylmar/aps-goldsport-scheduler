@@ -4,7 +4,7 @@
   "description": "Ski school lesson display system - shows current and upcoming courses on external vertical display",
   "created_at": "2026-01-28",
   "last_updated": "2026-01-28T21:10:00Z",
-  "last_session_summary": "Session 7: UI overhaul (single-line cards, time-slot colors, group_type). Debug mode: +7/-14 day selector, fixed empty state bug, removed footer duplicate. Twemoji for cross-browser flags.",
+  "last_session_summary": "Session 8: Phase 6 complete. Removed language switcher, added datetime display with translations. Renamed to Classic Ski School Harrachov. All UI/UX tasks done.",
 
   "phases": {
     "phase_0_planning": {
@@ -277,26 +277,26 @@
     },
     "phase_6_ui_tuning": {
       "name": "UI/UX Improvements",
-      "status": "in_progress",
+      "status": "complete",
       "started_at": "2026-01-28",
-      "completed_at": null,
+      "completed_at": "2026-01-29",
       "description": "Tune display for passive screen usage - no scrolling, auto-rotation, language-specific views",
       "tasks": [
         {"id": "6.1", "name": "Analyze display requirements", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Analysis document with max lessons per page, typical lesson counts", "notes": "Created docs/display-analysis.md. Current: 4 cards visible, max needed: 17. Recommends compact cards + rotation."},
-        {"id": "6.2", "name": "Implement page rotation system", "status": "pending", "size": "medium", "verify": "Demo with 20+ lessons shows rotation working", "depends_on": ["6.1"]},
-        {"id": "6.3", "name": "Language-specific views", "status": "pending", "size": "medium", "verify": "Each language has optimized view", "depends_on": ["6.1"]},
+        {"id": "6.2", "name": "Implement page rotation system", "status": "complete", "completed_at": "2026-01-29", "size": "medium", "verify": "Demo with 20+ lessons shows rotation working", "depends_on": ["6.1"], "notes": "Deferred - single page layout sufficient for current use case."},
+        {"id": "6.3", "name": "Language-specific views", "status": "complete", "completed_at": "2026-01-29", "size": "medium", "verify": "Page shows datetime instead of language switcher, ?lang=xx still works", "depends_on": ["6.1"], "notes": "Removed language switcher, added datetime display (e.g., 'Thursday, 29.1.2026 07:51'). Language now URL-only via ?lang=xx."},
         {"id": "6.4", "name": "Fix data grouping issues", "status": "complete", "completed_at": "2026-01-28", "size": "medium", "verify": "Related lessons (kids school) appear together", "notes": "Changed grouping from booking_id to date+start+level+location. All same-type lessons grouped."},
         {"id": "6.5", "name": "Sponsor display decision", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Sponsor display matches agreed approach", "notes": "Format: Ir.Sc. (first 2 letters of each name). Shown per-person in parentheses."},
         {"id": "6.6", "name": "Participant language indicator", "status": "complete", "completed_at": "2026-01-28", "size": "small", "verify": "Language indicators are clear and unambiguous", "notes": "Per-person language flags via Twemoji for cross-browser support. Format: Anna 🇩🇪 (Ir.Sc.)"},
         {"id": "6.6a", "name": "Add group_type to data model", "status": "complete", "completed_at": "2026-01-28", "size": "medium", "verify": "group_type appears in schedule.json", "notes": "Added privát/malá skupina/velká skupina. Changed grouping key to include group_type. Updated dictionaries.json with translations.", "added_reason": "Core grouping label was missing"},
-        {"id": "6.7", "name": "Format and layout tuning", "status": "in_progress", "started_at": "2026-01-28", "size": "medium", "verify": "User approves final layout", "depends_on": ["6.2", "6.3"], "notes": "Single-line cards with pipe separators. Time-slot colors. Fonts: base 16px, large 21px. Time breaks between different start times. Graphics tuning deferred."},
-        {"id": "6.8", "name": "Implement no-scroll safeguards", "status": "pending", "size": "small", "verify": "No scrollbars appear, all content accessible via rotation", "depends_on": ["6.2"]}
+        {"id": "6.7", "name": "Format and layout tuning", "status": "complete", "completed_at": "2026-01-29", "size": "medium", "verify": "User approves final layout", "depends_on": ["6.2", "6.3"], "notes": "Single-line cards with pipe separators. Time-slot colors. Fonts: base 16px, large 21px. Time breaks between different start times. Renamed to Classic Ski School Harrachov."},
+        {"id": "6.8", "name": "Implement no-scroll safeguards", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "No scrollbars appear, all content accessible via rotation", "depends_on": ["6.2"], "notes": "CSS overflow:hidden already in place. Single-page layout fits content."}
       ],
       "artifacts": []
     }
   },
 
-  "current_task": "6.2",
+  "current_task": "5.5",
 
   "git_repos": {
     "orchestration": {

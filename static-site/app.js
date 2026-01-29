@@ -44,8 +44,9 @@ async function init() {
         showDebugBanner();
     }
 
-    // Set up language selector
-    setupLanguageSelector();
+    // Set up date/time display
+    updateDateTimeDisplay();
+    setInterval(updateDateTimeDisplay, 1000); // Update every second
 
     // Load configurations and data
     try {
@@ -104,45 +105,34 @@ async function loadSchedule() {
 }
 
 /**
- * Set up language selector buttons
+ * Day names for date display
  */
-function setupLanguageSelector() {
-    const buttons = document.querySelectorAll('.lang-btn');
-
-    buttons.forEach(btn => {
-        const lang = btn.dataset.lang;
-
-        // Mark active language
-        if (lang === state.language) {
-            btn.classList.add('active');
-        }
-
-        // Handle click
-        btn.addEventListener('click', () => {
-            changeLanguage(lang);
-        });
-    });
-}
+const DAY_NAMES = {
+    'cz': ['Neděle', 'Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota'],
+    'cs': ['Neděle', 'Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota'],
+    'de': ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
+    'en': ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    'pl': ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'],
+};
 
 /**
- * Change display language
+ * Update the date/time display in the header
+ * Format: "Thursday, 29.1.2026 07:51"
  */
-function changeLanguage(lang) {
-    state.language = lang;
+function updateDateTimeDisplay() {
+    const el = document.getElementById('datetime-display');
+    if (!el) return;
 
-    // Update URL without reload
-    const url = new URL(window.location);
-    url.searchParams.set('lang', lang);
-    window.history.replaceState({}, '', url);
+    const now = new Date();
+    const dayNames = DAY_NAMES[state.language] || DAY_NAMES['en'];
+    const dayName = dayNames[now.getDay()];
+    const day = now.getDate();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
 
-    // Update active button
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.lang === lang);
-    });
-
-    // Reapply translations
-    applyTranslations();
-    renderSchedule();
+    el.textContent = `${dayName}, ${day}.${month}.${year} ${hours}:${minutes}`;
 }
 
 /**

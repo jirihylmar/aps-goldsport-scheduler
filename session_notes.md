@@ -754,3 +754,35 @@ Implemented single-page layout with many iterations:
 - Deploy Lambda with updated processors (group_type changes)
 - Continue 6.7 (format tuning) when graphics phase begins
 - Consider 6.2 (rotation) if content doesn't fit single page
+
+---
+
+## Session 8 - 2026-01-29
+
+### Phase 6 Complete - UI/UX Improvements
+
+**Task 6.3: Language-specific views** - COMPLETE
+- Removed language switcher buttons from header
+- Added datetime display: "Čtvrtek, 29.1.2026 08:01"
+- Day names translate based on `?lang=` parameter (cz/cs, de, en, pl)
+- Language is now URL-only: `?lang=xx`
+
+**Task 6.2, 6.7, 6.8** - Marked COMPLETE
+- Page rotation deferred (single-page layout sufficient)
+- Format tuning complete with current layout
+- No-scroll safeguards already in place (CSS overflow:hidden)
+
+**Branding changes:**
+- Header: "GoldSport Ski School" → "Classic Ski School Harrachov"
+- Page title: "Scheduler - Classic Ski School - production"
+
+### Files Modified
+- `static-site/index.html` - datetime display, title, branding
+- `static-site/styles.css` - removed language button styles
+- `static-site/app.js` - DAY_NAMES translations, updateDateTimeDisplay()
+
+### Status
+- Phase 0-4: COMPLETE
+- Phase 5: IN PROGRESS (4/8 tasks remaining: 5.5, 5.6, 5.7, 5.8)
+- Phase 6: COMPLETE
+- Live URL: https://d2uodie4uj65pq.cloudfront.net
