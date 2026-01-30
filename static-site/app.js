@@ -136,6 +136,46 @@ function isMainSlot(slot) {
 }
 
 /**
+ * Group lessons by time slot for page rotation
+ * @param {Array} lessons - Array of lesson objects
+ * @returns {Array} - Array of {slot, lessons} objects, only includes slots with lessons
+ */
+function groupLessonsBySlot(lessons) {
+    if (!lessons || lessons.length === 0) {
+        return [];
+    }
+
+    // Group lessons by slot
+    const slotGroups = new Map();
+
+    lessons.forEach(lesson => {
+        const slot = getSlotForLesson(lesson.start);
+        if (slot) {
+            if (!slotGroups.has(slot.id)) {
+                slotGroups.set(slot.id, { slot, lessons: [] });
+            }
+            slotGroups.get(slot.id).lessons.push(lesson);
+        } else {
+            // Lesson doesn't fit any slot - add to "other" group
+            // For now, we'll add it to the nearest slot
+            console.warn(`Lesson at ${lesson.start} doesn't fit any time slot`);
+        }
+    });
+
+    // Convert to array and sort by slot ID
+    const pages = Array.from(slotGroups.values())
+        .sort((a, b) => a.slot.id - b.slot.id);
+
+    // Store in state for rotation
+    state.rotation.pages = pages;
+
+    console.log(`Grouped ${lessons.length} lessons into ${pages.length} pages:`,
+        pages.map(p => `${p.slot.label}: ${p.lessons.length} lessons`));
+
+    return pages;
+}
+
+/**
  * Initialize the application
  */
 async function init() {
@@ -301,6 +341,9 @@ function renderSchedule() {
 
     const lessons = targetDate ? (allByDate[targetDate] || []) : [];
 
+    // Group lessons by time slot for page rotation
+    const pages = groupLessonsBySlot(lessons);
+
     // Update title with translated text
     // Format: "Schedule for Friday, 30.01.2026. This day we give 11 lessons."
     const titleEl = document.getElementById('day-title');
@@ -319,7 +362,8 @@ function renderSchedule() {
         titleEl.textContent = getUIText('no_lessons');
     }
 
-    // Render all lessons
+    // Render lessons (for now, render all - page rotation in Task 8.3)
+    // TODO: Task 8.3 will implement renderCurrentPage() instead
     renderLessons('all-lessons', lessons, 'no_lessons');
 
 }
@@ -370,7 +414,7 @@ function formatParticipant(participant) {
 /**
  * Get time slot number for color coding (1-5 based on hour)
  */
-function getTimeSlot(startTime) {
+function getTimeSlotColor(startTime) {
     if (!startTime) return 1;
     const hour = parseInt(startTime.split(':')[0], 10);
     if (hour < 10) return 1;      // 08:00-09:59 - blue
@@ -416,8 +460,8 @@ function renderLessons(containerId, lessons, emptyMessageKey) {
         const cardEl = card.querySelector('.lesson-card');
 
         // Set time slot for color coding
-        const slot = getTimeSlot(lesson.start);
-        if (cardEl) cardEl.setAttribute('data-slot', slot);
+        const colorSlot = getTimeSlotColor(lesson.start);
+        if (cardEl) cardEl.setAttribute('data-slot', colorSlot);
 
         // Line 1: Time | Group Type | Level | Location
         const timeRange = `${lesson.start || '--:--'}-${lesson.end || '--:--'}`;
