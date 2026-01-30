@@ -153,10 +153,10 @@ html, body {
 }
 
 /* Time slot colors */
-/* Main page cards: inverse colors (dark bg, light text) */
+/* Main page cards: inverse colors (dark bg, yellow text) */
 .main-page .lesson-card {
     background: var(--color-secondary);
-    color: var(--color-text);
+    color: var(--color-primary);
 }
 
 /* Plain text - no labels */
