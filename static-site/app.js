@@ -15,6 +15,50 @@ const CONFIG = {
     defaultLanguage: 'en',
 };
 
+// Time slot configuration for page rotation
+// Each slot groups lessons by start time, shown as separate pages
+const TIME_SLOTS = [
+    {
+        id: 1,
+        label: '09:00',
+        // Lessons starting 08:00-09:59 belong to this slot
+        startRange: { min: 480, max: 599 },  // minutes from midnight
+        // This slot is "main" (shown longer) when current time is 08:00-09:59
+        mainWindow: { min: 480, max: 599 },
+    },
+    {
+        id: 2,
+        label: '11:00',
+        // Lessons starting 11:00-11:59 belong to this slot
+        startRange: { min: 660, max: 719 },
+        // This slot is "main" when current time is 10:00-11:59
+        mainWindow: { min: 600, max: 719 },
+    },
+    {
+        id: 3,
+        label: '13:00',
+        // Lessons starting 13:00-13:59 belong to this slot
+        startRange: { min: 780, max: 839 },
+        // This slot is "main" when current time is 12:00-13:59
+        mainWindow: { min: 720, max: 839 },
+    },
+    {
+        id: 4,
+        label: '14:30',
+        // Lessons starting 14:30+ belong to this slot
+        startRange: { min: 870, max: 1439 },
+        // This slot is "main" when current time is 14:00-16:59
+        mainWindow: { min: 840, max: 1019 },
+    },
+];
+
+// Rotation timing configuration
+const ROTATION_CONFIG = {
+    mainPageDuration: 15000,   // 15 seconds for main page
+    otherPageDuration: 5000,   // 5 seconds for other pages
+    transitionDuration: 300,   // 300ms fade transition
+};
+
 // Application state
 const state = {
     language: CONFIG.defaultLanguage,
@@ -26,7 +70,70 @@ const state = {
     debugMode: false,      // ?debug=true shows all lessons
     dateOverride: null,    // ?date=28.01.2026 shows specific date
     timeOverride: null,    // ?time=09:30 simulates specific time
+    // Page rotation state
+    rotation: {
+        pages: [],           // Array of { slot, lessons } for pages with content
+        currentPageIndex: 0, // Currently displayed page
+        rotationTimer: null, // Timer for page switching
+        isPaused: false,     // Pause rotation in debug mode
+    },
 };
+
+// ============================================
+// Time Slot Utility Functions
+// ============================================
+
+/**
+ * Convert time string (HH:MM) to minutes from midnight
+ */
+function timeToMinutes(timeStr) {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
+}
+
+/**
+ * Get current time as minutes from midnight (respects timeOverride for debug)
+ */
+function getCurrentTimeMinutes() {
+    if (state.timeOverride) {
+        return timeToMinutes(state.timeOverride);
+    }
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes();
+}
+
+/**
+ * Find which time slot a lesson belongs to based on its start time
+ * @param {string} startTime - Lesson start time in HH:MM format
+ * @returns {object|null} - The matching time slot or null
+ */
+function getSlotForLesson(startTime) {
+    const minutes = timeToMinutes(startTime);
+    return TIME_SLOTS.find(slot =>
+        minutes >= slot.startRange.min && minutes <= slot.startRange.max
+    ) || null;
+}
+
+/**
+ * Get the "main" slot for the current time (shown longer)
+ * @returns {object|null} - The main time slot or null if outside operating hours
+ */
+function getMainSlot() {
+    const currentMinutes = getCurrentTimeMinutes();
+    return TIME_SLOTS.find(slot =>
+        currentMinutes >= slot.mainWindow.min && currentMinutes <= slot.mainWindow.max
+    ) || null;
+}
+
+/**
+ * Check if a slot is the main slot (should be shown longer)
+ * @param {object} slot - Time slot to check
+ * @returns {boolean}
+ */
+function isMainSlot(slot) {
+    const mainSlot = getMainSlot();
+    return mainSlot && mainSlot.id === slot.id;
+}
 
 /**
  * Initialize the application
