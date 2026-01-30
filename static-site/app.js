@@ -70,6 +70,7 @@ const state = {
     debugMode: false,      // ?debug=true shows all lessons
     dateOverride: null,    // ?date=28.01.2026 shows specific date
     timeOverride: null,    // ?time=09:30 simulates specific time
+    targetDate: null,      // Current date being displayed
     // Page rotation state
     rotation: {
         pages: [],           // Array of { slot, lessons } for pages with content
@@ -259,6 +260,7 @@ function renderCurrentPage() {
     // Handle no pages
     if (pages.length === 0) {
         renderLessons('all-lessons', [], 'no_lessons');
+        updateTitle(null);
         return;
     }
 
@@ -269,8 +271,54 @@ function renderCurrentPage() {
     // Render lessons for current page only
     renderLessons('all-lessons', currentPage.lessons, 'no_lessons');
 
-    // Update page indicator (Task 8.5 will enhance this)
+    // Update title with current slot info
+    updateTitle(currentPage);
+
+    // Update page indicator
     updatePageIndicator();
+}
+
+/**
+ * Update title with current slot's time range and lesson count
+ * Format: "Schedule for Friday, 30.01.2026 {11:00-12:50}. {5} lessons."
+ */
+function updateTitle(currentPage) {
+    const titleEl = document.getElementById('day-title');
+    if (!titleEl) return;
+
+    const targetDate = state.targetDate;
+
+    if (!targetDate) {
+        titleEl.textContent = getUIText('no_lessons');
+        return;
+    }
+
+    // Parse date from DD.MM.YYYY format
+    const [day, month, year] = targetDate.split('.');
+    const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    const dayNames = DAY_NAMES[state.language] || DAY_NAMES['en'];
+    const dayName = dayNames[dateObj.getDay()];
+
+    const scheduleFor = getUIText('schedule_for');
+
+    if (!currentPage || currentPage.lessons.length === 0) {
+        titleEl.textContent = `${scheduleFor} ${dayName}, ${targetDate}. ${getUIText('no_lessons')}`;
+        return;
+    }
+
+    // Get time range from lessons (earliest start to latest end)
+    const lessons = currentPage.lessons;
+    const starts = lessons.map(l => l.start).filter(Boolean).sort();
+    const ends = lessons.map(l => l.end).filter(Boolean).sort();
+    const timeRange = starts.length > 0 && ends.length > 0
+        ? `{${starts[0]}-${ends[ends.length - 1]}}`
+        : '';
+
+    // Lesson count for this slot
+    const lessonCount = lessons.length;
+    const lessonsText = getUIText('lessons_on_day').replace('{n}', lessonCount);
+
+    titleEl.textContent = `${scheduleFor} ${dayName}, ${targetDate} ${timeRange}. ${lessonsText}`;
 }
 
 /**
@@ -497,26 +545,11 @@ function renderSchedule() {
 
     const lessons = targetDate ? (allByDate[targetDate] || []) : [];
 
+    // Store targetDate in state for title updates
+    state.targetDate = targetDate;
+
     // Group lessons by time slot for page rotation
     const pages = groupLessonsBySlot(lessons);
-
-    // Update title with translated text
-    // Format: "Schedule for Friday, 30.01.2026. This day we give 11 lessons."
-    const titleEl = document.getElementById('day-title');
-    if (titleEl && targetDate) {
-        // Parse date from DD.MM.YYYY format
-        const [day, month, year] = targetDate.split('.');
-        const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-        const dayNames = DAY_NAMES[state.language] || DAY_NAMES['en'];
-        const dayName = dayNames[dateObj.getDay()];
-
-        const scheduleFor = getUIText('schedule_for');
-        const lessonsText = getUIText('lessons_on_day').replace('{n}', lessons.length);
-
-        titleEl.textContent = `${scheduleFor} ${dayName}, ${targetDate}. ${lessonsText}`;
-    } else if (titleEl) {
-        titleEl.textContent = getUIText('no_lessons');
-    }
 
     // Reset rotation to first page when schedule changes
     state.rotation.currentPageIndex = 0;
