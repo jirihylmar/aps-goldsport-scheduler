@@ -110,7 +110,78 @@ Schedule for Thursday, 30.01.2026. 11 lessons scheduled.
 ### Auto-Refresh
 
 - Frontend refreshes data every **60 seconds**
-- "Last updated" shows when frontend last fetched data (not when backend generated it)
+- "Schedule updated" shows when Lambda generated the data
+
+---
+
+## Page Rotation System
+
+When multiple time slots have lessons, the display rotates between pages automatically.
+
+### Time Slots
+
+| Slot | Lessons Starting | Main Display Window |
+|------|------------------|---------------------|
+| 09:00 | 08:00-09:59 | 08:00-10:00 |
+| 11:00 | 11:00-11:59 | 10:00-12:00 |
+| 13:00 | 13:00-13:59 | 12:00-14:00 |
+| 14:30 | 14:30+ | 14:00-17:00 |
+
+### Display Timing
+
+| Slot Position | Duration | Description |
+|---------------|----------|-------------|
+| **Current** | 15 seconds | Main slot (current time window) |
+| **Previous** | 3 seconds | Slots before current |
+| **Upcoming** | 10 seconds | Slots after current |
+
+### Visual Indicators
+
+- **Page indicator**: Dots at bottom showing current page
+- **Active page**: White dot (larger)
+- **Main slot**: Yellow border on dot
+- **Main slot cards**: Dark background with yellow text
+
+### Changing Rotation Parameters
+
+Edit `static-site/app.js`:
+
+**Time Slots** (lines ~17-52):
+```javascript
+const TIME_SLOTS = [
+    {
+        id: 1,
+        label: '09:00',
+        startRange: { min: 480, max: 599 },  // minutes from midnight
+        mainWindow: { min: 480, max: 599 },
+    },
+    // ... add/modify slots
+];
+```
+
+**Display Timing** (lines ~55-60):
+```javascript
+const ROTATION_CONFIG = {
+    currentDuration: 15000,    // 15 seconds for current/main slot
+    previousDuration: 3000,    // 3 seconds for previous slots
+    upcomingDuration: 10000,   // 10 seconds for upcoming slots
+    transitionDuration: 300,   // 300ms fade transition
+};
+```
+
+After editing, deploy to both buckets:
+```bash
+# Dev/CloudFront bucket
+AWS_PROFILE=JiHy__vsb__299 aws s3 cp static-site/app.js s3://goldsport-scheduler-web-dev/app.js
+
+# Hot/embedded bucket
+AWS_PROFILE=JiHy__vsb__299 aws s3 cp static-site/app.js s3://medite-ss1-infgsp-299025166536/classicskischoolharrachov/schedule/app.js
+
+# Invalidate CloudFront
+AWS_PROFILE=JiHy__vsb__299 aws cloudfront create-invalidation --distribution-id E1UECZ9R3RFNX --paths /app.js
+```
+
+---
 
 ### Languages
 

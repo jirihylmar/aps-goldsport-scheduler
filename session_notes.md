@@ -1049,3 +1049,73 @@ CloudFront invalidation required after S3 uploads (distribution ID: E1UECZ9R3RFN
 - Live URL: https://d2uodie4uj65pq.cloudfront.net
 
 ---
+
+## Session 13 - 2026-01-30
+
+### Phase 8: Page Rotation System - COMPLETE
+
+Implemented multi-page rotation for vertical display screens.
+
+**Time Slots:**
+| Slot | Lessons Starting | Main Display Window |
+|------|------------------|---------------------|
+| 09:00 | 08:00-09:59 | 08:00-10:00 |
+| 11:00 | 11:00-11:59 | 10:00-12:00 |
+| 13:00 | 13:00-13:59 | 12:00-14:00 |
+| 14:30 | 14:30+ | 14:00-17:00 |
+
+**Display Timing:**
+- Current/main slot: 15 seconds
+- Previous slots: 3 seconds
+- Upcoming slots: 10 seconds
+
+**Visual Design:**
+- Main slot cards: Dark background (#1a1a1a) with yellow text
+- Other slots: Default white cards with dark text
+- Page indicator: Dots with time labels, white=active, yellow border=main
+
+**Tasks Completed:**
+- 8.1: Define time slot configuration
+- 8.2: Implement lesson grouping by slot
+- 8.3: Implement page rotation engine
+- 8.4: Implement main page priority timing
+- 8.5: Add page indicator UI
+- 8.6: Handle edge cases + debug controls
+- 8.7: Test with real data
+
+**Debug Mode Enhancements:**
+- Prev/Next buttons for manual page navigation
+- Pause/Resume toggle for rotation
+- Page status display
+
+**Files Modified:**
+- `static-site/app.js` - TIME_SLOTS, ROTATION_CONFIG, rotation engine
+- `static-site/styles.css` - page indicator, inverse colors for main
+- `static-site/index.html` - page indicator div
+
+**Deployed To:**
+- `s3://goldsport-scheduler-web-dev/` (CloudFront)
+- `s3://medite-ss1-infgsp-299025166536/classicskischoolharrachov/schedule/` (embedded/hot)
+
+### Configuration Reference
+
+**To change time slots:** Edit `TIME_SLOTS` in `static-site/app.js` (lines ~17-52)
+
+**To change display timing:** Edit `ROTATION_CONFIG` in `static-site/app.js` (lines ~55-60)
+```javascript
+const ROTATION_CONFIG = {
+    currentDuration: 15000,    // 15 seconds
+    previousDuration: 3000,    // 3 seconds
+    upcomingDuration: 10000,   // 10 seconds
+};
+```
+
+**After changes, deploy to both buckets and invalidate CloudFront.**
+
+### Status
+- Phase 0-8: COMPLETE
+- Phase 5: IN PROGRESS (4 tasks remaining: 5.5, 5.6, 5.7, 5.8)
+- Git: Pushed to https://github.com/jirihylmar/aps-goldsport-scheduler.git
+- Live URL: https://d2uodie4uj65pq.cloudfront.net
+
+---
