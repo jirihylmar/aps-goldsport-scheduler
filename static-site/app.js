@@ -54,8 +54,9 @@ const TIME_SLOTS = [
 
 // Rotation timing configuration
 const ROTATION_CONFIG = {
-    mainPageDuration: 15000,   // 15 seconds for main page
-    otherPageDuration: 5000,   // 5 seconds for other pages
+    currentDuration: 15000,    // 15 seconds for current/main slot
+    previousDuration: 3000,    // 3 seconds for previous slots
+    upcomingDuration: 10000,   // 10 seconds for upcoming slots
     transitionDuration: 300,   // 300ms fade transition
 };
 
@@ -218,13 +219,24 @@ function scheduleNextRotation() {
     const currentPage = state.rotation.pages[state.rotation.currentPageIndex];
     if (!currentPage) return;
 
-    // Determine duration based on whether this is the main page
-    const duration = isMainSlot(currentPage.slot)
-        ? ROTATION_CONFIG.mainPageDuration
-        : ROTATION_CONFIG.otherPageDuration;
+    // Determine duration based on slot position relative to main
+    const mainSlot = getMainSlot();
+    let duration;
+    let slotType;
+
+    if (isMainSlot(currentPage.slot)) {
+        duration = ROTATION_CONFIG.currentDuration;
+        slotType = 'CURRENT';
+    } else if (mainSlot && currentPage.slot.id < mainSlot.id) {
+        duration = ROTATION_CONFIG.previousDuration;
+        slotType = 'previous';
+    } else {
+        duration = ROTATION_CONFIG.upcomingDuration;
+        slotType = 'upcoming';
+    }
 
     console.log(`Page ${state.rotation.currentPageIndex + 1}/${state.rotation.pages.length} ` +
-        `(${currentPage.slot.label}) - ${isMainSlot(currentPage.slot) ? 'MAIN' : 'other'} - ${duration/1000}s`);
+        `(${currentPage.slot.label}) - ${slotType} - ${duration/1000}s`);
 
     state.rotation.rotationTimer = setTimeout(() => {
         rotateToNextPage();
