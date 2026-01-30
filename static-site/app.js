@@ -175,6 +175,119 @@ function groupLessonsBySlot(lessons) {
     return pages;
 }
 
+// ============================================
+// Page Rotation Engine
+// ============================================
+
+/**
+ * Start page rotation
+ */
+function startRotation() {
+    // Don't rotate if paused (debug mode) or only one page
+    if (state.rotation.isPaused) {
+        console.log('Rotation paused');
+        return;
+    }
+
+    if (state.rotation.pages.length <= 1) {
+        console.log('Only one page, no rotation needed');
+        return;
+    }
+
+    // Schedule next rotation
+    scheduleNextRotation();
+}
+
+/**
+ * Stop page rotation
+ */
+function stopRotation() {
+    if (state.rotation.rotationTimer) {
+        clearTimeout(state.rotation.rotationTimer);
+        state.rotation.rotationTimer = null;
+    }
+}
+
+/**
+ * Schedule the next page rotation based on current page timing
+ */
+function scheduleNextRotation() {
+    stopRotation(); // Clear any existing timer
+
+    const currentPage = state.rotation.pages[state.rotation.currentPageIndex];
+    if (!currentPage) return;
+
+    // Determine duration based on whether this is the main page
+    const duration = isMainSlot(currentPage.slot)
+        ? ROTATION_CONFIG.mainPageDuration
+        : ROTATION_CONFIG.otherPageDuration;
+
+    console.log(`Page ${state.rotation.currentPageIndex + 1}/${state.rotation.pages.length} ` +
+        `(${currentPage.slot.label}) - ${isMainSlot(currentPage.slot) ? 'MAIN' : 'other'} - ${duration/1000}s`);
+
+    state.rotation.rotationTimer = setTimeout(() => {
+        rotateToNextPage();
+    }, duration);
+}
+
+/**
+ * Rotate to the next page
+ */
+function rotateToNextPage() {
+    if (state.rotation.pages.length === 0) return;
+
+    // Move to next page (wrap around)
+    state.rotation.currentPageIndex =
+        (state.rotation.currentPageIndex + 1) % state.rotation.pages.length;
+
+    // Render the new current page
+    renderCurrentPage();
+
+    // Schedule next rotation
+    scheduleNextRotation();
+}
+
+/**
+ * Render only the current page of lessons
+ */
+function renderCurrentPage() {
+    const container = document.getElementById('all-lessons');
+    if (!container) return;
+
+    const pages = state.rotation.pages;
+
+    // Handle no pages
+    if (pages.length === 0) {
+        renderLessons('all-lessons', [], 'no_lessons');
+        return;
+    }
+
+    // Get current page
+    const currentPage = pages[state.rotation.currentPageIndex];
+    if (!currentPage) return;
+
+    // Render lessons for current page only
+    renderLessons('all-lessons', currentPage.lessons, 'no_lessons');
+
+    // Update page indicator (Task 8.5 will enhance this)
+    updatePageIndicator();
+}
+
+/**
+ * Update page indicator (placeholder - Task 8.5 will implement full UI)
+ */
+function updatePageIndicator() {
+    // For now, just log. Task 8.5 will add visual indicator
+    const pages = state.rotation.pages;
+    const current = state.rotation.currentPageIndex;
+    const currentPage = pages[current];
+
+    if (currentPage) {
+        console.log(`Showing page ${current + 1}/${pages.length}: ${currentPage.slot.label} ` +
+            `(${currentPage.lessons.length} lessons)`);
+    }
+}
+
 /**
  * Initialize the application
  */
@@ -188,9 +301,11 @@ async function init() {
     state.dateOverride = urlParams.get('date') || null;
     state.timeOverride = urlParams.get('time') || null;  // e.g., "09:30"
 
-    // Show debug indicator
+    // Show debug indicator and pause rotation in debug mode
     if (state.debugMode || state.dateOverride || state.timeOverride) {
         showDebugBanner();
+        // Pause rotation in debug mode so user can inspect pages manually
+        state.rotation.isPaused = state.debugMode;
     }
 
     // Set up date/time display
@@ -245,6 +360,8 @@ async function loadSchedule() {
         state.schedule = await response.json();
         state.lastUpdate = new Date();
 
+        // Stop existing rotation before re-rendering
+        stopRotation();
         renderSchedule();
         updateLastUpdateTime();
     } catch (error) {
@@ -362,9 +479,12 @@ function renderSchedule() {
         titleEl.textContent = getUIText('no_lessons');
     }
 
-    // Render lessons (for now, render all - page rotation in Task 8.3)
-    // TODO: Task 8.3 will implement renderCurrentPage() instead
-    renderLessons('all-lessons', lessons, 'no_lessons');
+    // Reset rotation to first page when schedule changes
+    state.rotation.currentPageIndex = 0;
+
+    // Render current page and start rotation
+    renderCurrentPage();
+    startRotation();
 
 }
 

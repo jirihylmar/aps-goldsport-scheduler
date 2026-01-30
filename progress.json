@@ -325,7 +325,7 @@
       "tasks": [
         {"id": "8.1", "name": "Define time slot configuration", "status": "complete", "completed_at": "2026-01-30", "size": "small", "verify": "TIME_SLOTS config object exists in app.js with 4 slots defined", "notes": "Added TIME_SLOTS (4 slots), ROTATION_CONFIG (timing), rotation state, and helper functions (timeToMinutes, getCurrentTimeMinutes, getSlotForLesson, getMainSlot, isMainSlot)"},
         {"id": "8.2", "name": "Implement lesson grouping by slot", "status": "complete", "completed_at": "2026-01-30", "size": "medium", "verify": "Lessons correctly grouped into pages by start time", "depends_on": ["8.1"], "notes": "Added groupLessonsBySlot() function. Lessons grouped into pages stored in state.rotation.pages. Renamed getTimeSlot to getTimeSlotColor to avoid conflict."},
-        {"id": "8.3", "name": "Implement page rotation engine", "status": "pending", "size": "medium", "verify": "Pages auto-cycle with configurable timing", "depends_on": ["8.2"]},
+        {"id": "8.3", "name": "Implement page rotation engine", "status": "complete", "completed_at": "2026-01-30", "size": "medium", "verify": "Pages auto-cycle with configurable timing", "depends_on": ["8.2"], "notes": "Added startRotation, stopRotation, scheduleNextRotation, rotateToNextPage, renderCurrentPage, updatePageIndicator functions. Rotation paused in debug mode."},
         {"id": "8.4", "name": "Implement main page priority timing", "status": "pending", "size": "small", "verify": "Main page shows 15s, others 5s based on current time window", "depends_on": ["8.3"]},
         {"id": "8.5", "name": "Add page indicator UI", "status": "pending", "size": "small", "verify": "Visual dots/slider showing current page position", "depends_on": ["8.3"]},
         {"id": "8.6", "name": "Handle edge cases", "status": "pending", "size": "small", "verify": "Empty slots skipped, single page no rotation, outside hours handled", "depends_on": ["8.4", "8.5"]},
@@ -335,7 +335,7 @@
     }
   },
 
-  "current_task": "8.3",
+  "current_task": "8.4",
 
   "git_repos": {
     "orchestration": {
