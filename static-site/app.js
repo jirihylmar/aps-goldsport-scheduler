@@ -259,6 +259,7 @@ function renderCurrentPage() {
 
     // Handle no pages
     if (pages.length === 0) {
+        container.classList.remove('main-page');
         renderLessons('all-lessons', [], 'no_lessons');
         updateTitle(null);
         return;
@@ -267,6 +268,13 @@ function renderCurrentPage() {
     // Get current page
     const currentPage = pages[state.rotation.currentPageIndex];
     if (!currentPage) return;
+
+    // Add/remove main-page class for card coloring
+    if (isMainSlot(currentPage.slot)) {
+        container.classList.add('main-page');
+    } else {
+        container.classList.remove('main-page');
+    }
 
     // Render lessons for current page only
     renderLessons('all-lessons', currentPage.lessons, 'no_lessons');

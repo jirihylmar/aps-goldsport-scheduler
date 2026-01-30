@@ -156,11 +156,12 @@ html, body {
 }
 
 /* Time slot colors */
-.lesson-card[data-slot="1"] { background: var(--color-slot-1); border-left-color: #2196f3; }
-.lesson-card[data-slot="2"] { background: var(--color-slot-2); border-left-color: #4caf50; }
-.lesson-card[data-slot="3"] { background: var(--color-slot-3); border-left-color: #ff9800; }
-.lesson-card[data-slot="4"] { background: var(--color-slot-4); border-left-color: #e91e63; }
-.lesson-card[data-slot="5"] { background: var(--color-slot-5); border-left-color: #9c27b0; }
+/* Card colors only on main page */
+.main-page .lesson-card[data-slot="1"] { background: var(--color-slot-1); border-left-color: #2196f3; }
+.main-page .lesson-card[data-slot="2"] { background: var(--color-slot-2); border-left-color: #4caf50; }
+.main-page .lesson-card[data-slot="3"] { background: var(--color-slot-3); border-left-color: #ff9800; }
+.main-page .lesson-card[data-slot="4"] { background: var(--color-slot-4); border-left-color: #e91e63; }
+.main-page .lesson-card[data-slot="5"] { background: var(--color-slot-5); border-left-color: #9c27b0; }
 
 /* Plain text - no labels */
 .lesson-time {
