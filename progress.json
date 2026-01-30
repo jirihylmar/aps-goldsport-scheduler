@@ -3,8 +3,8 @@
   "project": "GoldSport Scheduler",
   "description": "Ski school lesson display system - shows current and upcoming courses on external vertical display",
   "created_at": "2026-01-28",
-  "last_updated": "2026-01-29T14:45:00Z",
-  "last_session_summary": "Session 12: Fixed translation loading in embedded iframe (absolute URLs). Footer now shows schedule update time (generated_at). Fixed Czech language code normalization (cs→cz).",
+  "last_updated": "2026-01-30T14:45:00Z",
+  "last_session_summary": "Session 13: Added Phase 8 - Page Rotation System. 7 tasks to implement multi-page display with auto-rotation for vertical screens.",
 
   "phases": {
     "phase_0_planning": {
@@ -315,10 +315,27 @@
         {"id": "7.4", "name": "Reprocess data with new logic", "status": "complete", "completed_at": "2026-01-29", "size": "small", "verify": "Fresh data in DynamoDB with correct grouping and versioning", "depends_on": ["7.3"], "notes": "Deployed Lambda via CDK, invoked fetcher. 334 items stored with versioned SK format."}
       ],
       "artifacts": []
+    },
+    "phase_8_page_rotation": {
+      "name": "Page Rotation System",
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "description": "Multi-page rotation for vertical display when lessons overflow single page",
+      "tasks": [
+        {"id": "8.1", "name": "Define time slot configuration", "status": "pending", "size": "small", "verify": "TIME_SLOTS config object exists in app.js with 4 slots defined"},
+        {"id": "8.2", "name": "Implement lesson grouping by slot", "status": "pending", "size": "medium", "verify": "Lessons correctly grouped into pages by start time", "depends_on": ["8.1"]},
+        {"id": "8.3", "name": "Implement page rotation engine", "status": "pending", "size": "medium", "verify": "Pages auto-cycle with configurable timing", "depends_on": ["8.2"]},
+        {"id": "8.4", "name": "Implement main page priority timing", "status": "pending", "size": "small", "verify": "Main page shows 15s, others 5s based on current time window", "depends_on": ["8.3"]},
+        {"id": "8.5", "name": "Add page indicator UI", "status": "pending", "size": "small", "verify": "Visual dots/slider showing current page position", "depends_on": ["8.3"]},
+        {"id": "8.6", "name": "Handle edge cases", "status": "pending", "size": "small", "verify": "Empty slots skipped, single page no rotation, outside hours handled", "depends_on": ["8.4", "8.5"]},
+        {"id": "8.7", "name": "Test with real data", "status": "pending", "size": "small", "verify": "Rotation works correctly with various lesson configurations", "depends_on": ["8.6"]}
+      ],
+      "artifacts": []
     }
   },
 
-  "current_task": null,
+  "current_task": "8.1",
 
   "git_repos": {
     "orchestration": {
