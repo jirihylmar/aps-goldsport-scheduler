@@ -762,6 +762,12 @@ function showDebugBanner() {
         <div class="date-selector">
             ${dateButtons.join('')}
         </div>
+        <div class="rotation-controls" id="rotation-controls">
+            <button id="prev-page" class="rotation-btn">&larr; Prev</button>
+            <button id="toggle-rotation" class="rotation-btn">▶ Resume</button>
+            <button id="next-page" class="rotation-btn">Next &rarr;</button>
+            <span id="page-status" class="page-status">Page 0/0</span>
+        </div>
     `;
     banner.style.cssText = `
         position: fixed;
@@ -812,11 +818,104 @@ function showDebugBanner() {
             background: #4caf50;
             color: white;
         }
+        .debug-banner .rotation-controls {
+            margin-top: 6px;
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+        }
+        .debug-banner .rotation-btn {
+            padding: 4px 12px;
+            background: rgba(255,255,255,0.3);
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .debug-banner .rotation-btn:hover {
+            background: rgba(255,255,255,0.5);
+        }
+        .debug-banner .page-status {
+            font-size: 12px;
+            margin-left: 8px;
+        }
     `;
     document.head.appendChild(style);
 
     document.body.prepend(banner);
-    document.body.style.paddingTop = '70px';
+    document.body.style.paddingTop = '95px';
+
+    // Set up rotation control event handlers
+    setupRotationControls();
+}
+
+/**
+ * Set up rotation control event handlers for debug mode
+ */
+function setupRotationControls() {
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+    const toggleBtn = document.getElementById('toggle-rotation');
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            if (state.rotation.pages.length === 0) return;
+            state.rotation.currentPageIndex =
+                (state.rotation.currentPageIndex - 1 + state.rotation.pages.length) % state.rotation.pages.length;
+            renderCurrentPage();
+            updateRotationControlsUI();
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            if (state.rotation.pages.length === 0) return;
+            state.rotation.currentPageIndex =
+                (state.rotation.currentPageIndex + 1) % state.rotation.pages.length;
+            renderCurrentPage();
+            updateRotationControlsUI();
+        });
+    }
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            state.rotation.isPaused = !state.rotation.isPaused;
+            if (state.rotation.isPaused) {
+                stopRotation();
+            } else {
+                startRotation();
+            }
+            updateRotationControlsUI();
+        });
+    }
+
+    // Initial UI update
+    updateRotationControlsUI();
+}
+
+/**
+ * Update rotation controls UI state
+ */
+function updateRotationControlsUI() {
+    const toggleBtn = document.getElementById('toggle-rotation');
+    const pageStatus = document.getElementById('page-status');
+
+    if (toggleBtn) {
+        toggleBtn.textContent = state.rotation.isPaused ? '▶ Resume' : '⏸ Pause';
+    }
+
+    if (pageStatus) {
+        const pages = state.rotation.pages;
+        const current = state.rotation.currentPageIndex;
+        const currentPage = pages[current];
+        if (currentPage) {
+            pageStatus.textContent = `Page ${current + 1}/${pages.length} (${currentPage.slot.label})`;
+        } else {
+            pageStatus.textContent = `Page 0/${pages.length}`;
+        }
+    }
 }
 
 /**
