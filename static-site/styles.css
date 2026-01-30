@@ -122,8 +122,6 @@ html, body {
     font-size: var(--font-size-large);
     font-weight: 600;
     margin-bottom: var(--spacing-sm);
-    padding-bottom: var(--spacing-xs);
-    border-bottom: 2px solid var(--color-primary);
     color: var(--color-text-dark);
 }
 
