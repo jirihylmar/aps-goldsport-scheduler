@@ -328,14 +328,14 @@
         {"id": "8.3", "name": "Implement page rotation engine", "status": "complete", "completed_at": "2026-01-30", "size": "medium", "verify": "Pages auto-cycle with configurable timing", "depends_on": ["8.2"], "notes": "Added startRotation, stopRotation, scheduleNextRotation, rotateToNextPage, renderCurrentPage, updatePageIndicator functions. Rotation paused in debug mode."},
         {"id": "8.4", "name": "Implement main page priority timing", "status": "complete", "completed_at": "2026-01-30", "size": "small", "verify": "Main page shows 15s, others 5s based on current time window", "depends_on": ["8.3"], "notes": "Implemented as part of Task 8.3 - scheduleNextRotation uses isMainSlot to determine 15s vs 5s timing."},
         {"id": "8.5", "name": "Add page indicator UI", "status": "complete", "completed_at": "2026-01-30", "size": "small", "verify": "Visual dots/slider showing current page position", "depends_on": ["8.3"], "notes": "Added page-indicator container in HTML, CSS for dots with active/main states, updatePageIndicator() creates dots dynamically with time labels."},
-        {"id": "8.6", "name": "Handle edge cases", "status": "pending", "size": "small", "verify": "Empty slots skipped, single page no rotation, outside hours handled", "depends_on": ["8.4", "8.5"]},
+        {"id": "8.6", "name": "Handle edge cases", "status": "complete", "completed_at": "2026-01-30", "size": "small", "verify": "Empty slots skipped, single page no rotation, outside hours handled", "depends_on": ["8.4", "8.5"], "notes": "Edge cases handled: empty slots auto-skipped, single page no rotation, outside hours all pages equal timing. Added debug mode controls: Prev/Next, Pause/Resume."},
         {"id": "8.7", "name": "Test with real data", "status": "pending", "size": "small", "verify": "Rotation works correctly with various lesson configurations", "depends_on": ["8.6"]}
       ],
       "artifacts": []
     }
   },
 
-  "current_task": "8.6",
+  "current_task": "8.7",
 
   "git_repos": {
     "orchestration": {
