@@ -274,17 +274,56 @@ function renderCurrentPage() {
 }
 
 /**
- * Update page indicator (placeholder - Task 8.5 will implement full UI)
+ * Update page indicator - visual dots showing current page
  */
 function updatePageIndicator() {
-    // For now, just log. Task 8.5 will add visual indicator
+    const container = document.getElementById('page-indicator');
+    if (!container) return;
+
     const pages = state.rotation.pages;
     const current = state.rotation.currentPageIndex;
-    const currentPage = pages[current];
 
+    // Clear existing dots
+    container.innerHTML = '';
+
+    // Don't show indicator if only one page or no pages
+    if (pages.length <= 1) return;
+
+    // Create dots for each page
+    pages.forEach((page, index) => {
+        const dot = document.createElement('div');
+        dot.className = 'page-dot';
+
+        // Mark as active if current page
+        if (index === current) {
+            dot.classList.add('active');
+        }
+
+        // Mark as main if this is the main slot
+        if (isMainSlot(page.slot)) {
+            dot.classList.add('main');
+        }
+
+        // Circle element
+        const circle = document.createElement('div');
+        circle.className = 'page-dot-circle';
+        dot.appendChild(circle);
+
+        // Label element
+        const label = document.createElement('span');
+        label.className = 'page-dot-label';
+        label.textContent = page.slot.label;
+        dot.appendChild(label);
+
+        container.appendChild(dot);
+    });
+
+    // Log for debugging
+    const currentPage = pages[current];
     if (currentPage) {
-        console.log(`Showing page ${current + 1}/${pages.length}: ${currentPage.slot.label} ` +
-            `(${currentPage.lessons.length} lessons)`);
+        console.log(`Page ${current + 1}/${pages.length}: ${currentPage.slot.label} ` +
+            `(${currentPage.lessons.length} lessons)` +
+            (isMainSlot(currentPage.slot) ? ' [MAIN]' : ''));
     }
 }
 
