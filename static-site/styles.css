@@ -218,14 +218,18 @@ html, body {
 
 /* Page indicator for rotation */
 .page-indicator {
+    position: fixed;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     justify-content: center;
     align-items: center;
     gap: var(--spacing-md);
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--color-card);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: rgba(0, 0, 0, 0.8);
     border-radius: var(--card-radius);
-    margin-top: var(--spacing-sm);
+    z-index: 100;
 }
 
 .page-indicator:empty {
@@ -238,28 +242,19 @@ html, body {
     align-items: center;
     gap: var(--spacing-xs);
     cursor: default;
-    transition: transform 0.2s ease;
-}
-
-.page-dot.active {
-    transform: scale(1.1);
 }
 
 .page-dot-circle {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: var(--color-text-muted);
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    transition: background-color 0.3s ease;
 }
 
-.page-dot.active .page-dot-circle {
-    background: var(--color-primary);
-    transform: scale(1.3);
-}
-
+/* Only main slot gets yellow color */
 .page-dot.main .page-dot-circle {
-    border: 2px solid var(--color-primary);
+    background: var(--color-primary);
 }
 
 .page-dot-label {
@@ -268,7 +263,7 @@ html, body {
     white-space: nowrap;
 }
 
-.page-dot.active .page-dot-label {
+.page-dot.main .page-dot-label {
     color: var(--color-primary);
     font-weight: 600;
 }

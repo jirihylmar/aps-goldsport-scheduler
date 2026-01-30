@@ -311,7 +311,7 @@ function updateTitle(currentPage) {
     const starts = lessons.map(l => l.start).filter(Boolean).sort();
     const ends = lessons.map(l => l.end).filter(Boolean).sort();
     const timeRange = starts.length > 0 && ends.length > 0
-        ? `{${starts[0]}-${ends[ends.length - 1]}}`
+        ? `${starts[0]}-${ends[ends.length - 1]}`
         : '';
 
     // Lesson count for this slot
