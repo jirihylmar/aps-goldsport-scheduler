@@ -1119,3 +1119,49 @@ const ROTATION_CONFIG = {
 - Live URL: https://d2uodie4uj65pq.cloudfront.net
 
 ---
+
+## Session 14 - 2026-02-01
+
+### Completed This Session
+
+**Task 5.9: Configure scheduled fetch times** - UPDATED
+- Changed from 14 separate EventBridge rules to hybrid approach
+- Single `rate(5 minutes)` EventBridge rule
+- Lambda internally filters based on current time (CET):
+  - 08:00-12:00: Fetch on every trigger (5-min intervals)
+  - 12:00-17:00: Fetch only on 10-min marks (12:00, 12:10, etc.)
+  - Outside hours: Skip
+
+### Technical Details
+
+**Why this approach:**
+- Initial attempt with 80+ EventBridge rules failed
+- AWS Lambda policy size limit: 20KB (~50 rules max)
+- Solution: Single rate rule with time filtering in Lambda
+
+**Files Modified:**
+- `infrastructure/lib/scheduler-stack.ts` - single rate(5 min) rule
+- `lambda/fetcher/handler.py` - added `should_fetch_now()` function
+
+### Verification Results
+| Task | Verify | Result |
+|------|--------|--------|
+| 5.9 | aws events list-rules | PASSED - single rate(5 min) rule active |
+| 5.9 | Lambda invoke at 07:17 CET | PASSED - correctly skipped (outside hours) |
+
+### Commits This Session
+| Hash | Description |
+|------|-------------|
+| d22beda | feat: Hybrid fetch schedule - 5min morning, 10min afternoon |
+
+### Status
+- Phase 0-8: COMPLETE
+- Phase 5: IN PROGRESS (4 tasks remaining: 5.5, 5.6, 5.7, 5.8)
+- Git: Pushed to https://github.com/jirihylmar/aps-goldsport-scheduler.git
+- Live URL: https://d2uodie4uj65pq.cloudfront.net
+
+### Context for Next Session
+- First fetch at 08:00 CET (no morning fetch before that)
+- User confirmed schedule is correct - wait until 08:00 for first fetch
+
+---
