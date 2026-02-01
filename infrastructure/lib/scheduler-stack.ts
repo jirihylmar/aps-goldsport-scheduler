@@ -90,34 +90,17 @@ export class SchedulerStack extends cdk.Stack {
     // Grant Fetcher Lambda permissions
     this.inputBucket.grantWrite(this.fetcherLambda);
 
-    // Task 1.5b - EventBridge schedule rules (triggers Fetcher at specific times)
-    // Times are in UTC (CET = UTC+1 in winter, UTC+2 in summer)
-    // Adjust after DST changes (last Sunday March / last Sunday October)
-    const fetchTimes = [
-      { name: '0600', cron: 'cron(0 5 * * ? *)', desc: '06:00 CET - Morning start' },
-      { name: '0855', cron: 'cron(55 7 * * ? *)', desc: '08:55 CET - Before 09:00 lessons' },
-      { name: '0900', cron: 'cron(0 8 * * ? *)', desc: '09:00 CET - 09:00 lessons start' },
-      { name: '0905', cron: 'cron(5 8 * * ? *)', desc: '09:05 CET - After 09:00 lessons' },
-      { name: '1000', cron: 'cron(0 9 * * ? *)', desc: '10:00 CET - Mid-morning' },
-      { name: '1005', cron: 'cron(5 9 * * ? *)', desc: '10:05 CET - Mid-morning' },
-      { name: '1055', cron: 'cron(55 9 * * ? *)', desc: '10:55 CET - Before 11:00 lessons' },
-      { name: '1255', cron: 'cron(55 11 * * ? *)', desc: '12:55 CET - Before 13:00 lessons' },
-      { name: '1300', cron: 'cron(0 12 * * ? *)', desc: '13:00 CET - 13:00 lessons start' },
-      { name: '1305', cron: 'cron(5 12 * * ? *)', desc: '13:05 CET - After 13:00 lessons' },
-      { name: '1425', cron: 'cron(25 13 * * ? *)', desc: '14:25 CET - Before 14:30 lessons' },
-      { name: '1430', cron: 'cron(30 13 * * ? *)', desc: '14:30 CET - 14:30 lessons start' },
-      { name: '1435', cron: 'cron(35 13 * * ? *)', desc: '14:35 CET - After 14:30 lessons' },
-      { name: '1725', cron: 'cron(25 16 * * ? *)', desc: '17:25 CET - End of day' },
-    ];
-
-    for (const time of fetchTimes) {
-      const rule = new events.Rule(this, `FetchSchedule${time.name}`, {
-        ruleName: `goldsport-scheduler-fetch-${time.name}-${env}`,
-        schedule: events.Schedule.expression(time.cron),
-        description: time.desc,
-      });
-      rule.addTarget(new targets.LambdaFunction(this.fetcherLambda));
-    }
+    // Task 1.5b - EventBridge schedule rule (triggers Fetcher every 5 min)
+    // Lambda internally checks time and decides whether to fetch:
+    // - 08:00-12:00 CET: Every trigger (5-min intervals)
+    // - 12:00-17:00 CET: Only on 10-min marks (12:00, 12:10, etc.)
+    // - Outside hours: Skip
+    const fetchSchedule = new events.Rule(this, 'FetchSchedule', {
+      ruleName: `goldsport-scheduler-fetch-schedule-${env}`,
+      schedule: events.Schedule.rate(cdk.Duration.minutes(5)),
+      description: 'Trigger fetcher every 5 min - Lambda handles time-based filtering',
+    });
+    fetchSchedule.addTarget(new targets.LambdaFunction(this.fetcherLambda));
 
     // Task 1.6 - S3 trigger for Processor Lambda
     // Trigger on file uploads to orders/ and instructors/ prefixes
